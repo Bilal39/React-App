@@ -1,0 +1,163 @@
+.App {
+    text-align: center;
+  }
+  
+  .App-logo {
+    height: 40vmin;
+    pointer-events: none;
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    .App-logo {
+      animation: App-logo-spin infinite 20s linear;
+    }
+  }
+  
+  .page-header{
+    color: lightskyblue;
+    text-align: center;
+    margin-left: 3%;  
+    margin-top: 1%;
+    text-shadow: 2px 2px 3px #dfdfe2;
+    font-weight: bold;
+  }
+  
+  .App-header {
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+  }
+  .welcome_video{
+    max-width: 100%;
+    min-width: 100%;
+  }
+  .content {
+    position: fixed;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: lightskyblue; ;
+    width: 100%;
+    padding: 20px;
+  }
+  
+  .container-fluid{
+    background-color: rgb(193, 226, 246);
+  }
+  .qnrflogo {
+    float:right; 
+    margin-right: 20px;
+  }
+  
+  
+  .about-headings{
+    color:lightskyblue; 
+    margin-left: 3%;  
+    margin-top: 1%;
+    text-shadow: 2px 2px 3px #ebebf9;
+    font-weight: bold;
+  }
+  .about-paragraph{
+    margin-left: 3%;
+    margin-right: 3%; 
+    text-align: justify;
+    text-indent: 1%;
+  }
+  
+  .training_instructions{
+    text-align: left;
+    margin-left: 40px;
+    margin-top: 2%;
+    align-items: left;
+    justify-content: left;
+  }
+  
+  .range_sliders{
+    margin-left: 40px;
+    margin-top: 2%;
+    display:grid;
+    grid-gap:15px;
+  }
+  
+  .training_content{
+    padding: 2% 0 0 20%;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .upload button{
+    padding: 2% 0 0 20%;
+    align-items: center;
+    justify-content: center;
+    
+  
+  }
+  
+  .left {
+    width: 20%;
+    padding: 2% 0 0 2%;
+    float: left}
+  
+  .file_upload{
+    margin-left: 40px;
+  }
+  .button-link{
+    margin-left: 40px;
+    margin-top: 20px;
+  }
+  
+  .disp_results{
+    text-align: center;
+    font-weight: bold;
+  }
+  .smoothfunctions{
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+  .training_results{
+    font-weight: bold;
+    font-style: italic;
+    font-size: large;
+  }
+  
+  .prediction-fields{
+    text-align: center;
+    margin-left: 40px;
+    margin-top: 2%;
+    display: grid;
+    justify-content: space-evenly;
+    align-items: center;
+    grid-gap: 4px;
+  }
+  
+  .prediction-update-button{
+    margin-top: 8%;
+    font-weight: bold;
+    font-style: italic;
+    font-size: large;
+  }
+  
+  .container-fluid{
+    margin-left: 20px;
+  }
+  
+  .App-link {
+    color: #61dafb;
+  }
+  
+  @keyframes App-logo-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .Prediction {
+    text-align: center;
+  }
