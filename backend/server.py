@@ -1,4 +1,5 @@
 # Import flask and datetime module for showing date and time
+#from crypt import methods
 from flask import Flask
 from flask_cors import CORS
 import datetime
@@ -7,6 +8,7 @@ from werkzeug.utils import secure_filename
 import os
 from train_model import model_training
 from predictor import predictor_func
+from input_config import input_manger
 from empty_plots import empty_plots
 import json
 from pprint import pprint
@@ -30,6 +32,7 @@ training_status = {'mstatus':"in progress .."}
 
 # Create a directory in a known location to save files to.
 uploads_dir = os.path.join(app.instance_path, 'uploads')
+input_nbr_path = os.path.join(os.getcwd(), 'assests', "nbr_of_inputs.ini")
 
 
 @app.route('/parameter',  methods={"POST"})
@@ -91,6 +94,16 @@ def results():
 		"mstatus":training_status['mstatus']
 		}
 
+@app.route("/input_config", methods={"GET"})
+def input_config():
+	print("entering input config!!!!")
+	# Reading User Input Parameters
+	with open(input_nbr_path) as f:
+		lines = f.readlines()
+		for line in lines:
+			inputnumber = str(line)
+	return {"inputnumber" : inputnumber}
+
 
 @app.route('/predict',  methods={"POST"})
 def get_prediction():
@@ -110,6 +123,8 @@ def get_prediction():
 		lines = f.readlines()
 		for line in lines:
 			unit = str(line.split(',')[0])
+			if unit == "Enter output unit":
+				unit = "units"
 			break
 			
 	print('Output unit is = ', unit)

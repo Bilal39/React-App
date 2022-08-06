@@ -24,7 +24,7 @@ def model_training(file_name):
 
     # Reading the data
     data_df = pd.read_csv(file_name, header=1)
-    print("Data frame before removing header = ", data_df)
+    #print("Data frame before removing header = ", data_df)
     #data_df = data_df.iloc[0:,:]
     #print("Dataframe after removing header = ", data_df)
     # Splitting Data into Inputs and Outputs 
