@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 
 function Prediction() {
-  const [formFields, setFormFields] = useState([
-    { name: '' },
-  ])
+  const [formFields, setFormFields] = useState(
+    Array.from({length: 5}, () => ({ name: '' }))
+  )
 
   const [count1, setCount1] = useState(0)
 
