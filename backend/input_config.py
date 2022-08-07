@@ -23,9 +23,12 @@ def input_manger():
     
     with open(input_nbr_path) as f:
         lines = f.readlines()
+        # print('lines', lines)
         for line in lines:
-            inputnumber = str(line)
+            # print('line', line)
+            inputnumber = int(line)
 
+    # print('inputnumber', inputnumber, type(inputnumber))
     input_dict["columnsCount"] = inputnumber
 
     # Reading the data
@@ -36,13 +39,14 @@ def input_manger():
     for n in range(len(x.columns)):
         var_name = "col{}".format(n+1)
         #print("column = ",n)
-        min_val = str(x.iloc[:, n].min())
-        max_val = str(x.iloc[:, n].max())
-        #print("min value = ", min_val)
-        #print("max value = ", max_val)
-        min_max_dict[var_name] = [min_val, max_val]
+        min_val = x.iloc[:, n].min()
+        max_val = x.iloc[:, n].max()
+        # print("min value = ", min_val, type(min_val), min_val.item(), type(min_val.item()))
+        # print("max value = ", max_val, type(min_val), max_val.item(), type(max_val.item()))
+        min_max_dict[var_name] = [min_val.item(), max_val.item()]
 
     input_dict["columns"] = min_max_dict
+    print('input_dict', input_dict, type(input_dict))
     return input_dict
 
 ##input_dict = input_manger()
