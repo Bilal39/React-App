@@ -1,53 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 
 function Prediction() {
   const [formFields, setFormFields] = useState([]);
   const [count1, setCount1] = useState(0);
-<<<<<<< HEAD
-  const inputfields = {};
-
-  useEffect(() => {
-    (async () => {
-      await fetch('/input_config').then((res) =>
-        res.json().then((data) => {
-          console.log(data);
-
-
-          // console.log("Here we go = ", key, arr, obj)
-          console.log("My exp about to start")
-          for (var key in data) {
-            var arr = data[key];
-            console.log("Key = ", key)
-            //console.log("arr = ", arr)
-            for (var keyinside in arr) {
-              var arrinside = arr[keyinside]
-              console.log(keyinside, "=", arrinside)
-              //console.log("all together = ", key,keyinside,arrinside)
-              //const [keyinside] = arrinside;
-              inputfields.keyinside = arrinside
-            }
-          }
-          console.log("Here is the inputfield = ", inputfields)
-          /*
-            1. Console the real data from line 12.
-            2. For example, sample data looks like:
-              {
-                columnsCount: 4,
-                columns: {
-                  col1: [min, max],
-                  col2: [min, max],
-                  col3: [min, max],
-                }
-              }
-            3. At line 27 place the data accordingly.
-          */
-          setFormFields(
-            Array.from({ length: data.columnsCount }, () => ({ name: "" }))
-          );
-        })
-      );
-=======
   console.log('formFields', formFields)
   useEffect(() => {
     (async () => {
@@ -80,10 +37,9 @@ function Prediction() {
 					);
       })
     );
->>>>>>> 1b317f6719ec446f074575e02186c70dcb7be555
     })();
   }, [count1]);
-
+	
 
   const handleFormChange = (event, index) => {
     // console.log(event.target.value)
