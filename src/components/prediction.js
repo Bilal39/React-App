@@ -4,27 +4,35 @@ import Button from 'react-bootstrap/Button';
 function Prediction() {
   const [formFields, setFormFields] = useState([]);
   const [count1, setCount1] = useState(0);
-
+  console.log('formFields', formFields)
   useEffect(() => {
     (async () => {
       await fetch('/input_config').then((res) => 
         res.json().then((data)=>{
-					console.log(data);
-					/*
-						1. Console the real data from line 12.
-						2. For example, sample data looks like:
-							{
-								columnsCount: 4,
-								columns: {
-									col1: [min, max],
-									col2: [min, max],
-									col3: [min, max],
-								}
-							}
-						3. At line 27 place the data accordingly.
-					*/
-					setFormFields(
-						Array.from({ length: data.columnsCount }, () => ({ name: "" }))
+					console.log('data', data);
+					console.log('data.columnsCount', data.columnsCount)
+					console.log('data.columns', data.columns)
+          // console.log(Object.entries(data.columns))
+          // const formattedForm = []
+          // Object.entries(data.columns).forEach((ele, key)=>{
+          //   console.log('########', ele, key)
+          //   formattedForm.append()
+          // })
+
+          /*
+            - I want the following data in response in this format.
+            - Donot require columnCounts, and other thing. Just send this array
+          */
+          const ass = [
+            {'name': 'col1', 'max': 60, 'min': 10, value: 0},
+            {'name': 'col2', 'max': 50, 'min': 20, value: 0},
+            {'name': 'col3', 'max': 40, 'min': 30, value: 0},
+            {'name': 'col4', 'max': 30, 'min': 10, value: 0},
+            {'name': 'col5', 'max': 20, 'min': 10, value: 0},
+            {'name': 'col6', 'max': 10, 'min': 5, value: 0}
+          ]
+          setFormFields(
+						Array.from(ass)
 					);
       })
     );
@@ -33,8 +41,10 @@ function Prediction() {
 	
 
   const handleFormChange = (event, index) => {
+    // console.log(event.target.value)
     let data = [...formFields];
-    data[index][event.target.name] = event.target.value;
+    // console.log(data[index][event.target.name])
+    data[index]['value'] = event.target.value;
     setFormFields(data);
   }
 
@@ -112,15 +122,22 @@ function Prediction() {
 
           <form onSubmit={submit}>
             {formFields.map((form, index) => {
+              // console.log('formFields', formFields)
+              // console.log(`formformform${index}`, form);
+              // console.log('form', form.name, typeof(form.name));
               return (
                 <div key={index}>
                   <input
-                    type="number"
-                    name='name'
+                    // type="number"
+                    name={form.name}
+                    type='range'
+                    min={form.min}
+                    max={form.max}
                     placeholder='Input Value'
                     onChange={event => handleFormChange(event, index)}
-                    value={form.name}
+                    value={form.value}
                   />
+                  {form.value}
                   <Button variant='secondary' size="sm" onClick={() => removeFields(index)}>Remove</Button>
                 </div>
               )
