@@ -15,18 +15,16 @@ import csv
 
 
 def input_manger():
+    input_data_list = []
     input_dict = {}
-    min_max_dict = {}
     input_nbr_path = os.path.join(os.getcwd(), 'assests', "nbr_of_inputs.ini")
 
     print("Running Input Config")
-    
+
     with open(input_nbr_path) as f:
         lines = f.readlines()
         for line in lines:
-            inputnumber = str(line)
-
-    input_dict["columnsCount"] = inputnumber
+            inputnumber = int(line)
 
     # Reading the data
     data_df = pd.read_csv("object_file.txt", header=1)
@@ -34,18 +32,23 @@ def input_manger():
     y = data_df.iloc[:, -1]
 
     for n in range(len(x.columns)):
+        temp_dict = {}
         var_name = "col{}".format(n+1)
-        #print("column = ",n)
-        min_val = str(x.iloc[:, n].min())
-        max_val = str(x.iloc[:, n].max())
-        #print("min value = ", min_val)
-        #print("max value = ", max_val)
-        min_max_dict[var_name] = [min_val, max_val]
 
-    input_dict["columns"] = min_max_dict
+        min_val = x.iloc[:, n].min()
+        max_val = x.iloc[:, n].max()
+
+        temp_dict['name'] = var_name
+        temp_dict['max'] = max_val.item()
+        temp_dict['min'] = min_val.item()
+        temp_dict['value'] = round((max_val.item()+min_val.item())/2, 2)
+        input_data_list.append(temp_dict)
+
+    input_dict["data"] = input_data_list
+    print('input_dict', input_dict)
     return input_dict
 
-##input_dict = input_manger()
+#input_dict = input_manger()
 # print(input_dict)
 
 
