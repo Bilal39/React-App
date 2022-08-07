@@ -102,7 +102,10 @@ def input_config():
 		lines = f.readlines()
 		for line in lines:
 			inputnumber = str(line)
-	return {"inputnumber" : inputnumber}
+	input_dict = input_manger()
+	print("Input Dictionary = ", input_dict)
+
+	return input_dict
 
 
 @app.route('/predict',  methods={"POST"})

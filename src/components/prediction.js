@@ -2,29 +2,35 @@ import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 
 function Prediction() {
-  const [inputnbr, setinputnbr] = useState(3)
-
-  const [formFields, setFormFields] = useState(
-    Array.from({ length: inputnbr }, () => ({ name: '' }))
-  )
-  console.log("Input number at line 10 = ", inputnbr)
-
-  const [count1, setCount1] = useState(0)
+  const [formFields, setFormFields] = useState([]);
+  const [count1, setCount1] = useState(0);
 
   useEffect(() => {
-    // Using fetch to fetch the api from 
-    // flask server it will be redirected to proxy
-    console.log("Input config!");
-    fetch("/input_config").then((res) =>
-      res.json().then((inputData) => {
-        // Setting a data from api
-        console.log("Data got from input config = ", inputData.inputnumber)
-        setinputnbr(inputData.inputnumber);
+    (async () => {
+      await fetch('/input_config').then((res) => 
+        res.json().then((data)=>{
+					console.log(data);
+					/*
+						1. Console the real data from line 12.
+						2. For example, sample data looks like:
+							{
+								columnsCount: 4,
+								columns: {
+									col1: [min, max],
+									col2: [min, max],
+									col3: [min, max],
+								}
+							}
+						3. At line 27 place the data accordingly.
+					*/
+					setFormFields(
+						Array.from({ length: data.columnsCount }, () => ({ name: "" }))
+					);
       })
     );
-  }, [count1], []);
-
-
+    })();
+  }, [count1]);
+	
 
   const handleFormChange = (event, index) => {
     let data = [...formFields];
