@@ -16,6 +16,7 @@ import csv
 
 def input_manger():
     input_dict = {}
+    min_max_dict = {}
     input_nbr_path = os.path.join(os.getcwd(), 'assests', "nbr_of_inputs.ini")
 
     print("Running Input Config")
@@ -33,14 +34,15 @@ def input_manger():
     y = data_df.iloc[:, -1]
 
     for n in range(len(x.columns)):
-        var_name = "column{}".format(n+1)
+        var_name = "col{}".format(n+1)
         #print("column = ",n)
         min_val = str(x.iloc[:, n].min())
         max_val = str(x.iloc[:, n].max())
         #print("min value = ", min_val)
         #print("max value = ", max_val)
-        input_dict[var_name] = [min_val, max_val]
+        min_max_dict[var_name] = [min_val, max_val]
 
+    input_dict["columns"] = min_max_dict
     return input_dict
 
 ##input_dict = input_manger()
