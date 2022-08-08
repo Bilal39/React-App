@@ -1,3 +1,4 @@
+from turtle import heading
 from flask import Flask, render_template, url_for, request
 from werkzeug.utils import secure_filename
 import pandas as pd
@@ -19,8 +20,6 @@ def input_manger():
     input_dict = {}
     input_nbr_path = os.path.join(os.getcwd(), 'assests', "nbr_of_inputs.ini")
 
-    print("Running Input Config")
-
     with open(input_nbr_path) as f:
         lines = f.readlines()
         for line in lines:
@@ -31,9 +30,10 @@ def input_manger():
     x = data_df.iloc[:, :-1]
     y = data_df.iloc[:, -1]
 
-    for n in range(len(x.columns)):
+    for n,heading in enumerate(x.columns):
         temp_dict = {}
-        var_name = "col{}".format(n+1)
+        print("column name = ", heading)
+        var_name = heading
 
         min_val = x.iloc[:, n].min()
         max_val = x.iloc[:, n].max()
@@ -45,7 +45,7 @@ def input_manger():
         input_data_list.append(temp_dict)
 
     input_dict["data"] = input_data_list
-    print('input_dict', input_dict)
+    #print('input_dict', input_dict)
     return input_dict
 
 #input_dict = input_manger()

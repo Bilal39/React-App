@@ -8,38 +8,23 @@ function Prediction() {
   console.log('formFields', formFields)
   useEffect(() => {
     (async () => {
-      await fetch('/input_config').then((res) => 
-        res.json().then((data)=>{
-					console.log('data', data);
-					console.log('data.columnsCount', data.columnsCount)
-					console.log('data.columns', data.columns)
-          // console.log(Object.entries(data.columns))
-          // const formattedForm = []
-          // Object.entries(data.columns).forEach((ele, key)=>{
-          //   console.log('########', ele, key)
-          //   formattedForm.append()
-          // })
+      await fetch('/input_config').then((res) =>
+        res.json().then((data) => {
+          //console.log('data', data);
 
-          /*
-            - I want the following data in response in this format.
-            - Donot require columnCounts, and other thing. Just send this array
-          */
-          const ass = [
-            {'name': 'col1', 'max': 60, 'min': 10, value: 0},
-            {'name': 'col2', 'max': 50, 'min': 20, value: 0},
-            {'name': 'col3', 'max': 40, 'min': 30, value: 0},
-            {'name': 'col4', 'max': 30, 'min': 10, value: 0},
-            {'name': 'col5', 'max': 20, 'min': 10, value: 0},
-            {'name': 'col6', 'max': 10, 'min': 5, value: 0}
-          ]
-          setFormFields(
-						Array.from(ass)
-					);
-      })
-    );
+          for (var key in data) {
+            var arr = data[key];
+            //console.log("arr = ", arr);
+            setFormFields(
+              Array.from(arr)
+            );
+          }
+
+        })
+      );
     })();
   }, [count1]);
-	
+
 
   const handleFormChange = (event, index) => {
     // console.log(event.target.value)
@@ -128,6 +113,7 @@ function Prediction() {
               // console.log('form', form.name, typeof(form.name));
               return (
                 <div key={index}>
+                  {form.name}
                   <input
                     // type="number"
                     name={form.name}
@@ -139,7 +125,6 @@ function Prediction() {
                     value={form.value}
                   />
                   {form.value}
-                  <Button variant='secondary' size="sm" onClick={() => removeFields(index)}>Remove</Button>
                 </div>
               )
             })}
@@ -147,7 +132,6 @@ function Prediction() {
           </form>
 
 
-          <Button variant='secondary' size="md" onClick={addFields}>Add More...</Button>
           <br />
           <Button variant='secondary' size="md" onClick={submit}>Submit Input Values</Button>
           <div className='prediction-update-button'>
