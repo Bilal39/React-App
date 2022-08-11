@@ -13,10 +13,10 @@
   }
 }
 
-.page-header{
+.page-header {
   color: lightskyblue;
   text-align: center;
-  margin-left: 3%;  
+  margin-left: 3%;
   margin-top: 1%;
   text-shadow: 2px 2px 3px #dfdfe2;
   font-weight: bold;
@@ -33,58 +33,62 @@
   color: white;
 }
 
-.background-Image{
-  background-image: 
-  url(
-"./assests/images/hbku.png");
+.background-Image {
+  background-image:
+    url("./assests/images/hbku.png");
   background-size: auto;
   height: 100vh;
-  background-repeat:round; 
+  background-repeat: round;
 
 }
-.welcome_video{
+
+.welcome_video {
   max-width: 100%;
   min-width: 100%;
 }
+
 .infoicon {
   max-width: 25%;
   max-height: 25%;
   padding-left: 0.5%;
- }
+}
 
 .content {
   position: fixed;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  color: lightskyblue; ;
+  color: lightskyblue;
+  ;
   width: 100%;
   padding: 20px;
 }
 
-.container-fluid{
+.container-fluid {
   background-color: rgb(193, 226, 246);
 }
+
 .qnrflogo {
-  float:right; 
+  float: right;
   margin-right: 20px;
 }
 
 
-.about-headings{
-  color:lightskyblue; 
-  margin-left: 3%;  
+.about-headings {
+  color: lightskyblue;
+  margin-left: 3%;
   margin-top: 1%;
   text-shadow: 2px 2px 3px #ebebf9;
   font-weight: bold;
 }
-.about-paragraph{
+
+.about-paragraph {
   margin-left: 3%;
-  margin-right: 3%; 
+  margin-right: 3%;
   text-align: justify;
   text-indent: 1%;
 }
 
-.training_instructions{
+.training_instructions {
   text-align: left;
   margin-left: 40px;
   margin-top: 2%;
@@ -92,27 +96,28 @@
   justify-content: left;
 }
 
-.range_sliders{
+.range_sliders {
   margin-left: 40px;
   margin-top: 2%;
-  display:grid;
-  grid-gap:15px;
+  display: grid;
+  grid-gap: 15px;
 }
 
-.training_content{
+.training_content {
   padding: 2% 0 0 20%;
   align-items: center;
   justify-content: center;
 }
-.shufflecheckbox{
+
+.shufflecheckbox {
   padding-right: 2%;
 }
 
-.upload button{
+.upload button {
   margin-left: 40px;
 }
 
-.training_status{
+.training_status {
   margin-left: 40px;
   margin-top: 2%;
   font-weight: bold;
@@ -126,31 +131,43 @@
   padding: 2% 0 0 2%;
   float: left;
   color: #ff0000;
-  line-height: 12pt;}
+  line-height: 12pt;
+}
 
-.file_upload{
+.file_upload {
   margin-left: 40px;
 }
-.button-link{
+
+.button-link {
   margin-left: 40px;
   margin-top: 20px;
 }
 
-.disp_results{
+.disp_results {
   text-align: center;
   font-weight: bold;
 }
-.smoothfunctions{
+
+.smoothfunctions {
   margin-top: 40px;
   margin-bottom: 40px;
 }
-.training_results{
+
+.training_results {
   font-weight: bold;
   font-style: italic;
   font-size: large;
 }
 
-.prediction-fields{
+.prediction_sliders {
+  width: 50%;
+  margin-right: 10px;
+  margin-left: 20px;
+  margin-top: 20px;
+  display: list-item;
+}
+
+.prediction-fields {
   text-align: center;
   display: grid;
   justify-content: space-evenly;
@@ -160,14 +177,14 @@
   padding: 2% 0 0 10%;
 }
 
-.prediction-update-button{
+.prediction-update-button {
   margin-top: 8%;
   font-weight: bold;
   font-style: italic;
   font-size: large;
 }
 
-.container-fluid{
+.container-fluid {
   margin-left: 20px;
 }
 
@@ -179,6 +196,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

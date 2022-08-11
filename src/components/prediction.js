@@ -19,13 +19,19 @@ function Prediction() {
               Array.from(arr)
             );
           }
-
         })
       );
     })();
   }, [count1]);
 
+  const handleReset = (event) => {
+    let data = [...formFields];
+    for (var i = 0, l = data.length; i < l; i++) {
+      data[i]['value'] = ((data[i]['max'] + data[i]['min']) / 2).toFixed(2);
+      setFormFields(data);
+    }
 
+  }
   const handleFormChange = (event, index) => {
     // console.log(event.target.value)
     let data = [...formFields];
@@ -75,7 +81,7 @@ function Prediction() {
   useEffect(() => {
     // Using fetch to fetch the api from 
     // flask server it will be redirected to proxy
-    console.log("count1 changed!");
+    console.log("count1 changed! =", count1);
     fetch("/outputval").then((res) =>
       res.json().then((outputdata) => {
         // Setting a data from api
@@ -112,28 +118,32 @@ function Prediction() {
               // console.log(`formformform${index}`, form);
               // console.log('form', form.name, typeof(form.name));
               return (
-                <div key={index}>
-                  {form.name}
-                  <input
-                    // type="number"
-                    name={form.name}
-                    type='range'
-                    min={form.min}
-                    max={form.max}
-                    placeholder='Input Value'
-                    onChange={event => handleFormChange(event, index)}
-                    value={form.value}
-                  />
-                  {form.value}
+                <div className='prediction_sliders'>
+                  <div key={index}>
+                    {form.name}
+                    <input
+                      // type="number"
+                      //className='prediction_sliders'
+                      name={form.name}
+                      type='range'
+                      min={form.min}
+                      max={form.max}
+                      placeholder='Input Value'
+                      onChange={event => handleFormChange(event, index)}
+                      value={form.value}
+                    />
+                    {form.value}
+                  </div>
                 </div>
               )
             })}
 
           </form>
 
-
           <br />
+          <button type='reset' onClick={handleReset}>Reset values</button>
           <Button variant='secondary' size="md" onClick={submit}>Submit Input Values</Button>
+
           <div className='prediction-update-button'>
             <Button variant="primary" size="lg" onClick={() => setCount1(count1 + 1)}>Check Result</Button>
             <p>Predicted Value = {outputdata.output_value} {unit.unit_value}</p>
