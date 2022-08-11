@@ -97,6 +97,7 @@ function Prediction() {
 
   return (
     <>
+    <body>
       <div className="background-Image">
         <div className='page-header'>
           <h2>Output Predictions</h2>
@@ -155,6 +156,7 @@ function Prediction() {
           </div>
         </div>
       </div>
+      </body>
     </>
 
   );

@@ -3,6 +3,7 @@ import React from 'react'
 export default function () {
   return (
     <>
+    <body>
     <div className="background-Image">
       <div class="about_content">
         <div>
@@ -38,6 +39,7 @@ export default function () {
 
       </div>
       </div>
+      </body>
         </>
   )
 }

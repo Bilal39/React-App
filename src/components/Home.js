@@ -3,6 +3,7 @@ import React from 'react'
 export default function Home() {
   return (
     <>
+    <body>
     <div>
         </div>
         <video loop muted autoPlay className='welcome_video'>
@@ -16,6 +17,7 @@ export default function Home() {
         <h1>Welcome to Machine Learning GUI</h1>
         <p>Goto 'Train Model' and upload a file to train a model</p>
       </div>
+      </body>
         </>
   )
 }

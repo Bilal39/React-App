@@ -79,6 +79,7 @@ export const Test = () => {
 
   return (
     <Fragment>
+      <body>
       <div className="background-Image">
         <h1 className="page-header">Model Training</h1>
 
@@ -181,6 +182,7 @@ export const Test = () => {
         </form>
 
       </div>
+      </body>
     </Fragment>
   )
 }
