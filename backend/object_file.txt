@@ -1,4 +1,4 @@
-﻿Enter output unit,,,,,,,
+﻿%,,,,,,,
 Ni loading %,Other metal Loading%,Atomic number,Electronegativity (EN),Reaction temperature C,Surface area (m2 g-1),Pore size (nm),CH4 conversion
 3,3,19,0.82,750,112.3,4.72,51
 3,3,56,0.89,750,137.6,3.4,65
