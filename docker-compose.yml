@@ -1,13 +1,13 @@
 version: '3.1'
 services:
-    flaskbackend:
+    flaskbackend2:
         build: ./backend
         ports:
             - "5000:5000"
         volumes: 
             - ./backend:/app
             - ./src/assests/images/:/src/assests/images/
-    reactfrontend:
+    reactfrontend2:
         build: ./
         ports:
             - "3000:3000"

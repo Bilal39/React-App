@@ -34,7 +34,7 @@ export const Test = () => {
     console.log('Upload Handler')
     event.preventDefault();
 
-    fetch('http://localhost:5000/parameter', {
+    fetch('http://flaskbackend2:5000/parameter', {
       method: 'POST',
       body: JSON.stringify(state),
     })
@@ -47,7 +47,7 @@ export const Test = () => {
 
     //console.log("File = ",file,  typeof (file))
     //console.log("File = ", file)
-    fetch('http://localhost:5000/upload', {
+    fetch('http://flaskbackend2:5000/upload', {
       method: 'POST',
       body: file,
     })
@@ -61,7 +61,7 @@ export const Test = () => {
     let count = 1
     const timerId = setInterval(() => {
       console.log('setInterval', count);
-      fetch("/training_status")
+      fetch("http://flaskbackend2:5000/training_status")
         .then((res) => {
           res.json()
             .then((statusData) => {
