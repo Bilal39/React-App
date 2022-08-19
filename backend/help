@@ -1,2 +1,0 @@
-docker build -t vital_backend .
-docker run -d --env-file ./envs/integration.env -p 8080:8080 --name vital_backend_container vital_backend
