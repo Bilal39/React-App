@@ -17,7 +17,7 @@ export default function () {
   useEffect(() => {
     // Using fetch to fetch the api from 
     // flask server it will be redirected to proxy
-    fetch("/results_update").then((res) =>
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/results_update`).then((res) =>
       res.json().then((data) => {
         // Setting a data from api
         setdata({

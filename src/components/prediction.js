@@ -8,7 +8,7 @@ function Prediction() {
   console.log('formFields', formFields)
   useEffect(() => {
     (async () => {
-      await fetch('/input_config').then((res) =>
+      await fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/input_config`).then((res) =>
         res.json().then((data) => {
           //console.log('data', data);
 
@@ -46,7 +46,7 @@ function Prediction() {
 
     e.preventDefault();
 
-    fetch('http://localhost:5000/predict', {
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/predict`, {
       method: 'POST',
       body: JSON.stringify(formFields),
     }).then((response) => {
@@ -82,7 +82,7 @@ function Prediction() {
     // Using fetch to fetch the api from 
     // flask server it will be redirected to proxy
     console.log("count1 changed! =", count1);
-    fetch("/outputval").then((res) =>
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/outputval`).then((res) =>
       res.json().then((outputdata) => {
         // Setting a data from api
         setdata({
