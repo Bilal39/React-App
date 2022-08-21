@@ -10,10 +10,10 @@ import os
 
 
 def empty_plots():
-    histogram_path = os.path.join(os.path.dirname(os.getcwd()),"src", "assests", "images","histogram.png" )
-    training_plot_path = os.path.join(os.path.dirname(os.getcwd()),"src", "assests", "images", "training_plot.png" )
-    testing_plot_path = os.path.join(os.path.dirname(os.getcwd()),"src", "assests", "images", "testing_plot.png" )
-    smooth_func_path = os.path.join(os.path.dirname(os.getcwd()),"src", "assests", "images", "smooth_func.png" )
+    histogram_path = os.path.join(os.path.dirname(os.getcwd()),"src", "assests", "plots","histogram.png" )
+    training_plot_path = os.path.join(os.path.dirname(os.getcwd()),"src", "assests", "plots", "training_plot.png" )
+    testing_plot_path = os.path.join(os.path.dirname(os.getcwd()),"src", "assests", "plots", "testing_plot.png" )
+    smooth_func_path = os.path.join(os.path.dirname(os.getcwd()),"src", "assests", "plots", "smooth_func.png" )
 
     plt.switch_backend('agg')
     plt.figure()
