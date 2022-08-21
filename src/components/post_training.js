@@ -17,7 +17,7 @@ export default function () {
   useEffect(() => {
     // Using fetch to fetch the api from 
     // flask server it will be redirected to proxy
-    fetch("/results_update").then((res) =>
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/results_update`).then((res) =>
       res.json().then((data) => {
         // Setting a data from api
         setdata({
@@ -47,15 +47,15 @@ export default function () {
             </div>
 
 
-            {show && <img src={require('../assests/images/training_plot.png')} />}
-            {show && <img src={require('../assests/images/testing_plot.png')} />}
-            {show && <img src={require('../assests/images/histogram.png')} alt="*Please upload a data file and train the model." />}
+            {show && <img src={require('../assests/plots/training_plot.png')} />}
+            {show && <img src={require('../assests/plots/testing_plot.png')} />}
+            {show && <img src={require('../assests/plots/histogram.png')} alt="*Please upload a data file and train the model." />}
 
             <div className="smoothfunctions">
               <Button variant="primary" size="md" type="button" onClick={() => setDisp(!disp)}>
                 {disp === true ? 'Hide Smooth Functions' : 'Show Smooth Functions'}
               </Button>
-              {disp && <img src={require('../assests/images/smooth_func.png')} />}
+              {disp && <img src={require('../assests/plots/smooth_func.png')} />}
 
             </div>
           </div>
