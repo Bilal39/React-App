@@ -96,13 +96,11 @@ def train_status():
 
 @app.route('/results_update')
 def results():
+    #print("we are in result update sir!!!!")
+    #print("The following data will take off now = ", graph_data_dict)
 
     # Returning an api for showing in reactjs
-    return {
-        "training_r_squared_value": results_dict['train_r_squared'],
-        "testing_r_squared_value": results_dict['test_r_squared'],
-        "mstatus": training_status['mstatus']
-    }
+    return graph_data_dict
 
 
 @app.route("/input_config", methods={"GET"})

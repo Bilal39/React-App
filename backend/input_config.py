@@ -61,7 +61,7 @@ def input_manger():
         input_data_list.append(temp_dict)
 
     input_dict["data"] = input_data_list
-    #print('input_dict', input_dict)
+    print('input_dict = ', input_dict)
     return input_dict
 
 #input_dict = input_manger()

@@ -97,65 +97,65 @@ function Prediction() {
 
   return (
     <>
-    <body>
-      <div className="background-Image">
-        <div className='page-header'>
-          <h2>Output Predictions</h2>
-        </div>
+      <body>
+        <div className="background-Image">
+          <div className='page-header'>
+            <h2>Output Predictions</h2>
+          </div>
 
-        <div className="left">
-          <h6>Instructions:</h6>
-          <p>1. Please enter the exact number of input values which were provided in the CSV file during the training.</p>
-          <p>2. After entering the input values, click on the 'Submit Input Values' button.</p>
-          <p>3. At last, click on the 'Check Result' button to get predicted value.</p>
-          <p>Note: In order to download the trained model file which is used for predictions, click on 'Download Trained Model".</p>
-        </div>
+          <div className="left">
+            <h6>Instructions:</h6>
+            <p>1. Please enter the exact number of input values which were provided in the CSV file during the training.</p>
+            <p>2. After entering the input values, click on the 'Submit Input Values' button.</p>
+            <p>3. At last, click on the 'Check Result' button to get predicted value.</p>
+            <p>Note: In order to download the trained model file which is used for predictions, click on 'Download Trained Model".</p>
+          </div>
 
-        <div className="prediction-fields">
+          <div className="prediction-fields">
 
-          <form onSubmit={submit}>
-            {formFields.map((form, index) => {
-              // console.log('formFields', formFields)
-              // console.log(`formformform${index}`, form);
-              // console.log('form', form.name, typeof(form.name));
-              return (
-                <div className='prediction_sliders'>
-                  <div key={index}>
-                    {form.name}
-                    <input
-                      // type="number"
-                      //className='prediction_sliders'
-                      name={form.name}
-                      type='range'
-                      min={form.min}
-                      max={form.max}
-                      placeholder='Input Value'
-                      onChange={event => handleFormChange(event, index)}
-                      value={form.value}
-                    />
-                    {form.value}
+            <form onSubmit={submit}>
+              {formFields.map((form, index) => {
+                // console.log('formFields', formFields)
+                // console.log(`formformform${index}`, form);
+                // console.log('form', form.name, typeof(form.name));
+                return (
+                  <div className='prediction_sliders'>
+                    <div key={index}>
+                      {form.name}
+                      <input
+                        // type="number"
+                        //className='prediction_sliders'
+                        name={form.name}
+                        type='range'
+                        min={form.min}
+                        max={form.max}
+                        placeholder='Input Value'
+                        onChange={event => handleFormChange(event, index)}
+                        value={form.value}
+                      />
+                      {form.value}
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
 
-          </form>
+            </form>
 
-          <br />
-          <button type='reset' onClick={handleReset}>Reset values</button>
-          <Button variant='secondary' size="md" onClick={submit}>Submit Input Values</Button>
+            <br />
+            <button type='reset' onClick={handleReset}>Reset values</button>
+            <Button variant='secondary' size="md" onClick={submit}>Submit Input Values</Button>
 
-          <div className='prediction-update-button'>
-            <Button variant="primary" size="lg" onClick={() => setCount1(count1 + 1)}>Check Result</Button>
-            <p>Predicted Value = {outputdata.output_value} {unit.unit_value}</p>
+            <div className='prediction-update-button'>
+              <Button variant="primary" size="lg" onClick={() => setCount1(count1 + 1)}>Check Result</Button>
+              <p>Predicted Value = {outputdata.output_value} {unit.unit_value}</p>
 
-          </div>
+            </div>
 
-          <div>
-            <a href={require("../assests/gam_model.pkl")} download="trained_model.pkl">Download Trained Model</a>
+            <div>
+              <a href={require("../assests/gam_model.pkl")} download="trained_model.pkl">Download Trained Model</a>
+            </div>
           </div>
         </div>
-      </div>
       </body>
     </>
 
