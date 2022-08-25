@@ -72,8 +72,8 @@ def upload_file():
     # Truncating file to reset default values
     with open(predictor_default_value_path, 'r+') as f:
         f.truncate(0)
-    train_r_squared, test_r_squared, graph_data_list = model_training(file_path)
-    graph_data_dict["graph_data"] = graph_data_list
+    train_r_squared, test_r_squared = model_training(file_path)
+    ##graph_data_dict["graph_data"] = graph_data_list
     results_dict['train_r_squared'] = float(train_r_squared)
     results_dict['test_r_squared'] = float(test_r_squared)
     training_status['mstatus'] = "Done!"
