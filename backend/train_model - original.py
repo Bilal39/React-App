@@ -22,11 +22,6 @@ def model_training(file_name):
     testing_plot_path = os.path.join(os.path.dirname(os.getcwd()),"src", "assests", "images", "testing_plot.png" )
     smooth_func_path = os.path.join(os.path.dirname(os.getcwd()),"src", "assests", "images", "smooth_func.png" )
 
-    #initializing list and dictionaries
-    final_data_list = []
-    train_data_dict = {}
-    test_data_dict = {}
-
     # Reading the data
     data_df = pd.read_csv(file_name, header=1)
     #print("Data frame before removing header = ", data_df)
@@ -113,72 +108,53 @@ def model_training(file_name):
 
 
     ### Calculating R2 RMSE Values for training data
-    gam_predictions_training = gam.predict(X_train)
-    training_rmse = round(mean_squared_error(y_train, gam_predictions_training, squared=False),2)
-    training_r_squared = round(r2_score(y_train, gam_predictions_training),2)
+    gam_predictions = gam.predict(X_train)
+    training_rmse = round(mean_squared_error(y_train, gam_predictions, squared=False),2)
+    training_r_squared = round(r2_score(y_train, gam_predictions),2)
 
     ## Plotting fited line w.r.t training data
-    #plt.switch_backend('agg')
-    plt.scatter(y_train, gam_predictions_training)
-    #plt.title("Training Plot")
-    #plt.xlabel('Actual values')
-    #plt.ylabel('Predicted values')
-    plt.plot(np.unique(y_train), np.poly1d(np.polyfit(y_train, gam_predictions_training, 1))(np.unique(y_train)))
-    #print("np.unique(y_train) = ", np.unique(y_train))
-    #print("np.unique(y_train)length = ", len(np.unique(y_train)))
-    #print("np.poly1d(np.polyfit(y_train, gam_predictions_training, 1))(np.unique(y_train) = ", np.poly1d(np.polyfit(y_train, gam_predictions_training, 1))(np.unique(y_train)))
-    #print("np.poly1d(np.polyfit(y_train, gam_predictions_training, 1))(np.unique(y_train)length  = ", len(np.poly1d(np.polyfit(y_train, gam_predictions_training, 1))(np.unique(y_train))))
-    #plt.figtext(.3, .8, "RMSE = {}".format(training_rmse))
-    #plt.figtext(.3, .75, "R-Squared value = {}".format(training_r_squared))
-    #plt.savefig(training_plot_path)
-    #plt.figure().clear()
-    #plt.switch_backend('agg')
+    plt.switch_backend('agg')
+    plt.scatter(y_train, gam_predictions)
+    plt.title("Training Plot")
+    plt.xlabel('Actual values')
+    plt.ylabel('Predicted values')
+    plt.plot(np.unique(y_train), np.poly1d(np.polyfit(y_train, gam_predictions, 1))(np.unique(y_train)))
+    plt.figtext(.3, .8, "RMSE = {}".format(training_rmse))
+    plt.figtext(.3, .75, "R-Squared value = {}".format(training_r_squared))
+    plt.savefig(training_plot_path)
+    plt.figure().clear()
+    plt.switch_backend('agg')
 
 
     ### Calculating R2 RMSE Values for testing data
-    gam_predictions_testing = gam.predict(x_test)
-    testing_rmse = round(mean_squared_error(y_test, gam_predictions_testing, squared=False),2)
-    testing_r_squared = round(r2_score(y_test, gam_predictions_testing),2)
+    gam_predictions = gam.predict(x_test)
+    testing_rmse = round(mean_squared_error(y_test, gam_predictions, squared=False),2)
+    testing_r_squared = round(r2_score(y_test, gam_predictions),2)
 
     ## Plotting fited line w.r.t testing data
-    plt.scatter(y_test, gam_predictions_testing)
-    #plt.title("Testing Plot")
-    #plt.xlabel('Actual values')
-    #plt.ylabel('Predicted values')
-    plt.plot(np.unique(y_test), np.poly1d(np.polyfit(y_test, gam_predictions_testing, 1))(np.unique(y_test)))
-    #plt.figtext(.3, .8, "RMSE = {}".format(testing_rmse))
-    #plt.figtext(.3, .75, "R-Squared value = {}".format(testing_r_squared))
-    #plt.savefig(testing_plot_path)  
-    #plt.figure().clear()
-    #plt.switch_backend('agg')
+    plt.scatter(y_test, gam_predictions)
+    plt.title("Testing Plot")
+    plt.xlabel('Actual values')
+    plt.ylabel('Predicted values')
+    plt.plot(np.unique(y_test), np.poly1d(np.polyfit(y_test, gam_predictions, 1))(np.unique(y_test)))
+    plt.figtext(.3, .8, "RMSE = {}".format(testing_rmse))
+    plt.figtext(.3, .75, "R-Squared value = {}".format(testing_r_squared))
+    plt.savefig(testing_plot_path)  
+    plt.figure().clear()
+    plt.switch_backend('agg')
 
     ## Plotting histogram
     plt.hist(y, bins = bin)
-    #plt.grid()
-    #plt.figtext(.4, .8, "Bins = {}".format(bin))
-    #plt.title("Histogram")
-    #plt.xlabel("Output Values")
-    #plt.ylabel("Number of times")
-    #plt.savefig(histogram_path)
-    #plt.figure().clear()
-    #plt.switch_backend('agg')
-    train_data_dict['name'] = "Training Plot" 
-    train_data_dict['xaxis'] = y_train.tolist()
-    train_data_dict['yaxis'] = gam_predictions_training.tolist()
-    train_data_dict['xaxis2'] = np.unique(y_train).tolist()
-    train_data_dict['yaxis2'] = np.poly1d(np.polyfit(y_train, gam_predictions_training, 1))(np.unique(y_train)).tolist()
-    train_data_dict['rsqaured'] = training_r_squared
-    final_data_list.append(train_data_dict)
+    plt.grid()
+    plt.figtext(.4, .8, "Bins = {}".format(bin))
+    plt.title("Histogram")
+    plt.xlabel("Output Values")
+    plt.ylabel("Number of times")
+    plt.savefig(histogram_path)
+    plt.figure().clear()
+    plt.switch_backend('agg')
 
-    test_data_dict['name'] = "Testing Plot" 
-    test_data_dict['xaxis'] = y_test.tolist()
-    test_data_dict['yaxis'] = gam_predictions_testing.tolist()
-    test_data_dict['xaxis2'] = np.unique(y_test).tolist()
-    test_data_dict['yaxis2'] = np.poly1d(np.polyfit(y_test, gam_predictions_testing, 1))(np.unique(y_test)).tolist()
-    test_data_dict['rsqaured'] = testing_r_squared
-    final_data_list.append(test_data_dict)
-
-    return training_r_squared, testing_r_squared, final_data_list
+    return training_r_squared, testing_r_squared
 
 
 

@@ -36,7 +36,6 @@ def input_manger():
             for line in lines:
                 predictor_input_values.append(float(line))
 
-
     # Reading the data
     data_df = pd.read_csv("object_file.txt", header=1)
     x = data_df.iloc[:, :-1]
@@ -61,7 +60,6 @@ def input_manger():
         input_data_list.append(temp_dict)
 
     input_dict["data"] = input_data_list
-    print('input_dict = ', input_dict)
     return input_dict
 
 #input_dict = input_manger()

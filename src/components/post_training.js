@@ -1,67 +1,128 @@
 import React, { useState, useEffect } from "react";
-import Button from 'react-bootstrap/Button';
+import Plot from 'react-plotly.js';
 
 export default function () {
   // usestate for setting a javascript
   // object for storing and using data
-  const [data, setdata] = useState({
-  });
-  const [show, setShow] = useState(true);
 
-  const [disp, setDisp] = useState(false);
+  const [formFields, setFormFields] = useState([]);
+  const [formFields2, setFormFields2] = useState([]);
+  const [count1, setCount1] = useState(0);
+  const [count2, setCount2] = useState(0);
 
-
-
-
-  // Using useEffect for single rendering
   useEffect(() => {
-    // Using fetch to fetch the api from 
-    // flask server it will be redirected to proxy
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/results_update`).then((res) =>
-      res.json().then((data) => {
-        // Setting a data from api
-        setdata({
-          trained_r: data.training_r_squared_value,
-          tested_r: data.testing_r_squared_value
-        });
-      })
-    );
-  }, []);
+    (async () => {
+      await fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/results_update`).then((res) =>
+        res.json().then((graph_data) => {
+          //console.log('data getting from backend = ', graph_data);
+
+          for (var key in graph_data) {
+            var arr = graph_data[key];
+            //console.log("arr = ", arr);
+            setFormFields(
+              Array.from(arr)
+            );
+          }
+
+        })
+      );
+    })();
+  },[]);
+
+  useEffect(() => {
+    (async () => {
+      await fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/smooth_func_data`).then((res) =>
+        res.json().then((graph_data) => {
+          //console.log('data getting from backend = ', graph_data);
+
+          for (var key in graph_data) {
+            var arr = graph_data[key];
+            console.log("smooth function data getting arr = ", arr);
+            setFormFields2(
+              Array.from(arr)
+            );
+          }
+
+        })
+      );
+    })();
+  },[]);
+
+
 
   return (
     <>
       <body>
         <div className="disp_results">
           <h1 className="page-header">Training Result</h1>
+          {formFields.map((form, index) => {
+            return (
+              <div key={index}>
+                <Plot
+                  data={[
+                    {
+                      name: form.name.slice(0, 8) + " Data Points",
+                      text: "R-Squared Value = ",
+                      textposition: "top left",
+                      x: form.xaxis,
+                      y: form.yaxis,
+                      type: 'scatter',
+                      mode: 'markers',
+                      marker: { color: 'red' },
+                    },
+                    { type: 'line', x: form.xaxis2, y: form.yaxis2, name: "Best fit" },
+                  ]}
+                  layout={{ width: 720, height: 480, title: form.name }}
+                />
+              </div>
 
-          <div className="training_results">
-            <p>Training R-Squared Value = {data.trained_r}</p>
-            <p>Testing R-Squared Value = {data.tested_r}</p>
-          </div>
-
-          <div className="trainingresults">
-            <div>
-              <Button variant="primary" size="md" type="button" onClick={() => setShow(!show)}>
-                {show === true ? 'Hide Training-Testing Plots' : 'Show Training-Testing Plots'}
-              </Button>
-            </div>
-
-
-            {show && <img src={require('../assests/images/training_plot.png')} />}
-            {show && <img src={require('../assests/images/testing_plot.png')} />}
-            {show && <img src={require('../assests/images/histogram.png')} alt="*Please upload a data file and train the model." />}
-
-            <div className="smoothfunctions">
-              <Button variant="primary" size="md" type="button" onClick={() => setDisp(!disp)}>
-                {disp === true ? 'Hide Smooth Functions' : 'Show Smooth Functions'}
-              </Button>
-              {disp && <img src={require('../assests/images/smooth_func.png')} />}
-
-            </div>
-          </div>
-
-
+            )
+          })}
         </div>
+
+        <div className="disp_results">
+          <h1 className="page-header">Smooth Functions</h1>
+          {formFields2.map((form, index) => {
+            return (
+              <div key={index}>
+                <Plot
+                  data={[
+                    {
+                      name: "Smooth Function",
+                      x: form.xaxis,
+                      y: form.yaxis1,
+                      type: 'line',
+                      mode: 'lines',
+                      marker: { color: 'blue' },
+                    },{
+                      x: form.xaxis,
+                      y: form.lower_confidence,
+                      type: 'line',
+                      mode: 'lines',
+                      line: {
+                        dash: 'dash'
+                      },
+                      marker: { color: 'red' },
+                    },{
+                      x: form.xaxis,
+                      y: form.upper_confidence,
+                      type: "line",
+                      mode: "lines",
+                      line: {
+                        dash: 'dash'
+                      },
+                      marker: { color: 'red' },
+                    },
+                    
+                  ]}
+                  layout={{ width: 720, height: 480 }}
+                />
+              </div>
+
+            )
+          })}
+        </div>
+        
       </body>
 
     </>
