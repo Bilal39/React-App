@@ -7,6 +7,7 @@ export default function () {
 
   const [formFields, setFormFields] = useState([]);
   const [formFields2, setFormFields2] = useState([]);
+  const [formFields3, setFormFields3] = useState([]);
   const [count1, setCount1] = useState(0);
   const [count2, setCount2] = useState(0);
 
@@ -18,7 +19,7 @@ export default function () {
 
           for (var key in graph_data) {
             var arr = graph_data[key];
-            //console.log("arr = ", arr);
+            //console.log("training testing data arr = ", arr);
             setFormFields(
               Array.from(arr)
             );
@@ -27,7 +28,7 @@ export default function () {
         })
       );
     })();
-  },[]);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -37,7 +38,7 @@ export default function () {
 
           for (var key in graph_data) {
             var arr = graph_data[key];
-            console.log("smooth function data getting arr = ", arr);
+            //console.log("smooth function data getting arr = ", arr);
             setFormFields2(
               Array.from(arr)
             );
@@ -46,9 +47,24 @@ export default function () {
         })
       );
     })();
-  },[]);
+  }, []);
 
+  useEffect(() => {
+    (async () => {
+      await fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
+        res.json().then((graph_data) => {
+          for (var key in graph_data) {
+            var arr = graph_data[key];
+            console.log("Histogram Data arr = ", arr);
+            setFormFields3(
+              Array.from(arr)
+            );
+          }
 
+        })
+      );
+    })();
+  }, []);
 
   return (
     <>
@@ -81,6 +97,28 @@ export default function () {
         </div>
 
         <div className="disp_results">
+          <h1 className="page-header">Histogram</h1>
+          <Plot
+            data={[
+              {
+                name: "Histogram",
+                x: formFields3,
+                type: "histogram",
+                marker: { color: 'blue' },
+              },
+            ]}
+            layout={{
+              width: 480, height: 480, title: "Histogram", xaxis: {
+                title: "Output Values",
+              },
+              yaxis: {
+                title: "Number of times",
+              }
+            }}
+          />
+        </div>
+
+        <div className="disp_results">
           <h1 className="page-header">Smooth Functions</h1>
           {formFields2.map((form, index) => {
             return (
@@ -94,7 +132,7 @@ export default function () {
                       type: 'line',
                       mode: 'lines',
                       marker: { color: 'blue' },
-                    },{
+                    }, {
                       x: form.xaxis,
                       y: form.lower_confidence,
                       type: 'line',
@@ -103,7 +141,7 @@ export default function () {
                         dash: 'dash'
                       },
                       marker: { color: 'red' },
-                    },{
+                    }, {
                       x: form.xaxis,
                       y: form.upper_confidence,
                       type: "line",
@@ -113,7 +151,7 @@ export default function () {
                       },
                       marker: { color: 'red' },
                     },
-                    
+
                   ]}
                   layout={{ width: 720, height: 480 }}
                 />
@@ -122,7 +160,7 @@ export default function () {
             )
           })}
         </div>
-        
+
       </body>
 
     </>

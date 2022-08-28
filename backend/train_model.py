@@ -38,6 +38,7 @@ def model_training(file_name):
     # Splitting Data into Inputs and Outputs 
     x = data_df.iloc[:,:-1]
     y = data_df.iloc[:,-1]
+    output_data_list = y.tolist()
 
     # Reading User Input Parameters
     with open(input_parameters_path) as f:
@@ -104,8 +105,8 @@ def model_training(file_name):
             #print("confidence_interval = ", confidence_interval[0])
             lower_bound_list.append(confidence_interval[0])
             upper_bound_list.append(confidence_interval[1])
-        print("xx[] = ", len(XX[:, i]))
-        print("upper bond length", len(upper_bound_list))
+        #print("xx[] = ", len(XX[:, i]))
+        #print("upper bond length", len(upper_bound_list))
         #print("lower bound confidence interval = ",  gam.partial_dependence(term=i, X=XX, width=.95)[1][:][0])
         smooth_func_temp_dict['yaxis2'] = gam.partial_dependence(term=i, X=XX, width=.95)[1].tolist()
         smooth_func_temp_dict['lower_confidence'] = lower_bound_list
@@ -170,7 +171,7 @@ def model_training(file_name):
     test_data_dict['rsqaured'] = testing_r_squared
     final_data_list.append(test_data_dict)
 
-    return training_r_squared, testing_r_squared, final_data_list, smooth_funct_list
+    return training_r_squared, testing_r_squared, final_data_list, smooth_funct_list, output_data_list
 
 
 
