@@ -1,3 +1,4 @@
+import { findByPlaceholderText } from "@testing-library/react";
 import React, { useState, useEffect } from "react";
 import Plot from 'react-plotly.js';
 
@@ -49,6 +50,7 @@ export default function () {
     })();
   }, []);
 
+
   useEffect(() => {
     (async () => {
       await fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
@@ -78,17 +80,15 @@ export default function () {
                   data={[
                     {
                       name: form.name.slice(0, 8) + " Data Points",
-                      text: "R-Squared Value = ",
-                      textposition: "top left",
                       x: form.xaxis,
                       y: form.yaxis,
                       type: 'scatter',
                       mode: 'markers',
                       marker: { color: 'red' },
                     },
-                    { type: 'line', x: form.xaxis2, y: form.yaxis2, name: "Best fit" },
+                    { type: 'line', x: form.xaxis2, y: form.yaxis2,text: "R-Squared Value = "+form.rsqaured, name: "Best fit" },
                   ]}
-                  layout={{ width: 720, height: 480, title: form.name }}
+                  layout={{ width: 720, height: 480, title: form.name+ " with R-Squared Value" }}
                 />
               </div>
 
@@ -98,25 +98,35 @@ export default function () {
 
         <div className="disp_results">
           <h1 className="page-header">Histogram</h1>
-          <Plot
-            data={[
-              {
-                name: "Histogram",
-                x: formFields3,
-                type: "histogram",
-                marker: { color: 'blue' },
-              },
-            ]}
-            layout={{
-              width: 480, height: 480, title: "Histogram", xaxis: {
-                title: "Output Values",
-              },
-              yaxis: {
-                title: "Number of times",
-              }
-            }}
-          />
+          {formFields3.map((form, index) => {
+            return (
+              <div key={index}>
+                <Plot
+                  data={[
+                    {
+                      name: "Histogram",
+                      x: form.data,
+                      nbinsx: form.bin_size,
+                      type: "histogram",
+                      marker: { color: 'blue' },
+                    },
+                  ]}
+                  layout={{
+                    width: 640, height: 640, title: "Histogram", xaxis: {
+                      title: "Output Values",
+                    },
+                    yaxis: {
+                      title: "Number of times",
+                    }
+                  }}
+                />
+              </div>
+
+            )
+          })}
         </div>
+
+
 
         <div className="disp_results">
           <h1 className="page-header">Smooth Functions</h1>
@@ -126,13 +136,14 @@ export default function () {
                 <Plot
                   data={[
                     {
-                      name: "Smooth Function",
+                      name: "Fitted Smooth Function",
                       x: form.xaxis,
                       y: form.yaxis1,
                       type: 'line',
                       mode: 'lines',
                       marker: { color: 'blue' },
                     }, {
+                      name: "Confidence Interval",
                       x: form.xaxis,
                       y: form.lower_confidence,
                       type: 'line',
@@ -142,6 +153,7 @@ export default function () {
                       },
                       marker: { color: 'red' },
                     }, {
+                      name: "Confidence Interval",
                       x: form.xaxis,
                       y: form.upper_confidence,
                       type: "line",
@@ -153,7 +165,15 @@ export default function () {
                     },
 
                   ]}
-                  layout={{ width: 720, height: 480 }}
+                  layout={{
+                    width: 720, height: 480,
+                    title: "Smooth function for '" + form.feature_name + "'",
+                    xaxis: {
+                      title: form.feature_name,
+                    }, yaxis: {
+                      title: "s(" + form.feature_name + ")",
+                    }
+                  }}
                 />
               </div>
 

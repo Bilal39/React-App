@@ -95,6 +95,11 @@ function Prediction() {
     );
   }, [count1], []);
 
+  // Add option to download trained model
+  //<div>
+  //  <a href={require("../assests/gam_model.pkl")} download="trained_model.pkl">Download Trained Model</a>
+  //</div>
+
   return (
     <>
       <body>
@@ -149,10 +154,6 @@ function Prediction() {
               <Button variant="primary" size="lg" onClick={() => setCount1(count1 + 1)}>Check Result</Button>
               <p>Predicted Value = {outputdata.output_value} {unit.unit_value}</p>
 
-            </div>
-
-            <div>
-              <a href={require("../assests/gam_model.pkl")} download="trained_model.pkl">Download Trained Model</a>
             </div>
           </div>
         </div>
