@@ -7,11 +7,13 @@ from flask import request
 from werkzeug.utils import secure_filename
 import os
 from train_model import model_training
+from max_min import maxima_minima
 from predictor import predictor_func
 from input_config import input_manger
 import json
 from pprint import pprint
 import numpy as np
+import pandas as pd
 
 
 # Initializing flask app
@@ -19,11 +21,13 @@ app = Flask(__name__)
 CORS(app)
 
 # To store results
+columns_names = {}
 results_dict = {}
 output_result = {}
 graph_data_dict = {}
 smooth_func_dict = {}
 histogram_data = {}
+max_min_dict = {}
 output_result["output_value"] = "---"
 output_result['unit_value'] = "----"
 training_status = {'mstatus': "in progress .."}
@@ -60,20 +64,59 @@ def getting_form():
 
     return 'ok'
 
-
-@app.route('/upload',  methods=["POST"])
-def upload_file():
+@app.route('/file_transfer',  methods=["POST"])
+def getting_file_from_frontend():
     file1 = request.files.get("file")
     file_path = "object_file.txt"
     file1.save(secure_filename(file_path))
+
+    #reading file
+    data_df = pd.read_csv(file_path, header=1)
+
+    # Splitting Data into Inputs and Outputs
+    x = data_df.iloc[:, :-1]
+    y = data_df.iloc[:, -1]
+
+    #print("columns names = ", x.columns.tolist())
+    columns_names['data'] = x.columns.tolist()
+
 
     # Truncating file to reset default values
     with open(predictor_default_value_path, 'r+') as f:
         f.truncate(0)
 
-    train_r_squared, test_r_squared, graph_data_list, smooth_funct_list, output_data_list = model_training(file_path)
+    return "ok"
+
+@app.route('/col_names')
+def col_names_trans():
+
+    # Returning an api for showing in reactjs
+    return columns_names
+
+@app.route('/upload',  methods=["POST"])
+def upload_file():
+    payload = json.loads(request.data)
+
+    file_name = "object_file.txt"
+    # Reading the data
+    data_df = pd.read_csv(file_name, header=1)
+    col_names = data_df.columns.tolist()
+
+    for index, element in enumerate(payload):
+        if element == False:
+            data_df = data_df.drop(columns=[col_names[index]])
+        else:
+            pass
+
+    updated_file = "updated_object_file.txt"
+    data_df.to_csv(updated_file, sep = ",", index = False)
+    
+    # Running modules
+    train_r_squared, test_r_squared, graph_data_list, smooth_funct_list, output_data_list = model_training(updated_file)
+    max_min_list = maxima_minima(updated_file)
 
     # Updating data to fetch
+    max_min_dict['data'] = max_min_list
     graph_data_dict["graph_data"] = graph_data_list
     smooth_func_dict['data'] = smooth_funct_list
     histogram_data['data'] = output_data_list
@@ -115,6 +158,11 @@ def histogram_data_to_fetch():
     # Returning an api for showing in reactjs
     return histogram_data
 
+@app.route('/max_min_data')
+def maxima_minima_data():
+
+    # Returning an api for showing in reactjs
+    return max_min_dict
 
 @app.route("/input_config", methods={"GET"})
 def input_config():
@@ -155,7 +203,6 @@ def get_prediction():
                 unit = "units"
             break
 
-    #print('Output unit is = ', unit)
     output_result['unit_value'] = unit
 
     return {"output_prediction": output_prediction}

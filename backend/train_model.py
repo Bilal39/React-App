@@ -32,7 +32,7 @@ def model_training(file_name):
     upper_bound_list = []
 
     # Reading the data
-    data_df = pd.read_csv(file_name, header=1)
+    data_df = pd.read_csv(file_name)
 
     # Splitting Data into Inputs and Outputs
     x = data_df.iloc[:, :-1]

@@ -37,7 +37,7 @@ def input_manger():
                 predictor_input_values.append(float(line))
 
     # Reading the data
-    data_df = pd.read_csv("object_file.txt", header=1)
+    data_df = pd.read_csv("updated_object_file.txt")
     x = data_df.iloc[:, :-1]
     y = data_df.iloc[:, -1]
 

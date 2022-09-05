@@ -7,17 +7,13 @@ from flask import request
 from werkzeug.utils import secure_filename
 import os
 from train_model import model_training
+from max_min import maxima_minima
 from predictor import predictor_func
 from input_config import input_manger
-from empty_plots import empty_plots
 import json
 from pprint import pprint
 import numpy as np
 
-# Adding default plots
-empty_plots()
-
-x = datetime.datetime.now()
 
 # Initializing flask app
 app = Flask(__name__)
@@ -27,6 +23,9 @@ CORS(app)
 results_dict = {}
 output_result = {}
 graph_data_dict = {}
+smooth_func_dict = {}
+histogram_data = {}
+max_min_dict = {}
 output_result["output_value"] = "---"
 output_result['unit_value'] = "----"
 training_status = {'mstatus': "in progress .."}
@@ -69,14 +68,24 @@ def upload_file():
     file1 = request.files.get("file")
     file_path = "object_file.txt"
     file1.save(secure_filename(file_path))
+
     # Truncating file to reset default values
     with open(predictor_default_value_path, 'r+') as f:
         f.truncate(0)
-    train_r_squared, test_r_squared, graph_data_list = model_training(file_path)
+
+    # Running modules
+    train_r_squared, test_r_squared, graph_data_list, smooth_funct_list, output_data_list = model_training(file_path)
+    max_min_list = maxima_minima(file_path)
+
+    # Updating data to fetch
+    max_min_dict['data'] = max_min_list
     graph_data_dict["graph_data"] = graph_data_list
+    smooth_func_dict['data'] = smooth_funct_list
+    histogram_data['data'] = output_data_list
     results_dict['train_r_squared'] = float(train_r_squared)
     results_dict['test_r_squared'] = float(test_r_squared)
     training_status['mstatus'] = "Done!"
+
 
     return {
         "training_r_squared_value": train_r_squared,
@@ -98,12 +107,25 @@ def train_status():
 def results():
 
     # Returning an api for showing in reactjs
-    return {
-        "training_r_squared_value": results_dict['train_r_squared'],
-        "testing_r_squared_value": results_dict['test_r_squared'],
-        "mstatus": training_status['mstatus']
-    }
+    return graph_data_dict
 
+@app.route('/smooth_func_data')
+def smooth_func_data_points():
+
+    # Returning an api for showing in reactjs
+    return smooth_func_dict
+
+@app.route('/histogram_data')
+def histogram_data_to_fetch():
+
+    # Returning an api for showing in reactjs
+    return histogram_data
+
+@app.route('/max_min_data')
+def maxima_minima_data():
+
+    # Returning an api for showing in reactjs
+    return max_min_dict
 
 @app.route("/input_config", methods={"GET"})
 def input_config():
@@ -121,13 +143,10 @@ def input_config():
 def get_prediction():
     input_values = []
     payload = json.loads(request.data)
-    #print("\n input data for predictions = ")
+
     # print(payload)
     for item in payload:
-        #print("data values got at backend = ", item)
         input_values.append(item['value'])
-        #input_values.append(np.array(list(item.values())).astype(float)[0])
-    print("input values = ", input_values)
     
     # Writing prediction input values
     with open(predictor_default_value_path, 'w+') as f:
@@ -136,7 +155,6 @@ def get_prediction():
             f.write('\n')
 
     output_prediction = predictor_func(input_values)
-    #print("output_prediction = ", output_prediction[0], "\n")
     output_result['output_value'] = output_prediction
 
     # Reading User Input Parameters
