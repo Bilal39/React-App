@@ -22,11 +22,11 @@ export default function () {
         </div>
 
         <div >
-          <h2 className='about-headings'>Directions for Uploading a File.</h2>
-          <p className='about-paragraph'>1. Upload a 'CSV' fromat file.</p>
-          <p className='about-paragraph'>2. There can be any number of input columns but should have only 'one' output column.</p>
-          <p className='about-paragraph'>3. Make sure the output column is the right-most (last) column of the CSV file.</p>
-          <p className='about-paragraph'>4. File should have only 'one' header row.</p>
+          <h2 className='about-headings'>Directions to train a model.</h2>
+          <p className='about-paragraph'>1. Upload a CSV format file.</p>
+          <p className='about-paragraph'>2.	Set parameters for model training.</p>
+          <p className='about-paragraph'>3.	Click on “upload” button.</p>
+          <p className='about-paragraph'>4.	After clicking upload button, select input features you want to train the model on.</p>
           <p className='about-paragraph'>5. There should be 'no' serial number column in the file.</p>
         </div>
 

@@ -127,6 +127,7 @@ function Prediction() {
                   <div className='prediction_sliders'>
                     <div key={index}>
                       {form.name}
+                      <br/>
                       <input
                         // type="number"
                         //className='prediction_sliders'
@@ -134,11 +135,12 @@ function Prediction() {
                         type='range'
                         min={form.min}
                         max={form.max}
+                        step = {(form.max-form.min)/50}
                         placeholder='Input Value'
                         onChange={event => handleFormChange(event, index)}
                         value={form.value}
                       />
-                      {form.value}
+                      {parseFloat(form.value).toFixed(2)}
                     </div>
                   </div>
                 )

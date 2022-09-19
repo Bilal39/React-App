@@ -129,6 +129,17 @@ export const Test = () => {
     //console.log("formfields length = ", formFields.length)
 
   }
+  //<div className="left">
+  //          <h6>Instructions:</h6>
+  //          <p>1. Upload a 'CSV' fromat file.</p>
+  //          <p>2. There can be any number of input columns but should have only 'one' output column.</p>
+  //          <p>3. Make sure the output column is the right-most (last) column of the CSV file.</p>
+  //          <p>4. File should have only 'one' header row.</p>
+  //          <p>5. There should be 'no' serial number column in the file.</p>
+  //          <p>6. After selecting your file and setting parameters, click on the "upload" button.</p>
+  //          <p>7. Training status "in progress.." means the model is being trained.</p>
+  //          <p>8. On completion of model training, the status will change to "Done!" after which you can see the results at "Result" tab.</p>
+  //        </div>
 
 
   return (
@@ -139,14 +150,15 @@ export const Test = () => {
 
           <div className="left">
             <h6>Instructions:</h6>
-            <p>1. Upload a 'CSV' fromat file.</p>
-            <p>2. There can be any number of input columns but should have only 'one' output column.</p>
-            <p>3. Make sure the output column is the right-most (last) column of the CSV file.</p>
-            <p>4. File should have only 'one' header row.</p>
-            <p>5. There should be 'no' serial number column in the file.</p>
-            <p>6. After selecting your file and setting parameters, click on the "upload" button.</p>
-            <p>7. Training status "in progress.." means the model is being trained.</p>
-            <p>8. On completion of model training, the status will change to "Done!" after which you can see the results at "Result" tab.</p>
+            <p>1. Upload a CSV file.</p>
+            <p>2.	Set parameters for model training.</p>
+            <p>3.	Click on “upload” button.</p>
+            <p>4.	After clicking upload button, select input features you want to train the model on.</p>
+            <p><br/><b><u>Note:</u></b> CSV file:</p>
+            <p><b>i.</b> Should be formatted in the provided sample template format which can be downloaded by clicking “Download Sample Template” link.</p>
+            <p><b>ii.</b>	Can have ‘any’ number of input columns while should have only ‘one’ output column (ordered as a last column).</p>
+            <p><b>iii.</b> Should have ‘one’ header row.</p>
+            <p><b>iv.</b>	Should have no ‘serial number’ column.</p>
           </div>
 
           <form className="uploader" id='formEle' onSubmit={handleUploadImage}>
