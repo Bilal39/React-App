@@ -23,18 +23,18 @@ export default function () {
 
         <div >
           <h2 className='about-headings'>Directions to train a model.</h2>
-          <p className='about-paragraph'>1. Upload a CSV format file.</p>
-          <p className='about-paragraph'>2.	Set parameters for model training.</p>
-          <p className='about-paragraph'>3.	Click on “upload” button.</p>
-          <p className='about-paragraph'>4.	After clicking upload button, select input features you want to train the model on.</p>
-          <p className='about-paragraph'>5. There should be 'no' serial number column in the file.</p>
+          <p className='about-paragraph'><b>1.</b> Upload a CSV format file.</p>
+          <p className='about-paragraph'><b>2.</b> Set parameters for model training.</p>
+          <p className='about-paragraph'><b>3.</b> Click on “upload” button.</p>
+          <p className='about-paragraph'><b>4.</b> After clicking upload button, select input features you want to train the model on.</p>
+          <p className='about-paragraph'><b>5.</b> There should be 'no' serial number column in the file.</p>
         </div>
 
         <div >
           <h2 className='about-headings'>Instructions to Predict Values.</h2>
-          <p className='about-paragraph'>1. Remember to enter the "exact" number of input values where were present in the CSV file during the training.</p>
-          <p className='about-paragraph'>2. After entering, submit the values and check the predicted value.</p>
-          <p className='about-paragraph'>3. Trained model can be downloaded by clicking the "Download Trained Model" button.</p>
+          <p className='about-paragraph'><b>1.</b> Set input values.</p>
+          <p className='about-paragraph'><b>2.</b> After setting all values, click on “Submit Input Values”.</p>
+          <p className='about-paragraph'><b>3.</b> To predict a value, click on “Check Result”.</p>
         </div>
 
       </div>

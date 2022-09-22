@@ -149,12 +149,12 @@ export const Test = () => {
           <h1 className="page-header">Model Training</h1>
 
           <div className="left">
-            <h6>Instructions:</h6>
-            <p>1. Upload a CSV file.</p>
-            <p>2.	Set parameters for model training.</p>
-            <p>3.	Click on “upload” button.</p>
-            <p>4.	After clicking upload button, select input features you want to train the model on.</p>
-            <p><br/><b><u>Note:</u></b> CSV file:</p>
+            <h6><u>Instructions:</u></h6>
+            <p><b>1.</b> Upload a CSV format file.</p>
+            <p><b>2.</b>	Set parameters for model training.</p>
+            <p><b>3.</b>	Click on “upload” button.</p>
+            <p><b>4.</b>	After clicking upload button, select input features you want to train the model on.</p>
+            <p><br /><b>Note:</b> CSV file:</p>
             <p><b>i.</b> Should be formatted in the provided sample template format which can be downloaded by clicking “Download Sample Template” link.</p>
             <p><b>ii.</b>	Can have ‘any’ number of input columns while should have only ‘one’ output column (ordered as a last column).</p>
             <p><b>iii.</b> Should have ‘one’ header row.</p>
@@ -244,9 +244,9 @@ export const Test = () => {
               <div >
                 <br />
                 {formFields.map((form, index) => {
+
                   return (
                     <div key={index}>
-
                       <input
                         type="checkbox"
                         id={`custom-checkbox-${index}`}

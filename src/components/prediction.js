@@ -109,11 +109,10 @@ function Prediction() {
           </div>
 
           <div className="left">
-            <h6>Instructions:</h6>
-            <p>1. Please enter the exact number of input values which were provided in the CSV file during the training.</p>
-            <p>2. After entering the input values, click on the 'Submit Input Values' button.</p>
-            <p>3. At last, click on the 'Check Result' button to get predicted value.</p>
-            <p>Note: In order to download the trained model file which is used for predictions, click on 'Download Trained Model".</p>
+            <h6><u>Instructions:</u></h6>
+            <p><b>1.</b> Set input values.</p>
+            <p><b>2.</b> After setting all values, click on “Submit Input Values”.</p>
+            <p><b>3.</b> To predict a value, click on “Check Result”.</p>
           </div>
 
           <div className="prediction-fields">
