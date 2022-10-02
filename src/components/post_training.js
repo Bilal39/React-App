@@ -198,12 +198,14 @@ export default function () {
 
         <div className="disp_results">
           <h1 className="page-header">Maxima Minima Values</h1>
+          <br/>
           {formFields4.map((form, index) => {
             return (
               <div key={index}>
                 <Button variant="primary" size="md" type="button" onClick={() => setDisp(!disp)}>
                   {disp === true ? 'Hide Maxima-Minima' : 'Show Maxima-Minima'}
                 </Button>
+                <br/>
                 {disp && <> <br/> {form.str1} <br/> {form.str2} <br/> {form.str3}</>}
 
               </div>

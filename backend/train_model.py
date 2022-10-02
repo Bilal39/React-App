@@ -1,3 +1,4 @@
+from cmath import nan
 from flask import Flask, render_template, url_for, request
 from werkzeug.utils import secure_filename
 import pandas as pd
@@ -10,7 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from pygam import LinearGAM
 import pickle
-
+import math
 
 def model_training(file_name):
     nbr_input_track_file_path = os.path.join(
@@ -132,12 +133,20 @@ def model_training(file_name):
     training_rmse = round(mean_squared_error(
         y_train, gam_predictions_training, squared=False), 2)
     training_r_squared = round(r2_score(y_train, gam_predictions_training), 2)
+    if math.isnan(training_r_squared) == True:
+        training_r_squared = 0
+    
 
     # Calculating R2 RMSE Values for testing data
     gam_predictions_testing = gam.predict(x_test)
     testing_rmse = round(mean_squared_error(
         y_test, gam_predictions_testing, squared=False), 2)
+
     testing_r_squared = round(r2_score(y_test, gam_predictions_testing), 2)
+    if math.isnan(testing_r_squared) == True:
+        testing_r_squared = 0
+
+
 
     # Preparing Data for Training Plot
     train_data_dict['name'] = "Training Plot"
