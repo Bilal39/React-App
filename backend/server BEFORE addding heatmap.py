@@ -1,6 +1,8 @@
-# Importing Libraries
+# Import flask and datetime module for showing date and time
+#from crypt import methods
 from flask import Flask
 from flask_cors import CORS
+import datetime
 from flask import request
 from werkzeug.utils import secure_filename
 import os
@@ -10,8 +12,10 @@ from max_min import maxima_minima
 from predictor import predictor_func
 from input_config import input_manger
 import json
+from pprint import pprint
+import numpy as np
 import pandas as pd
-
+from scipy.stats import pearsonr
 
 
 # Initializing flask app
@@ -69,12 +73,38 @@ def getting_file_from_frontend():
     file_path = "object_file.txt"
     file1.save(secure_filename(file_path))
 
-    # Calling funtion for column names and correlation data
-    column_names, corr_data_list = correlation_among_data(file_path)
+    #reading file
+    data_df = pd.read_csv(file_path, header=1)
+    column_names, corr_data_list, corr_matrix = correlation_among_data(file_path)
 
-    # Storing column names in a dict to fetch easily
-    columns_names['data'] = column_names    
+    # Splitting Data into Inputs and Outputs
+    x = data_df.iloc[:, :-1]
+    y = data_df.iloc[:, -1]
+
+    columns_names['data'] = column_names
+
+    ## Getting Correlation among inputs and output
+    corr_data_list = []
+    
+    total_columns = len(data_df.columns)
+    for n in range(total_columns - 1):
+        temp_corr_dict = {}
+        data1= data_df.iloc[:,n]
+        data2= data_df.iloc[:,total_columns-1]
+
+        # Finding Pearson correlation
+        corr, _ = pearsonr(data1, data2)
+        #print('Pearsons correlation: %.3f' % corr)
+        temp_corr_dict['name'] = data_df.columns[n]
+        temp_corr_dict["val"] = round(corr,3)
+        corr_data_list.append(temp_corr_dict)
+
+    
+    print("corr_data_list = ", corr_data_list)
+    
     corr_data['data'] = corr_data_list
+
+
 
     # Truncating file to reset default values
     with open(predictor_default_value_path, 'r+') as f:
@@ -124,7 +154,6 @@ def upload_file():
     histogram_data['data'] = output_data_list
     results_dict['train_r_squared'] = float(train_r_squared)
     results_dict['test_r_squared'] = float(test_r_squared)
-    print("chaing status to done now !!!!!!!!!!!")
     training_status['mstatus'] = "Done!"
 
     return {

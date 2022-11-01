@@ -14,7 +14,7 @@ function Prediction() {
 
           for (var key in data) {
             var arr = data[key];
-            //console.log("arr = ", arr);
+            console.log("arr = ", arr);
             setFormFields(
               Array.from(arr)
             );
@@ -119,17 +119,13 @@ function Prediction() {
 
             <form onSubmit={submit}>
               {formFields.map((form, index) => {
-                // console.log('formFields', formFields)
-                // console.log(`formformform${index}`, form);
-                // console.log('form', form.name, typeof(form.name));
+
                 return (
                   <div className='prediction_sliders'>
                     <div key={index}>
                       {form.name}
                       <br/>
                       <input
-                        // type="number"
-                        //className='prediction_sliders'
                         name={form.name}
                         type='range'
                         min={form.min}

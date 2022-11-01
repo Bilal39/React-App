@@ -8,7 +8,7 @@ export default function Home() {
         </div>
         <video loop muted autoPlay className='welcome_video'>
         <source
-          src={require("../assests/Digital Data.mp4")}
+          src={require("../assests/Digital_Data.mp4")}
           type="video/mp4"
         />
         Your browser does not support the video tag.

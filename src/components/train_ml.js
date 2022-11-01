@@ -1,8 +1,10 @@
-import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import infoicon from '../assests/images/info_icon.png'
-import post_training from "./post_training";
+import Plot from 'react-plotly.js';
 import Button from 'react-bootstrap/Button';
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, Fragment } from "react";
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
+
 
 const initialState = {
   splines: 17,
@@ -21,6 +23,9 @@ export const Test = () => {
   const [status, setStatus] = useState('---')
   const [formFields, setFormFields] = useState([]);
   const [checkedState, setCheckedState] = useState([]);
+  const [correlation_names, setcorrelation_names] = useState([]);
+  const [correlation_val, setcorrelation_val] = useState([]);
+  const [correlation_matrix, setcorrelation_matrix] = useState([]);
   //console.log('state: ', { ...state, status })
 
   const handleUpload = (event) => {
@@ -31,6 +36,7 @@ export const Test = () => {
     data.append('file', event.target.files[0])
     setFile(data)
   }
+
 
   const handleReset = (event) => {
     setState(initialState)
@@ -106,11 +112,10 @@ export const Test = () => {
         setCheckedState(new Array(data['data'].length).fill(true))
         for (var key in data) {
           var arr = data[key];
-          console.log("getting column names  arr = ", arr)
+          //console.log("getting column names  arr = ", arr)
           setFormFields(
             Array.from(arr)
           );
-          console.log("checking formfields after = ", formFields)
         }
       })
     );
@@ -120,158 +125,242 @@ export const Test = () => {
         setCheckedState(new Array(data['data'].length).fill(true))
         for (var key in data) {
           var arr = data[key];
+          //console.log("col_names = ", arr)
           setFormFields(
             Array.from(arr)
           );
         }
       })
     );
-    //console.log("formfields length = ", formFields.length)
+
+    const corr_names = []
+    const corr_val = []
+    const corr_matrix = []
+
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/cor_data`).then((res) =>
+      res.json().then((corrdata) => {
+        for (var key in corrdata) {
+          var arr = corrdata[key];
+          //console.log("key = ", key)
+          console.log("corr_data = ", arr)
+          for (var n in arr) {
+            //console.log("n = ", n)
+            corr_names.push(arr[n]['name'])
+            corr_val.push(arr[n]['val'])
+
+
+            if (n == arr.length - 1) {
+              //console.log("here n  is equal=")
+
+              //console.log("here is the matrix we are pushing = ", arr[n]['matrix'])
+            }
+          }
+          corr_matrix.push(arr[arr.length - 1]['matrix'])
+          setcorrelation_names(Array.from(corr_names))
+          setcorrelation_val(Array.from(corr_val))
+          setcorrelation_matrix((corr_matrix))
+          console.log("correlation_matrix = ", correlation_matrix)
+        }
+      })
+    );
 
   }
-  //<div className="left">
-  //          <h6>Instructions:</h6>
-  //          <p>1. Upload a 'CSV' fromat file.</p>
-  //          <p>2. There can be any number of input columns but should have only 'one' output column.</p>
-  //          <p>3. Make sure the output column is the right-most (last) column of the CSV file.</p>
-  //          <p>4. File should have only 'one' header row.</p>
-  //          <p>5. There should be 'no' serial number column in the file.</p>
-  //          <p>6. After selecting your file and setting parameters, click on the "upload" button.</p>
-  //          <p>7. Training status "in progress.." means the model is being trained.</p>
-  //          <p>8. On completion of model training, the status will change to "Done!" after which you can see the results at "Result" tab.</p>
-  //        </div>
 
+  const handleCorrUpdate = (event) => {
+    console.log("Inside handleCorrUpdate")
+
+  }
 
   return (
     <Fragment>
-      <body>
-        <div className="background-Image">
-          <h1 className="page-header">Model Training</h1>
 
-          <div className="left">
-            <h6><u>Instructions:</u></h6>
-            <p><b>1.</b> Upload a CSV format file.</p>
-            <p><b>2.</b>	Set parameters for model training.</p>
-            <p><b>3.</b>	Click on “upload” button.</p>
-            <p><b>4.</b>	After clicking upload button, select input features you want to train the model on.</p>
-            <p><br /><b>Note:</b> CSV file:</p>
-            <p><b>i.</b> Should be formatted in the provided sample template format which can be downloaded by clicking “Download Sample Template” link.</p>
-            <p><b>ii.</b>	Can have ‘any’ number of input columns while should have only ‘one’ output column (ordered as a last column).</p>
-            <p><b>iii.</b> Should have ‘one’ header row.</p>
-            <p><b>iv.</b>	Should have no ‘serial number’ column.</p>
-          </div>
+      <div className="background-Image">
+        <h1 className="page-header">Model Training</h1>
 
-          <form className="uploader" id='formEle' onSubmit={handleUploadImage}>
-            <div className="training_content">
-              <div className="file_upload">
-                <input type='file' name='file' onChange={handleUpload} required />
-                <a href={require("../assests/template.csv")} download="template.csv">Download Sample Template</a>
-              </div>
-
-              <div className="range_sliders">
-                <div>
-                  <label id='spline-value'>Number of Splines </label>
-                  <input
-                    htmlFor='spline-value'
-                    type="range"
-                    min="4"
-                    max="90"
-                    value={state.splines}
-                    onChange={(e) => setState({ ...state, 'splines': e.target.value })}
-                  />
-                  {state.splines}
-                  {<img className="infoicon" src={infoicon} title="Greater number of splines will have more bendings/curves(complexity) in the smooth functions and vice versa." />}
-                </div>
-
-                <div>
-                  <lable id='lamda-value'>Lambda Value  </lable>
-                  <input
-                    htmlFor='lamda-value'
-                    type="range"
-                    min="3"
-                    max="20"
-                    value={state.lambdaval}
-                    onChange={(e) => setState({ ...state, 'lambdaval': e.target.value })}
-                  />
-                  {state.lambdaval}
-                  {<img className="infoicon" src={infoicon} title="Balance the lambda value. The greater the value, the better will be the training but may lead to overfitting." />}
-                </div>
-
-                <div>
-                  <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
-                  <input
-                    htmlFor='split-value'
-                    type="range"
-                    min="50"
-                    max="95"
-                    value={state.splitpercent}
-                    onChange={(e) => setState({ ...state, 'splitpercent': e.target.value })}
-                  />
-                  {state.splitpercent}
-                  {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
-                </div>
-
-                <div>
-                  <lable id='bin-value'>Bins size for histogram </lable>
-                  <input
-                    htmlFor='bin-value'
-                    type="range"
-                    min="2"
-                    max="100"
-                    value={state.bin}
-                    onChange={(e) => setState({ ...state, 'bin': e.target.value })}
-                  />
-                  {state.bin}
-                  {<img className="infoicon" src={infoicon} title="The towers or bars of a histogram are called bins. The greater the size of the bin, the more data division will be." />}
-                </div>
-
-                <div>
-                  <lable className="shufflecheckbox" >Shuffle Data </lable>
-                  <input
-                    type="checkbox"
-                    name="isChecked"
-                    onChange={(e) => setState({ ...state, 'shuffledata': e.target.checked })}
-                  />
-                  {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
-                </div>
-              </div>
-
-              <br />
-              <div className="upload button">
-                <Button variant="primary" size="md" type='submit'>Upload</Button>
-                <button type='reset' onClick={handleReset}>Reset values</button>
-              </div>
-              <div >
-                <br />
-                {formFields.map((form, index) => {
-
-                  return (
-                    <div key={index}>
-                      <input
-                        type="checkbox"
-                        id={`custom-checkbox-${index}`}
-                        name={form}
-                        checked={checkedState[index]}
-                        onChange={() => handleOnChange(index)}
-                      />
-                      <span> - </span>
-                      {form}
-
-                    </div>
-                  )
-                })}
-              </div>
-              <br />
-              <Button variant="primary" size="md" type='button' onClick={handleOnClick}>Train Model</Button>
-              <div className="training_status">
-                <p>Training Status : {status}</p>
-              </div>
-            </div>
-          </form>
-
+        <div className="left">
+          <h6><u>Instructions:</u></h6>
+          <p><b>1.</b> Upload a CSV format file.</p>
+          <p><b>2.</b>	Set parameters for model training.</p>
+          <p><b>3.</b>	Click on “upload” button.</p>
+          <p><b>4.</b>	After clicking upload button, select input features you want to train the model on.</p>
+          <p><br /><b>Note:</b> CSV file:</p>
+          <p><b>i.</b> Should be formatted in the provided sample template format which can be downloaded by clicking “Download Sample Template” link.</p>
+          <p><b>ii.</b>	Can have ‘any’ number of input columns while should have only ‘one’ output column (ordered as a last column).</p>
+          <p><b>iii.</b> Should have ‘one’ header row.</p>
+          <p><b>iv.</b>	Should have no ‘serial number’ column.</p>
         </div>
 
-      </body>
+        <form className="uploader" id='formEle' onSubmit={handleUploadImage}>
+          <div className="training_content">
+            <div className="file_upload">
+              <input type='file' name='file' onChange={handleUpload} required />
+              <a href={require("../assests/template.csv")} download="template.csv">Download Sample Template</a>
+            </div>
+
+            <div className="range_sliders">
+              <div>
+                <label id='spline-value'>Number of Splines </label>
+                <input
+                  htmlFor='spline-value'
+                  type="range"
+                  min="4"
+                  max="90"
+                  value={state.splines}
+                  onChange={(e) => setState({ ...state, 'splines': e.target.value })}
+                />
+                {state.splines}
+                {<img className="infoicon" src={infoicon} title="Greater number of splines will have more bendings/curves(complexity) in the smooth functions and vice versa." />}
+              </div>
+
+              <div>
+                <lable id='lamda-value'>Lambda Value  </lable>
+                <input
+                  htmlFor='lamda-value'
+                  type="range"
+                  min="3"
+                  max="20"
+                  value={state.lambdaval}
+                  onChange={(e) => setState({ ...state, 'lambdaval': e.target.value })}
+                />
+                {state.lambdaval}
+                {<img className="infoicon" src={infoicon} title="Balance the lambda value. The greater the value, the better will be the training but may lead to overfitting." />}
+              </div>
+
+              <div>
+                <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
+                <input
+                  htmlFor='split-value'
+                  type="range"
+                  min="50"
+                  max="95"
+                  value={state.splitpercent}
+                  onChange={(e) => setState({ ...state, 'splitpercent': e.target.value })}
+                />
+                {state.splitpercent}
+                {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
+              </div>
+
+              <div>
+                <lable id='bin-value'>Bins size for histogram </lable>
+                <input
+                  htmlFor='bin-value'
+                  type="range"
+                  min="2"
+                  max="100"
+                  value={state.bin}
+                  onChange={(e) => setState({ ...state, 'bin': e.target.value })}
+                />
+                {state.bin}
+                {<img className="infoicon" src={infoicon} title="The towers or bars of a histogram are called bins. The greater the size of the bin, the more data division will be." />}
+              </div>
+
+              <div>
+                <lable className="shufflecheckbox" >Shuffle Data </lable>
+                <input
+                  type="checkbox"
+                  name="isChecked"
+                  onChange={(e) => setState({ ...state, 'shuffledata': e.target.checked })}
+                />
+                {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
+              </div>
+            </div>
+
+            <br />
+            <div className="upload button">
+              <Button variant="primary" size="md" type='submit'>Upload</Button>
+              <button type='reset' onClick={handleReset}>Reset values</button>
+              <div >
+
+
+                <div className='features_checkbox'>
+                  <br />
+                  {formFields.map((form, index) => {
+
+                    return (
+                      <div key={index}>
+                        <input
+                          type="checkbox"
+                          id={`custom-checkbox-${index}`}
+                          name={form}
+                          checked={checkedState[index]}
+                          onChange={() => handleOnChange(index)}
+                        />
+                        <span> - </span>
+                        {form}
+
+                      </div>
+                    )
+                  })}
+
+                </div>
+                <div className='corrbtn'>
+                  <br />
+                  <Popup trigger={<button> Show Correlation</button>} position="right top" onClick={handleCorrUpdate}>
+                    <div><Plot
+                      data={[
+                        {
+                          z: correlation_matrix[0],
+                          x: formFields,
+                          y: formFields,
+                          type: 'heatmap',
+                          hoverongaps: false
+                        },
+                      ]}
+                      layout={{
+                        title: "Correlation heatmap among inputs", xaxis: {
+                          automargin: true
+                        },
+                        yaxis: {
+                          automargin: true
+                        }
+                      }}
+
+                    /></div>
+
+                    <div><Plot
+                      data={[
+                        {
+                          x: correlation_names,
+                          y: correlation_val,
+                          type: 'bar'
+                        },
+                      ]}
+                      layout={{
+                        title: " Correlation Between Inputs and Output", xaxis: {
+                          showgrid: true, gridcolor: '#bdbdbd',
+                          gridwidth: 1, automargin: true
+                        },
+                        yaxis: {
+                          title: "Correlation factor", showgrid: true, gridcolor: '#bdbdbd',
+                          gridwidth: 1, automargin: true
+                        }
+                      }}
+                    /></div>
+                    <br />
+
+                    <br />
+
+
+                  </Popup>
+                  {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
+
+
+                </div>
+
+                <br />
+                <br />
+                <Button variant="primary" size="md" type='button' onClick={handleOnClick}>Train Model</Button>
+                <div className="training_status">
+                  <p>Training Status : {status}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+      </div>
+
+
     </Fragment>
   )
 }

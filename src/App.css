@@ -41,9 +41,9 @@ body {
 .shadow {
   margin-top: 10%;
   position: absolute;
-  bottom: 0%;
+  bottom: -10%;
   width: 100%;
-  height: 1%;
+  height: 0.5%;
 }
 
 
@@ -130,14 +130,6 @@ body {
   margin-left: 40px;
 }
 
-.training_status {
-
-  margin-top: 2%;
-  font-weight: bold;
-  font-style: italic;
-  font-size: large;
-}
-
 
 .left {
   width: 20%;
@@ -149,6 +141,22 @@ body {
 
 .file_upload {
   margin-left: 40px;
+}
+
+.corrbtn {
+
+}
+
+.features_checkbox {
+  margin-left: 42px;
+}
+
+.training_status {
+  margin-left: 40px;
+  margin-top: 2%;
+  font-weight: bold;
+  font-style: italic;
+  font-size: large;
 }
 
 .button-link {
