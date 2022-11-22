@@ -7,8 +7,16 @@ from sklearn.metrics import mean_squared_error, r2_score
 from pygam import LinearGAM
 import pickle
 import math
+import random
+
+
+
+
+
 
 def model_training(file_name):
+
+
     nbr_input_track_file_path = os.path.join(
         os.getcwd(), 'assests', "nbr_of_inputs.ini")
     input_parameters_path = os.path.join(
@@ -26,6 +34,10 @@ def model_training(file_name):
     smooth_funct_list = []
     lower_bound_list = []
     upper_bound_list = []
+    maxima = []
+    maxima_output = []
+    minima = []
+    minima_output = []
 
     # Reading the data
     data_df = pd.read_csv(file_name)
@@ -83,7 +95,7 @@ def model_training(file_name):
 
     # Fitting Gam model
     gam = LinearGAM(n_splines=splines).gridsearch(x_train, y_train, lam=lams)
-    gam.summary()  # printing summary of the model
+    #gam.summary()  # printing summary of the model
 
     # Plotting Smooth Function graphs
     titles = data_df.columns[0:input_column_nbr]
@@ -163,7 +175,181 @@ def model_training(file_name):
     test_data_dict['rsqaured'] = testing_r_squared
     final_data_list.append(test_data_dict)
 
-    return training_r_squared, testing_r_squared, final_data_list, smooth_funct_list, output_data_list
+
+    # Gam Function
+    def gam_function(variables):
+      x = [variables]
+      modelmat = gam._modelmat(x, term=-1)
+      coeff = gam.coef_[gam.terms.get_coef_indices(-1)]
+      return modelmat.dot(coeff).flatten()
+    
+    
+    # Bounds
+    bounds = []
+    for column in X_train.columns:
+      min_val = (X_train[column].min())
+      max_val = (X_train[column].max())
+      bounds.append((min_val,max_val)) 
+    
+    #------------------------------------------------------------------------------
+    # TO CUSTOMIZE THIS PSO CODE TO SOLVE UNCONSTRAINED OPTIMIZATION PROBLEMS, CHANGE THE PARAMETERS IN THIS SECTION ONLY:
+    # THE FOLLOWING PARAMETERS MUST BE CHANGED.
+    
+    nv = len(X_train.columns)      # number of variables
+
+    
+    # THE FOLLOWING PARAMETERS ARE OPTINAL.
+    particle_size=50         # number of particles
+    iterations=40           # max number of iterations
+    w=0.85                    # inertia constant
+    c1=1                    # cognative constant
+    c2=0.5                     # social constant
+    # END OF THE CUSTOMIZATION SECTION
+    #------------------------------------------------------------------------------
+    
+    class Particle:
+        def __init__(self,bounds):
+            self.particle_position=[]                     # particle position
+            self.particle_velocity=[]                     # particle velocity
+            self.local_best_particle_position=[]          # best position of the particle
+            self.fitness_local_best_particle_position= initial_fitness
+            self.fitness_particle_position=initial_fitness
+
+            for i in range(nv):
+              self.particle_position.append(random.uniform(bounds [i][0],bounds [i][1])) 
+              self.particle_velocity.append(random.uniform(-1,1))
+
+        def evaluate(self,objective_function):
+            self.fitness_particle_position=objective_function(self.particle_position)
+            if mm == -1:
+                if self.fitness_particle_position < self.fitness_local_best_particle_position:
+                    self.local_best_particle_position = self.particle_position                  # update the local best
+                    self.fitness_local_best_particle_position = self.fitness_particle_position  # update the fitness of the local best
+
+            if mm == 1:
+                if self.fitness_particle_position > self.fitness_local_best_particle_position:
+                    self.local_best_particle_position = self.particle_position                  # update the local best
+                    self.fitness_local_best_particle_position = self.fitness_particle_position
+
+        def update_velocity(self,global_best_particle_position):
+            for i in range(nv):
+                r1=random.random()
+                r2=random.random()
+    
+                cognitive_velocity = c1*r1*(self.local_best_particle_position[i] - self.particle_position[i])
+                social_velocity = c2*r2*(global_best_particle_position[i] - self.particle_position[i])
+                self.particle_velocity[i] = w*self.particle_velocity[i]+ cognitive_velocity + social_velocity
+    
+        def update_position(self,bounds):
+            for i in range(nv):
+                self.particle_position[i]=self.particle_position[i]+self.particle_velocity[i]
+    
+                # check and repair to satisfy the upper bounds
+                if self.particle_position[i]>bounds[i][1]:
+                    self.particle_position[i]=bounds[i][1]
+
+                if self.particle_position[i] < bounds[i][0]:
+                	self.particle_position[i]=bounds[i][0]              
+    class PSO():
+        def __init__(self,objective_function,bounds,particle_size,iterations):
+        
+            fitness_global_best_particle_position=initial_fitness
+            global_best_particle_position=[]
+    
+            swarm_particle=[]
+            for i in range(particle_size):
+                swarm_particle.append(Particle(bounds))
+            A=[]
+
+            for i in range(iterations):
+                for j in range(particle_size):
+                    swarm_particle[j].evaluate(objective_function)
+                    if mm == -1:
+                      if swarm_particle[j].fitness_particle_position < fitness_global_best_particle_position:
+                        global_best_particle_position = list(swarm_particle[j].particle_position)
+                        fitness_global_best_particle_position = float(swarm_particle[j].fitness_particle_position)
+                    if mm == 1:
+                      if swarm_particle[j].fitness_particle_position > fitness_global_best_particle_position:
+                        global_best_particle_position = list(swarm_particle[j].particle_position)
+                        fitness_global_best_particle_position = float(swarm_particle[j].fitness_particle_position)
+                #print("\n Iteration = ", i)
+                #print('Optimal solution:', global_best_particle_position)
+                #print('Objective function value:' , fitness_global_best_particle_position)
+                for j in range(particle_size):
+                  swarm_particle[j].update_velocity(global_best_particle_position)
+                  swarm_particle[j].update_position(bounds)
+
+                A.append(fitness_global_best_particle_position) 
+
+            print(" MM value = ", mm)
+            if mm == 1:
+                maxima.append(global_best_particle_position)
+                maxima_output.append(fitness_global_best_particle_position)
+            else:
+                minima.append(global_best_particle_position)
+                minima_output.append(fitness_global_best_particle_position)
+            print('Optimal solution:', global_best_particle_position)
+            print('Objective function value:' , fitness_global_best_particle_position)
+            print('Evolutionary process of the objective function value:')
+
+
+            #plt.plot(A)
+
+    mm = 1                           # if minimization problem, mm = -1; if maximization problem, mm = 1
+    if mm == -1:
+	    initial_fitness = float("inf") # for minimization problem
+
+    if mm == 1:
+	    initial_fitness = -float("inf") # for maximization problem
+    
+    PSO(gam_function, bounds, particle_size, iterations)
+
+
+    
+    mm = -1                           # if minimization problem, mm = -1; if maximization problem, mm = 1
+    if mm == -1:
+	    initial_fitness = float("inf") # for minimization problem
+
+    if mm == 1:
+	    initial_fitness = -float("inf") # for maximization problem
+    
+    PSO(gam_function, bounds, particle_size, iterations)
+
+    print("Maxima values = ", maxima)
+    print("Minima values = ", minima)
+    # Reading User Input Parameters
+    with open("object_file.txt", encoding='utf-8-sig') as f:
+        lines = f.readlines()
+        for line in lines:
+            unit = str(line.split(',')[0])
+            if unit == "Enter output unit":
+                unit = "units"
+            break
+    
+    #str2 = "Input values for Max Output = {} , O/P = {}  ".format(predictions_dict[max_pred_val],max_pred_val)
+    str2 = "Max Output Value = {} {}, Based on Input values = {}".format(round(maxima_output[0],3),unit, [round(item, 3) for item in maxima[0]] )
+    str3 = "Min Output Value = {} {}, Based on Input values = {}".format(round(minima_output[0],2), unit, [round(item, 3) for item in minima[0]])
+    #str3 = "Input values for Min Output = {} , O/P = {}  ".format(predictions_dict[min_pred_val],min_pred_val)
+    print(str2) 
+    print(str3)
+    print("Done new approach !!!!!!!!") 
+    
+    col_str = "Input values follows following order:"
+    for element in X_train.columns:
+        col_str += " '"
+        col_str += element
+        col_str += "', "
+    str1 = col_str[:-2]
+
+    str_list = []
+    temp_dict = {}
+    temp_dict['str1'] = str1
+    temp_dict['str2'] = str2
+    temp_dict['str3'] = str3
+    str_list.append(temp_dict)
+
+
+    return training_r_squared, testing_r_squared, final_data_list, smooth_funct_list, output_data_list, str_list
 
 
 if __name__ == "__main__":

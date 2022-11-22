@@ -144,7 +144,9 @@ body {
 }
 
 .corrbtn {
-
+  padding: 2% 0 0 350px;
+  align-items: center;
+  justify-content: center;
 }
 
 .features_checkbox {
@@ -152,7 +154,6 @@ body {
 }
 
 .training_status {
-  margin-left: 40px;
   margin-top: 2%;
   font-weight: bold;
   font-style: italic;

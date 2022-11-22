@@ -6,7 +6,6 @@ from werkzeug.utils import secure_filename
 import os
 from train_model import model_training
 from correlation_data import correlation_among_data
-from max_min import maxima_minima
 from predictor import predictor_func
 from input_config import input_manger
 import json
@@ -69,12 +68,13 @@ def getting_file_from_frontend():
     file_path = "object_file.txt"
     file1.save(secure_filename(file_path))
 
-    # Calling funtion for column names and correlation data
-    column_names, corr_data_list = correlation_among_data(file_path)
-
-    # Storing column names in a dict to fetch easily
-    columns_names['data'] = column_names    
-    corr_data['data'] = corr_data_list
+    # Reading the data
+    data_df = pd.read_csv(file_path, header=1)
+    # Splitting Data into Inputs
+    x = data_df.iloc[:, :-1]
+    # Getting Column names
+    columns_names['data'] = data_df.columns.tolist()
+    #print(columns_names)
 
     # Truncating file to reset default values
     with open(predictor_default_value_path, 'r+') as f:
@@ -87,6 +87,27 @@ def col_names_trans():
 
     # Returning an api for showing in reactjs
     return columns_names
+
+@app.route('/data_for_corr',  methods=["POST"])
+def inputs_for_corr():
+    #print("Inside inputs_for_corr!!!!")
+    checked_array = json.loads(request.data)
+    print("checked_array = ", checked_array)
+    file_path = "object_file.txt"
+
+    # Calling funtion for column names and correlation data
+    column_names, corr_data_list = correlation_among_data(file_path,checked_array)
+    #print("These are the column names = ", column_names)
+    #print("\nThis is the corr_data_list = ", corr_data_list)
+
+    # Storing column names in a dict to fetch easily
+    columns_names['data'] = column_names    
+    corr_data['data'] = corr_data_list
+
+    #print(payload)
+
+    # Returning an api for showing in reactjs
+    return "OK"
 
 @app.route('/cor_data')
 def correlation_data():
@@ -113,9 +134,9 @@ def upload_file():
     data_df.to_csv(updated_file, sep = ",", index = False)
     
     # Running modules
-    train_r_squared, test_r_squared, graph_data_list, smooth_funct_list, output_data_list = model_training(updated_file)
-    max_min_list = maxima_minima(updated_file)
-    print("Max_Min_list = ", max_min_list)
+    train_r_squared, test_r_squared, graph_data_list, smooth_funct_list, output_data_list, max_min_list = model_training(updated_file)
+    #max_min_list = maxima_minima(updated_file)
+    #print("Max_Min_list = ", max_min_list)
 
     # Updating data to fetch
     max_min_dict['data'] = max_min_list
@@ -124,7 +145,7 @@ def upload_file():
     histogram_data['data'] = output_data_list
     results_dict['train_r_squared'] = float(train_r_squared)
     results_dict['test_r_squared'] = float(test_r_squared)
-    print("chaing status to done now !!!!!!!!!!!")
+    #print("chaing status to done now !!!!!!!!!!!")
     training_status['mstatus'] = "Done!"
 
     return {

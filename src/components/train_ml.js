@@ -1,19 +1,20 @@
 import infoicon from '../assests/images/info_icon.png'
 import Plot from 'react-plotly.js';
 import Button from 'react-bootstrap/Button';
-import React, { useState, Fragment } from "react";
+import React, { useState, Fragment, useEffect } from "react";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 
 
 const initialState = {
-  splines: 17,
+  splines: 10,
   lambdaval: 5,
   splitpercent: 90,
   bin: 15,
   shuffledata: false
 };
 
+//var counter = 0
 
 
 export const Test = () => {
@@ -23,9 +24,13 @@ export const Test = () => {
   const [status, setStatus] = useState('---')
   const [formFields, setFormFields] = useState([]);
   const [checkedState, setCheckedState] = useState([]);
+  const [corrNames, setcorrNames] = useState([]);
   const [correlation_names, setcorrelation_names] = useState([]);
   const [correlation_val, setcorrelation_val] = useState([]);
   const [correlation_matrix, setcorrelation_matrix] = useState([]);
+  const [effectStateCheck, seteffectStateCheck] = useState(0);
+  const [counter, setcounter] = useState(0);
+  
   //console.log('state: ', { ...state, status })
 
   const handleUpload = (event) => {
@@ -86,6 +91,7 @@ export const Test = () => {
     console.log('Upload Handler')
     event.preventDefault();
 
+
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/parameter`, {
       method: 'POST',
       body: JSON.stringify(state),
@@ -109,11 +115,14 @@ export const Test = () => {
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/col_names`).then((res) =>
       res.json().then((data) => {
         //console.log("checking formfields before = ", formFields)
-        setCheckedState(new Array(data['data'].length).fill(true))
+        //setCheckedState(new Array(data['data'].length).fill(true))
         for (var key in data) {
           var arr = data[key];
           //console.log("getting column names  arr = ", arr)
           setFormFields(
+            Array.from(arr)
+          );
+          setcorrNames(
             Array.from(arr)
           );
         }
@@ -122,54 +131,123 @@ export const Test = () => {
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/col_names`).then((res) =>
       res.json().then((data) => {
+
         setCheckedState(new Array(data['data'].length).fill(true))
         for (var key in data) {
           var arr = data[key];
-          //console.log("col_names = ", arr)
           setFormFields(
+            Array.from(arr)
+          );
+          setcorrNames(
             Array.from(arr)
           );
         }
       })
     );
+  }
+  const handleCorrUpdate = (event) => {
+    //console.log("Inside handleCorrUpdate")
+    //console.log("Checking states = ", checkedState)
+    //console.log("FormFields = ", formFields)
+    //console.log("setcorrNames = ", setcorrNames)
 
+    setcorrNames([]);
+    setcorrelation_matrix([]);
+    const temp_list = []
+    for (let i = 0; i < checkedState.length; i++) {
+      if (checkedState[i] == true) {
+        temp_list.push(formFields[i])
+      }
+    }
+    setcorrNames([temp_list]);
+    console.log("Corr Names = ", corrNames)
     const corr_names = []
     const corr_val = []
-    const corr_matrix = []
+    var corr_matrix = []
+
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/data_for_corr`, {
+      method: 'POST',
+      body: JSON.stringify(checkedState),
+    })
+      .then((response) => {
+        response.json()
+          .then((body) => {
+          });
+      });
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/cor_data`).then((res) =>
       res.json().then((corrdata) => {
+        setcorrelation_names([])
+        setcorrelation_val([])
         for (var key in corrdata) {
           var arr = corrdata[key];
-          //console.log("key = ", key)
-          console.log("corr_data = ", arr)
-          for (var n in arr) {
-            //console.log("n = ", n)
-            corr_names.push(arr[n]['name'])
-            corr_val.push(arr[n]['val'])
-
-
-            if (n == arr.length - 1) {
-              //console.log("here n  is equal=")
-
-              //console.log("here is the matrix we are pushing = ", arr[n]['matrix'])
-            }
-          }
           corr_matrix.push(arr[arr.length - 1]['matrix'])
-          setcorrelation_names(Array.from(corr_names))
-          setcorrelation_val(Array.from(corr_val))
+
+          //useEffect(() => { setcorrelation_matrix((corr_matrix)) }, [])
           setcorrelation_matrix((corr_matrix))
-          console.log("correlation_matrix = ", correlation_matrix)
+          //console.log("correlation_matrix = ", correlation_matrix)
         }
       })
     );
 
-  }
-
-  const handleCorrUpdate = (event) => {
-    console.log("Inside handleCorrUpdate")
 
   }
+  
+  useEffect(() => {
+      //const temp_value = counter
+      if (counter <2) {
+      setcounter(counter+1)
+      seteffectStateCheck(effectStateCheck+1)
+      //counter = counter + 1
+      console.log("counter value = ", counter)
+      //console.log("counter value = ", counter)
+      console.log("Congrats!!!! Inside useeffect")
+      setcorrNames([]);
+      setcorrelation_matrix([]);
+      const temp_list = []
+      for (let i = 0; i < checkedState.length; i++) {
+        if (checkedState[i] == true) {
+          temp_list.push(formFields[i])
+        }
+      }
+      setcorrNames([temp_list]);
+      console.log("Corr Names = ", corrNames)
+      const corr_names = []
+      const corr_val = []
+      var corr_matrix = []
+
+      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/data_for_corr`, {
+        method: 'POST',
+        body: JSON.stringify(checkedState),
+      })
+        .then((response) => {
+          response.json()
+            .then((body) => {
+            });
+        });
+
+      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/cor_data`).then((res) =>
+        res.json().then((corrdata) => {
+          setcorrelation_names([])
+          setcorrelation_val([])
+          for (var key in corrdata) {
+            var arr = corrdata[key];
+            corr_matrix.push(arr[arr.length - 1]['matrix'])
+
+            //useEffect(() => { setcorrelation_matrix((corr_matrix)) }, [])
+            setcorrelation_matrix((corr_matrix))
+            //console.log("correlation_matrix = ", correlation_matrix)
+          }
+        })
+      );
+
+      seteffectStateCheck(false)
+
+      };
+
+  });
+
+
 
   return (
     <Fragment>
@@ -274,7 +352,7 @@ export const Test = () => {
 
                 <div className='features_checkbox'>
                   <br />
-                  {formFields.map((form, index) => {
+                  {formFields.slice(0, -1).map((form, index) => {
 
                     return (
                       <div key={index}>
@@ -293,71 +371,56 @@ export const Test = () => {
                   })}
 
                 </div>
-                <div className='corrbtn'>
-                  <br />
-                  <Popup trigger={<button> Show Correlation</button>} position="right top" onClick={handleCorrUpdate}>
-                    <div><Plot
-                      data={[
-                        {
-                          z: correlation_matrix[0],
-                          x: formFields,
-                          y: formFields,
-                          type: 'heatmap',
-                          hoverongaps: false
-                        },
-                      ]}
-                      layout={{
-                        title: "Correlation heatmap among inputs", xaxis: {
-                          automargin: true
-                        },
-                        yaxis: {
-                          automargin: true
-                        }
-                      }}
 
-                    /></div>
-
-                    <div><Plot
-                      data={[
-                        {
-                          x: correlation_names,
-                          y: correlation_val,
-                          type: 'bar'
-                        },
-                      ]}
-                      layout={{
-                        title: " Correlation Between Inputs and Output", xaxis: {
-                          showgrid: true, gridcolor: '#bdbdbd',
-                          gridwidth: 1, automargin: true
-                        },
-                        yaxis: {
-                          title: "Correlation factor", showgrid: true, gridcolor: '#bdbdbd',
-                          gridwidth: 1, automargin: true
-                        }
-                      }}
-                    /></div>
-                    <br />
-
-                    <br />
-
-
-                  </Popup>
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
-
-
-                </div>
 
                 <br />
                 <br />
-                <Button variant="primary" size="md" type='button' onClick={handleOnClick}>Train Model</Button>
-                <div className="training_status">
-                  <p>Training Status : {status}</p>
-                </div>
+
               </div>
             </div>
           </div>
         </form>
+        <div className='corrbtn'>
+          <br />
+          <Popup trigger={<button> Show Correlation</button>} position="right top" onOpen={() => setcounter(0)}>
+            <div><Plot
+              data={[
+                {
+                  z: correlation_matrix[0],
+                  x: corrNames[0],
+                  y: corrNames[0],
+                  type: 'heatmap',
+                  hoverongaps: false
+                },
+              ]}
+              layout={{
+                title: "Correlation heatmap", xaxis: {
+                  automargin: true
+                },
+                yaxis: {
+                  automargin: true
+                }
+              }}
 
+            /></div>
+
+
+            <br />
+
+            <br />
+
+
+          </Popup>
+          {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
+
+
+        </div>
+        <div className='corrbtn'>
+          <Button variant="primary" size="md" type='button' onClick={handleOnClick}>Train Model</Button>
+          <div className="training_status">
+            <p>Training Status : {status}</p>
+          </div>
+        </div>
       </div>
 
 
