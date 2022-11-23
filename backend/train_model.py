@@ -281,16 +281,15 @@ def model_training(file_name):
 
                 A.append(fitness_global_best_particle_position) 
 
-            print(" MM value = ", mm)
             if mm == 1:
                 maxima.append(global_best_particle_position)
                 maxima_output.append(fitness_global_best_particle_position)
             else:
                 minima.append(global_best_particle_position)
                 minima_output.append(fitness_global_best_particle_position)
-            print('Optimal solution:', global_best_particle_position)
-            print('Objective function value:' , fitness_global_best_particle_position)
-            print('Evolutionary process of the objective function value:')
+            #print('Optimal solution:', global_best_particle_position)
+            #print('Objective function value:' , fitness_global_best_particle_position)
+            #print('Evolutionary process of the objective function value:')
 
 
             #plt.plot(A)
@@ -315,8 +314,6 @@ def model_training(file_name):
     
     PSO(gam_function, bounds, particle_size, iterations)
 
-    print("Maxima values = ", maxima)
-    print("Minima values = ", minima)
     # Reading User Input Parameters
     with open("object_file.txt", encoding='utf-8-sig') as f:
         lines = f.readlines()
@@ -329,10 +326,9 @@ def model_training(file_name):
     #str2 = "Input values for Max Output = {} , O/P = {}  ".format(predictions_dict[max_pred_val],max_pred_val)
     str2 = "Max Output Value = {} {}, Based on Input values = {}".format(round(maxima_output[0],3),unit, [round(item, 3) for item in maxima[0]] )
     str3 = "Min Output Value = {} {}, Based on Input values = {}".format(round(minima_output[0],2), unit, [round(item, 3) for item in minima[0]])
-    #str3 = "Input values for Min Output = {} , O/P = {}  ".format(predictions_dict[min_pred_val],min_pred_val)
-    print(str2) 
-    print(str3)
-    print("Done new approach !!!!!!!!") 
+    #print(str2) 
+    #print(str3)
+
     
     col_str = "Input values follows following order:"
     for element in X_train.columns:

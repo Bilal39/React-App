@@ -14,34 +14,26 @@ const initialState = {
   shuffledata: false
 };
 
-//var counter = 0
-
-
 export const Test = () => {
   const [state, setState] = useState(initialState)
-
   const [file, setFile] = useState();
-  const [status, setStatus] = useState('---')
+  const [status, setStatus] = useState('---');
   const [formFields, setFormFields] = useState([]);
   const [checkedState, setCheckedState] = useState([]);
   const [corrNames, setcorrNames] = useState([]);
   const [correlation_names, setcorrelation_names] = useState([]);
   const [correlation_val, setcorrelation_val] = useState([]);
   const [correlation_matrix, setcorrelation_matrix] = useState([]);
-  const [effectStateCheck, seteffectStateCheck] = useState(0);
   const [counter, setcounter] = useState(0);
-  
-  //console.log('state: ', { ...state, status })
+  const [counter2, setcounter2] = useState(10);
 
   const handleUpload = (event) => {
     setCheckedState([]);
     setFormFields([]);
-    //console.log("handleupload  checking states= ", checkedState)
     const data = new FormData()
     data.append('file', event.target.files[0])
     setFile(data)
   }
-
 
   const handleReset = (event) => {
     setState(initialState)
@@ -111,23 +103,13 @@ export const Test = () => {
           .then((body) => {
           });
       });
+    
+    setcounter2(0)
+  }
 
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/col_names`).then((res) =>
-      res.json().then((data) => {
-        //console.log("checking formfields before = ", formFields)
-        //setCheckedState(new Array(data['data'].length).fill(true))
-        for (var key in data) {
-          var arr = data[key];
-          //console.log("getting column names  arr = ", arr)
-          setFormFields(
-            Array.from(arr)
-          );
-          setcorrNames(
-            Array.from(arr)
-          );
-        }
-      })
-    );
+  useEffect(() => {
+    if (counter2 < 5) {
+      console.log("Inside useeffect!!!!!")
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/col_names`).then((res) =>
       res.json().then((data) => {
@@ -144,64 +126,14 @@ export const Test = () => {
         }
       })
     );
-  }
-  const handleCorrUpdate = (event) => {
-    //console.log("Inside handleCorrUpdate")
-    //console.log("Checking states = ", checkedState)
-    //console.log("FormFields = ", formFields)
-    //console.log("setcorrNames = ", setcorrNames)
-
-    setcorrNames([]);
-    setcorrelation_matrix([]);
-    const temp_list = []
-    for (let i = 0; i < checkedState.length; i++) {
-      if (checkedState[i] == true) {
-        temp_list.push(formFields[i])
-      }
-    }
-    setcorrNames([temp_list]);
-    console.log("Corr Names = ", corrNames)
-    const corr_names = []
-    const corr_val = []
-    var corr_matrix = []
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/data_for_corr`, {
-      method: 'POST',
-      body: JSON.stringify(checkedState),
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/cor_data`).then((res) =>
-      res.json().then((corrdata) => {
-        setcorrelation_names([])
-        setcorrelation_val([])
-        for (var key in corrdata) {
-          var arr = corrdata[key];
-          corr_matrix.push(arr[arr.length - 1]['matrix'])
-
-          //useEffect(() => { setcorrelation_matrix((corr_matrix)) }, [])
-          setcorrelation_matrix((corr_matrix))
-          //console.log("correlation_matrix = ", correlation_matrix)
-        }
-      })
-    );
+    setcounter2(10)
+    };
+  });
 
 
-  }
-  
   useEffect(() => {
-      //const temp_value = counter
-      if (counter <2) {
-      setcounter(counter+1)
-      seteffectStateCheck(effectStateCheck+1)
-      //counter = counter + 1
-      console.log("counter value = ", counter)
-      //console.log("counter value = ", counter)
-      console.log("Congrats!!!! Inside useeffect")
+    if (counter < 2) {
+      setcounter(counter + 1)
       setcorrNames([]);
       setcorrelation_matrix([]);
       const temp_list = []
@@ -234,17 +166,11 @@ export const Test = () => {
             var arr = corrdata[key];
             corr_matrix.push(arr[arr.length - 1]['matrix'])
 
-            //useEffect(() => { setcorrelation_matrix((corr_matrix)) }, [])
             setcorrelation_matrix((corr_matrix))
-            //console.log("correlation_matrix = ", correlation_matrix)
           }
         })
       );
-
-      seteffectStateCheck(false)
-
-      };
-
+    };
   });
 
 
@@ -371,7 +297,6 @@ export const Test = () => {
                   })}
 
                 </div>
-
 
                 <br />
                 <br />

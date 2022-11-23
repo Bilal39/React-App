@@ -92,7 +92,7 @@ def col_names_trans():
 def inputs_for_corr():
     #print("Inside inputs_for_corr!!!!")
     checked_array = json.loads(request.data)
-    print("checked_array = ", checked_array)
+    #print("checked_array = ", checked_array)
     file_path = "object_file.txt"
 
     # Calling funtion for column names and correlation data
