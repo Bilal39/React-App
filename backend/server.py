@@ -47,7 +47,7 @@ def getting_form():
         os.getcwd(), 'assests', "input_parameters.ini")
     payload = json.loads(request.data)
     #print("Payload = ")
-    # pprint(payload)
+    #print(payload)
 
     with open(input_parameters_path, 'w+') as f:
         f.write(str(payload['lambdaval']))
@@ -59,6 +59,10 @@ def getting_form():
         f.write(str(payload['bin']))
         f.write('\n')
         f.write(str(payload['shuffledata']))
+        f.write('\n')
+        f.write(str(payload['psoparticles']))
+        f.write('\n')
+        f.write(str(payload['psoiterations']))
 
     return 'ok'
 

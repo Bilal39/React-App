@@ -106,7 +106,14 @@ export default function () {
                     },
                     { type: 'line', x: form.xaxis2, y: form.yaxis2, text: "R-Squared Value = " + form.rsqaured, name: "Best fit" },
                   ]}
-                  layout={{ width: 720, height: 480, title: form.name + " with R-Squared Value" }}
+                  layout={{ width: 720, height: 480, title: form.name + " with R-Squared Value", xaxis: {
+                    title: "Actual Values", showgrid: true, gridcolor: '#bdbdbd',
+                    gridwidth: 1,
+                  },
+                  yaxis: {
+                    title: "Predicted Values", showgrid: true, gridcolor: '#bdbdbd',
+                    gridwidth: 1,
+                  }}}
                 />
               </div>
             )

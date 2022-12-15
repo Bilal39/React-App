@@ -11,7 +11,9 @@ const initialState = {
   lambdaval: 5,
   splitpercent: 90,
   bin: 15,
-  shuffledata: false
+  shuffledata: false,
+  psoparticles:50,
+  psoiterations:50
 };
 
 export const Test = () => {
@@ -27,6 +29,10 @@ export const Test = () => {
   const [counter, setcounter] = useState(0);
   const [counter2, setcounter2] = useState(10);
 
+  
+  //if (typeof file === 'undefined') {
+  //  console.log("yes it is undefined")
+  //}
   const handleUpload = (event) => {
     setCheckedState([]);
     setFormFields([]);
@@ -108,7 +114,9 @@ export const Test = () => {
   }
 
   useEffect(() => {
-    if (counter2 < 5) {
+    console.log("Entering if condition, counter value = ", counter2)
+    if (counter2 < 2) {
+      setcounter2(counter2+1)
       console.log("Inside useeffect!!!!!")
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/col_names`).then((res) =>
@@ -126,7 +134,7 @@ export const Test = () => {
         }
       })
     );
-    setcounter2(10)
+    
     };
   });
 
@@ -200,6 +208,8 @@ export const Test = () => {
               <input type='file' name='file' onChange={handleUpload} required />
               <a href={require("../assests/template.csv")} download="template.csv">Download Sample Template</a>
             </div>
+            <br/>
+            <h2 className="ml-header">Parameters for ML model</h2>
 
             <div className="range_sliders">
               <div>
@@ -267,6 +277,39 @@ export const Test = () => {
                 />
                 {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
               </div>
+              
+              <h2 className="pso-header">Parameters for PSO</h2>
+
+              <div>
+                <lable id='psoparticles-value'>Number of particles (PSO)  </lable>
+                <input
+                  htmlFor='psoparticles-value'
+                  type="range"
+                  min="10"
+                  max="200"
+                  step={10}
+                  value={state.psoparticles}
+                  onChange={(e) => setState({ ...state, 'psoparticles': e.target.value })}
+                />
+                {state.psoparticles}
+                {<img className="infoicon" src={infoicon} title="Select the number of particles for particle swarm optimization (PSO)." />}
+              </div>
+
+              <div>
+                <lable id='psoiterations-value'>Iterations for PSO  </lable>
+                <input
+                  htmlFor='psoiterations-value'
+                  type="range"
+                  min="10"
+                  max="100"
+                  step={5}
+                  value={state.psoiterations}
+                  onChange={(e) => setState({ ...state, 'psoiterations': e.target.value })}
+                />
+                {state.psoiterations}
+                {<img className="infoicon" src={infoicon} title="Select the maximum iterations for particle swarm optimization (PSO)." />}
+              </div>
+
             </div>
 
             <br />

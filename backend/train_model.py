@@ -10,12 +10,7 @@ import math
 import random
 
 
-
-
-
-
 def model_training(file_name):
-
 
     nbr_input_track_file_path = os.path.join(
         os.getcwd(), 'assests', "nbr_of_inputs.ini")
@@ -71,6 +66,13 @@ def model_training(file_name):
                     shufflestatus = bool("Something")
                 else:
                     shufflestatus = bool("")
+                counter += 1
+            elif counter == 5:
+                psoparticles = int(line)
+                counter += 1
+            elif counter == 6:
+                psoiterations = int(line)
+                counter += 1
 
     # preparing histogram data
     hist_dict['data'] = y.tolist()
@@ -199,8 +201,8 @@ def model_training(file_name):
 
     
     # THE FOLLOWING PARAMETERS ARE OPTINAL.
-    particle_size=50         # number of particles
-    iterations=40           # max number of iterations
+    particle_size = psoparticles         # number of particles
+    iterations = psoiterations           # max number of iterations
     w=0.85                    # inertia constant
     c1=1                    # cognative constant
     c2=0.5                     # social constant
