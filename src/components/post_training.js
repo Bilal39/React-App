@@ -26,7 +26,6 @@ export default function () {
               Array.from(arr)
             );
           }
-
         })
       );
     })();
@@ -73,9 +72,10 @@ export default function () {
     (async () => {
       await fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/max_min_data`).then((res) =>
         res.json().then((data) => {
+          //console.log("Data = ", data.data[0])
           for (var key in data) {
             var arr = data[key];
-            console.log("Max Min Data arr = ", arr);
+            //console.log("Max Min Data arr = ", arr);
             setFormFields4(
               Array.from(arr)
             );
@@ -106,14 +106,16 @@ export default function () {
                     },
                     { type: 'line', x: form.xaxis2, y: form.yaxis2, text: "R-Squared Value = " + form.rsqaured, name: "Best fit" },
                   ]}
-                  layout={{ width: 720, height: 480, title: form.name + " with R-Squared Value", xaxis: {
-                    title: "Actual Values", showgrid: true, gridcolor: '#bdbdbd',
-                    gridwidth: 1,
-                  },
-                  yaxis: {
-                    title: "Predicted Values", showgrid: true, gridcolor: '#bdbdbd',
-                    gridwidth: 1,
-                  }}}
+                  layout={{
+                    width: 720, height: 480, title: form.name + " with R-Squared Value", xaxis: {
+                      title: "Actual Values", showgrid: true, gridcolor: '#bdbdbd',
+                      gridwidth: 1,
+                    },
+                    yaxis: {
+                      title: "Predicted Values", showgrid: true, gridcolor: '#bdbdbd',
+                      gridwidth: 1,
+                    }
+                  }}
                 />
               </div>
             )
@@ -205,16 +207,19 @@ export default function () {
 
         <div className="disp_results">
           <h1 className="page-header">Maxima Minima Values</h1>
-          <br/>
+          <br />
           {formFields4.map((form, index) => {
+            console.log(" Form =  ", form)
             return (
               <div key={index}>
                 <Button variant="primary" size="md" type="button" onClick={() => setDisp(!disp)}>
                   {disp === true ? 'Hide Maxima-Minima' : 'Show Maxima-Minima'}
                 </Button>
-                <br/>
-                {disp && <> <br/> {form.str1} <br/> {form.str2} <br/> {form.str3}</>}
-
+                <br />
+                {disp && <> <br /> {form.str1} <br /> {form.str2} <br /> {form.str3}
+                  <br /> {form.str4} <br /> {form.str5} <br /> {form.str6}
+                  <br /> {form.str7}<br /> <br /> {form.str8} <br /> {form.str9}
+                  <br /> {form.str10} <br /> {form.str11}<br /> {form.str12}<br /> {form.str13}</>}
               </div>
             )
           })}

@@ -33,6 +33,7 @@ def model_training(file_name):
     maxima_output = []
     minima = []
     minima_output = []
+    all_bounds = []
 
     # Reading the data
     data_df = pd.read_csv(file_name)
@@ -186,12 +187,7 @@ def model_training(file_name):
       return modelmat.dot(coeff).flatten()
     
     
-    # Bounds
-    bounds = []
-    for column in X_train.columns:
-      min_val = (X_train[column].min())
-      max_val = (X_train[column].max())
-      bounds.append((min_val,max_val)) 
+
     
     #------------------------------------------------------------------------------
     # TO CUSTOMIZE THIS PSO CODE TO SOLVE UNCONSTRAINED OPTIMIZATION PROBLEMS, CHANGE THE PARAMETERS IN THIS SECTION ONLY:
@@ -285,36 +281,81 @@ def model_training(file_name):
 
             if mm == 1:
                 maxima.append(global_best_particle_position)
-                maxima_output.append(fitness_global_best_particle_position)
+                maxima_output.append(round(fitness_global_best_particle_position,3))
             else:
                 minima.append(global_best_particle_position)
-                minima_output.append(fitness_global_best_particle_position)
+                minima_output.append(round(fitness_global_best_particle_position,3))
             #print('Optimal solution:', global_best_particle_position)
             #print('Objective function value:' , fitness_global_best_particle_position)
             #print('Evolutionary process of the objective function value:')
 
 
             #plt.plot(A)
-
-    mm = 1                           # if minimization problem, mm = -1; if maximization problem, mm = 1
-    if mm == -1:
-	    initial_fitness = float("inf") # for minimization problem
-
-    if mm == 1:
-	    initial_fitness = -float("inf") # for maximization problem
     
-    PSO(gam_function, bounds, particle_size, iterations)
+    ## Bounds
+    #bounds = []
+    #for column in X_train.columns:
+    #  min_val = (X_train[column].min())
+    #  max_val = (X_train[column].max())
+    #  bounds.append((min_val,max_val)) 
+
+    for iter in range(5):
+        #print(iter)
+        # Dynamic Bounds
+        bounds = []
+        for column in X_train.columns:
+          min_val = (X_train[column].min())
+          max_val = (X_train[column].max())
+          min_rand_value = round(float(np.random.uniform(min_val,max_val,1)),3)
+          max_rand_value = round(float(np.random.uniform(min_val,max_val,1)),3)
+
+          if min_rand_value <= max_rand_value:
+            pass
+          else:
+            temp_value = min_rand_value
+            min_rand_value = max_rand_value
+            max_rand_value = temp_value
+
+          bounds.append((min_rand_value,max_rand_value)) 
+        
+        all_bounds.append(bounds[0])
+
+        mm = 1                           # if minimization problem, mm = -1; if maximization problem, mm = 1
+        if mm == -1:
+	        initial_fitness = float("inf") # for minimization problem
+
+        if mm == 1:
+	        initial_fitness = -float("inf") # for maximization problem
+
+        PSO(gam_function, bounds, particle_size, iterations)
 
 
+
+        mm = -1                           # if minimization problem, mm = -1; if maximization problem, mm = 1
+        if mm == -1:
+	        initial_fitness = float("inf") # for minimization problem
+
+        if mm == 1:
+	        initial_fitness = -float("inf") # for maximization problem
+
+        PSO(gam_function, bounds, particle_size, iterations)
+
+    #print("\nMAXIMA point values = ", maxima)
+    #print("Maxima_output = ", maxima_output)
+    #print("All bounds = ", all_bounds)
+    #print("minima_output = ", minima_output)
+    #print("\nMinima point values = ", minima)
+    #maxima_output, minima_output, all_bounds = zip(*sorted(zip(maxima_output, minima_output,all_bounds)))
+    #sorted_maxima_output, sorted_maxima_bounds = zip(*sorted(zip(maxima_output, all_bounds)))
+    #sorted_minima_output, sorted_minima_bounds = zip(*sorted(zip(minima_output, all_bounds)))
     
-    mm = -1                           # if minimization problem, mm = -1; if maximization problem, mm = 1
-    if mm == -1:
-	    initial_fitness = float("inf") # for minimization problem
-
-    if mm == 1:
-	    initial_fitness = -float("inf") # for maximization problem
+    sorted_maxima_output, sorted_maxima_bounds = zip(*sorted(zip(maxima_output, maxima),reverse=True))
+    sorted_minima_output, sorted_minima_bounds = zip(*sorted(zip(minima_output, minima)))
     
-    PSO(gam_function, bounds, particle_size, iterations)
+    ##print("\nSorted Maxima_output = ", sorted_maxima_output)
+    ##print("sorted minima bounds = ", sorted_maxima_bounds)
+    ##print("\nSorted minima_output = ", sorted_minima_output)
+    ##print("Sorted minima bounds = ", sorted_minima_bounds)
 
     # Reading User Input Parameters
     with open("object_file.txt", encoding='utf-8-sig') as f:
@@ -326,10 +367,26 @@ def model_training(file_name):
             break
     
     #str2 = "Input values for Max Output = {} , O/P = {}  ".format(predictions_dict[max_pred_val],max_pred_val)
-    str2 = "Max Output Value = {} {}, Based on Input values = {}".format(round(maxima_output[0],3),unit, [round(item, 3) for item in maxima[0]] )
-    str3 = "Min Output Value = {} {}, Based on Input values = {}".format(round(minima_output[0],2), unit, [round(item, 3) for item in minima[0]])
-    #print(str2) 
-    #print(str3)
+    #str2 = "Max Output Value = {} {}, Based on Input values = {}".format(round(maxima_output[0],3),unit, [round(item, 3) for item in maxima[0]] )
+    #str3 = "Min Output Value = {} {}, Based on Input values = {}".format(round(minima_output[0],2), unit, [round(item, 3) for item in minima[0]])
+
+    #str2 = "Output = {} {}, Based on Input = {} '\n' \n <br/> Output = {} {}, Based on Input = {}\n  ".format(round(sorted_maxima_output[0],3),unit, [round(item, 3) for item in sorted_maxima_bounds[0]],
+    #                                                                                                                               round(sorted_maxima_output[1],3),unit, [round(item, 3) for item in sorted_maxima_bounds[1]])
+    #str3 = "Output = {} {}, Based on Input = {} '\n' Output = {} {}, Based on Input = {}\n".format(round(sorted_minima_output[0],2), unit, [round(item, 3) for item in sorted_minima_bounds[0]],
+           
+    #                                                                                                                       round(sorted_minima_output[1],2), unit, [round(item, 3) for item in sorted_minima_bounds[1]])
+    str2 = "Top 5 Maxima Values"
+    str3 = "Output = {} {}, Based on Input = {}".format(round(sorted_maxima_output[0],3),unit, [round(item, 3) for item in sorted_maxima_bounds[0]])
+    str4 = "Output = {} {}, Based on Input = {}".format(round(sorted_maxima_output[1],3),unit, [round(item, 3) for item in sorted_maxima_bounds[1]])
+    str5 = "Output = {} {}, Based on Input = {}".format(round(sorted_maxima_output[2],3),unit, [round(item, 3) for item in sorted_maxima_bounds[2]])
+    str6 = "Output = {} {}, Based on Input = {}".format(round(sorted_maxima_output[3],3),unit, [round(item, 3) for item in sorted_maxima_bounds[3]])
+    str7 = "Output = {} {}, Based on Input = {}".format(round(sorted_maxima_output[4],3),unit, [round(item, 3) for item in sorted_maxima_bounds[4]])
+    str8 = "Top 5 Minima Values"
+    str9 = "Output = {} {}, Based on Input = {}".format(round(sorted_minima_output[0],3), unit, [round(item, 3) for item in sorted_minima_bounds[0]])
+    str10 = "Output = {} {}, Based on Input = {}".format(round(sorted_minima_output[1],3), unit, [round(item, 3) for item in sorted_minima_bounds[1]])
+    str11 = "Output = {} {}, Based on Input = {}".format(round(sorted_minima_output[2],3), unit, [round(item, 3) for item in sorted_minima_bounds[2]])
+    str12 = "Output = {} {}, Based on Input = {}".format(round(sorted_minima_output[3],3), unit, [round(item, 3) for item in sorted_minima_bounds[3]])
+    str13 = "Output = {} {}, Based on Input = {}".format(round(sorted_minima_output[4],3), unit, [round(item, 3) for item in sorted_minima_bounds[4]])
 
     
     col_str = "Input values follows following order:"
@@ -344,6 +401,16 @@ def model_training(file_name):
     temp_dict['str1'] = str1
     temp_dict['str2'] = str2
     temp_dict['str3'] = str3
+    temp_dict['str4'] = str4
+    temp_dict['str5'] = str5
+    temp_dict['str6'] = str6
+    temp_dict['str7'] = str7
+    temp_dict['str8'] = str8
+    temp_dict['str9'] = str9
+    temp_dict['str10'] = str10
+    temp_dict['str11'] = str11
+    temp_dict['str12'] = str12
+    temp_dict['str13'] = str13
     str_list.append(temp_dict)
 
 

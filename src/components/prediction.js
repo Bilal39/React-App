@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 
@@ -33,9 +32,9 @@ function Prediction() {
 
   }
   const handleFormChange = (event, index) => {
-    // console.log(event.target.value)
+    console.log("first console = ",event.target)
     let data = [...formFields];
-    // console.log(data[index][event.target.name])
+    console.log("Second console =", data[index][event.target.name])
     data[index]['value'] = event.target.value;
     setFormFields(data);
   }
@@ -55,19 +54,19 @@ function Prediction() {
     });
   }
 
-  const addFields = () => {
-    let object = {
-      name: ''
-    }
-
-    setFormFields([...formFields, object])
-  }
-
-  const removeFields = (index) => {
-    let data = [...formFields];
-    data.splice(index, 1)
-    setFormFields(data)
-  }
+  //const addFields = () => {
+  //  let object = {
+  //    name: ''
+  //  }
+//
+  //  setFormFields([...formFields, object])
+  //}
+//
+  //const removeFields = (index) => {
+  //  let data = [...formFields];
+  //  data.splice(index, 1)
+  //  setFormFields(data)
+  //}
 
   const [outputdata, setdata] = useState({
   });

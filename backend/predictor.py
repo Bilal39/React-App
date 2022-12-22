@@ -1,17 +1,5 @@
-from flask import Flask, render_template, url_for, request
-from werkzeug.utils import secure_filename
-import pandas as pd
-import matplotlib.pyplot as plt
-from time import sleep
-from pathlib import Path
-import numpy as np
 import os
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, r2_score
-from pygam import LinearGAM
 import pickle
-import pandas as pd
-import csv
 
 
 def predictor_func(input_values):

@@ -192,14 +192,35 @@ def maxima_minima_data():
     # Returning an api for showing in reactjs
     return max_min_dict
 
+@app.route("/update_data_file", methods={"POST"})
+def update_user_data_file():
+    payload = json.loads(request.data)
+
+    file_name = "object_file.txt"
+    # Reading the data
+    data_df = pd.read_csv(file_name, header=1)
+    col_names = data_df.columns.tolist()
+
+    for index, element in enumerate(payload):
+        if element == False:
+            data_df = data_df.drop(columns=[col_names[index]])
+        else:
+            pass
+
+    updated_file = "updated_object_file.txt"
+    data_df.to_csv(updated_file, sep = ",", index = False)
+
+    return "ok"
+
 @app.route("/input_config", methods={"GET"})
 def input_config():
     # Reading User Input Parameters
-    with open(input_nbr_path) as f:
-        lines = f.readlines()
-        for line in lines:
-            inputnumber = str(line)
+    #with open(input_nbr_path) as f:
+    #    lines = f.readlines()
+    #    for line in lines:
+    #        inputnumber = str(line)
     input_dict = input_manger()
+    #print("This is Input dict ..... = ", input_dict)
 
     return input_dict
 

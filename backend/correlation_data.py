@@ -1,5 +1,4 @@
 import pandas as pd
-from scipy.stats import pearsonr
 
 def correlation_among_data(file_path,checked_array):
 

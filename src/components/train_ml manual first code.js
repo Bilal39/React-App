@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button';
 import React, { useState, Fragment, useEffect, useRef } from "react";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
+import MultiRangeSlider from "multi-range-slider-react";
 import "./multiRangeSlider.css";
 
 
@@ -30,13 +31,18 @@ export const Test = () => {
   const [correlation_matrix, setcorrelation_matrix] = useState([]);
   const [counter, setcounter] = useState(0);
   const [counter2, setcounter2] = useState(10);
-  const [inputFields1, setinputFields1] = useState([]);
-  const [inputFields2, setinputFields2] = useState([]);
+  const [inputFields, setinputFields] = useState([]);
   const [count3, setCount3] = useState(0);
   const [counter4, setcounter4] = useState(0);
-  const range = useRef(null);
+  const [minValue, setMinValue] = useState(0);
+  const [maxValue, setMaxValue] = useState(0);
+  const [minValue2, setMinValue2] = useState(0);
+  const [maxValue2, setMaxValue2] = useState(0);
 
 
+  //if (typeof file === 'undefined') {
+  //  console.log("yes it is undefined")
+  //}
   const handleUpload = (event) => {
     setCheckedState([]);
     setFormFields([]);
@@ -44,31 +50,6 @@ export const Test = () => {
     data.append('file', event.target.files[0])
     setFile(data)
   }
-
-
-  //const handleFormChange = (event, index) => {
-  //  //console.log("first console = ", event.target.className)
-  //  console.log("first console = ", event.target.value)
-  //
-  //  if (event.target.className === "thumb thumb--left"){
-  //    console.log("left thumb")
-  //    let data1 = [...inputFields1];
-  //    console.log("Data1 = ", data1)
-  //    //data1[index]['value'] = event.target.value;
-  //    //setinputFields1(data1);
-  //  }
-  //  else {
-  //    console.log("right thumb")
-  //    let data2 = inputFields2;
-  //    data2[index]['value'] = event.target.value;
-  //    console.log("Data2 = ", data2)
-  //    //setinputFields2(data2);
-  //
-  //  }
-  //  //console.log("Second console =", data[index][event.target.name])
-  //  console.log("inputFields1 = ", inputFields1 )
-  //  console.log("inputFields2 = ", inputFields2 )
-  //}
 
   const handleReset = (event) => {
     setState(initialState)
@@ -78,42 +59,10 @@ export const Test = () => {
     const updatedCheckedState = checkedState.map((item, index) =>
       index === position ? !item : item
     );
+    console.log("Inside handleonchange = ", updatedCheckedState)
 
     setCheckedState(updatedCheckedState);
   };
-
-  const handleFormChange1 = (event, index) => {
-    //console.log("first console = ", event.target.className)
-    console.log("left dot Value = ", event.target.value)
-    //console.log("before manInput1 = ", manInput1)
-    let data1 = [...inputFields1];
-    console.log(" before Data1 = ", data1)
-    data1[index]['value'] = event.target.value;
-    console.log("after Data1 = ", data1)
-    setinputFields1(data1);
-    //manInput1[index]['value'] = event.target.value
-    //console.log("maninput1 = ", manInput1 )
-    //console.log("maninput2 = ", manInput2 )
-    console.log("inputFields1 = ", inputFields1)
-    console.log("inputFields2 = ", inputFields2)
-  }
-
-  const handleFormChange2 = (event, index) => {
-    //console.log("first console = ", event.target.className)
-    //console.log("fisrt checking inputfields2 = ", inputFields2)
-    console.log("right dot value = ", event.target.value)
-    //console.log("before manInput2 = ", manInput2)
-    //console.log("before manInput1 = ", manInput1)
-    let data2 = [...inputFields2];
-    data2[index]['value'] = event.target.value;
-    //console.log(" Data2 = ", data2)
-    setinputFields2(data2);
-    //manInput2[index]['value'] = event.target.value
-    //console.log("maninput1 = ", manInput1 )
-    //console.log("maninput2 = ", manInput2 )
-    //console.log("inputFields1 = ", inputFields1 )
-    console.log("inputFields2 = ", inputFields2)
-  }
 
   const handleOnClick = () => {
     let count = 1
@@ -129,7 +78,7 @@ export const Test = () => {
       });
 
     const timerId = setInterval(() => {
-      //console.log('setInterval', count);
+      console.log('setInterval', count);
       fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/training_status`)
         .then((res) => {
           res.json()
@@ -143,11 +92,11 @@ export const Test = () => {
             })
         })
     }, 1200);
-    //console.log('getStatus Counting: ', timerId);
+    console.log('getStatus Counting: ', timerId);
   }
 
   const handleUploadImage = (event) => {
-    //console.log('Upload Handler')
+    console.log('Upload Handler')
     event.preventDefault();
 
 
@@ -177,10 +126,10 @@ export const Test = () => {
 
 
   useEffect(() => {
-    //console.log("Entering if condition, counter value = ", counter2)
+    console.log("Entering if condition, counter value = ", counter2)
     if (counter2 < 2) {
       setcounter2(counter2 + 1)
-      //console.log("Inside useeffect!!!!!")
+      console.log("Inside useeffect!!!!!")
 
       fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/col_names`).then((res) =>
         res.json().then((data) => {
@@ -197,8 +146,10 @@ export const Test = () => {
           }
         })
       );
+
     };
   });
+
 
   useEffect(() => {
     if (counter < 2) {
@@ -212,7 +163,7 @@ export const Test = () => {
         }
       }
       setcorrNames([temp_list]);
-      //console.log("Corr Names = ", corrNames)
+      console.log("Corr Names = ", corrNames)
       const corr_names = []
       const corr_val = []
       var corr_matrix = []
@@ -234,6 +185,7 @@ export const Test = () => {
           for (var key in corrdata) {
             var arr = corrdata[key];
             corr_matrix.push(arr[arr.length - 1]['matrix'])
+
             setcorrelation_matrix((corr_matrix))
           }
         })
@@ -242,7 +194,7 @@ export const Test = () => {
 
     if (counter4 < 2) {
       setcounter4(counter4 + 1)
-      //console.log("Bringing Input Config!!!!")
+      console.log("Bringing Input Config!!!!")
 
       fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/update_data_file`, {
         method: 'POST',
@@ -261,21 +213,16 @@ export const Test = () => {
           for (var key in data) {
             var arr = data[key];
             console.log("setting input fields = ", arr);
-            setinputFields1(
-              JSON.parse(JSON.stringify(Array.from(arr)))
+            setinputFields(
+              Array.from(arr)
             );
-            setinputFields2(
-              JSON.parse(JSON.stringify(Array.from(arr)))
-            );
-            //manInput1 = (Array.from(arr));
-            //manInput1 = JSON.parse(JSON.stringify(Array.from(arr)));
-            //console.log("manInput1 assigning = ", manInput1);
-            //manInput2 = JSON.parse(JSON.stringify(Array.from(arr)));
-            //console.log("manInput2 assigning = ", manInput2)
           }
         })
       );
     }
+
+
+
   });
 
 
@@ -408,6 +355,7 @@ export const Test = () => {
                 {state.psoiterations}
                 {<img className="infoicon" src={infoicon} title="Select the maximum iterations for particle swarm optimization (PSO)." />}
               </div>
+
             </div>
 
             <br />
@@ -415,6 +363,8 @@ export const Test = () => {
               <Button variant="primary" size="md" type='submit'>Upload</Button>
               <button type='reset' onClick={handleReset}>Reset values</button>
               <div >
+
+
                 <div className='features_checkbox'>
                   <br />
                   {formFields.slice(0, -1).map((form, index) => {
@@ -434,6 +384,7 @@ export const Test = () => {
                       </div>
                     )
                   })}
+
                 </div>
 
                 <br />
@@ -466,8 +417,12 @@ export const Test = () => {
               }}
 
             /></div>
+
+
             <br />
+
             <br />
+
 
           </Popup>
           {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
@@ -475,54 +430,56 @@ export const Test = () => {
           <br />
           <Popup trigger={<button> Limit Input Boundries</button>} position="right top" onOpen={() => setcounter4(0)}>
             <div>
-              {inputFields1.map((form, index) => {
-                //console.log("inputFields1 with html = ", inputFields1)
+              {inputFields.map((form, index) => {
 
                 return (
                   <div className='random-class'>
                     <div key={index}>
                       {form.name}
                       <br />
-                      <div className="slidercontainer">
-                        <input
-                          type="range"
-                          min={form.min}
-                          max={form.max}
-                          step={(form.max - form.min) / 50}
-                          onChange={event => handleFormChange1(event, index)}
-                          className="thumb thumb--left"
-                        />
-                        <input
-                          type="range"
-                          min={form.min}
-                          max={form.max}
-                          step={(form.max - form.min) / 50}
-                          onChange={event => handleFormChange2(event, index)}
-                          className="thumb thumb--right"
-                        />
-                        <div className="slider">
-                          <div className="slider__track" />
-                          <div ref={range} className="slider__range" />
-                          <div className="slider__left-value">{parseFloat(form.value).toFixed(2)}</div>
-                          <div className="slider__right-value">{parseFloat(inputFields2[index].value).toFixed(2)}</div>
-                        </div>
-                        <br />
-                        <br />
+                      <input
+                        type="range"
+                        min="0"
+                        max="1000"
+                        className="thumb thumb--zindex-3"
+                      />
+                      <input
+                        type="range"
+                        min="0"
+                        max="1000"
+                        className="thumb thumb--zindex-4"
+                      />
+                      <div className="slider">
+                        <div className="slider__track" />
+                        <div className="slider__range" />
                       </div>
+
                     </div>
                   </div>
                 )
               })}
+
             </div>
+
+
+
+
           </Popup>
+
+
         </div>
+
+
         <div className='corrbtn'>
           <Button variant="primary" size="md" type='button' onClick={handleOnClick}>Train Model</Button>
           <div className="training_status">
             <p>Training Status : {status}</p>
           </div>
+
         </div>
+
       </div>
+
 
     </Fragment>
   )

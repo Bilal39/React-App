@@ -4,7 +4,9 @@ import Button from 'react-bootstrap/Button';
 import React, { useState, Fragment, useEffect, useRef } from "react";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
+import MultiRangeSlider from "./MultiRangeSlider";
 import "./multiRangeSlider.css";
+import PropTypes from "prop-types";
 
 
 
@@ -17,6 +19,8 @@ const initialState = {
   psoparticles: 50,
   psoiterations: 50
 };
+let manInput1 = [51]
+let manInput2 = [0]
 
 export const Test = () => {
   const [state, setState] = useState(initialState)
@@ -35,8 +39,12 @@ export const Test = () => {
   const [count3, setCount3] = useState(0);
   const [counter4, setcounter4] = useState(0);
   const range = useRef(null);
+  
 
 
+  //if (typeof file === 'undefined') {
+  //  console.log("yes it is undefined")
+  //}
   const handleUpload = (event) => {
     setCheckedState([]);
     setFormFields([]);
@@ -49,7 +57,7 @@ export const Test = () => {
   //const handleFormChange = (event, index) => {
   //  //console.log("first console = ", event.target.className)
   //  console.log("first console = ", event.target.value)
-  //
+//
   //  if (event.target.className === "thumb thumb--left"){
   //    console.log("left thumb")
   //    let data1 = [...inputFields1];
@@ -63,7 +71,7 @@ export const Test = () => {
   //    data2[index]['value'] = event.target.value;
   //    console.log("Data2 = ", data2)
   //    //setinputFields2(data2);
-  //
+//
   //  }
   //  //console.log("Second console =", data[index][event.target.name])
   //  console.log("inputFields1 = ", inputFields1 )
@@ -78,41 +86,44 @@ export const Test = () => {
     const updatedCheckedState = checkedState.map((item, index) =>
       index === position ? !item : item
     );
+    //console.log("Inside handleonchange = ", updatedCheckedState)
 
     setCheckedState(updatedCheckedState);
   };
 
   const handleFormChange1 = (event, index) => {
     //console.log("first console = ", event.target.className)
-    console.log("left dot Value = ", event.target.value)
-    //console.log("before manInput1 = ", manInput1)
-    let data1 = [...inputFields1];
-    console.log(" before Data1 = ", data1)
-    data1[index]['value'] = event.target.value;
-    console.log("after Data1 = ", data1)
-    setinputFields1(data1);
-    //manInput1[index]['value'] = event.target.value
-    //console.log("maninput1 = ", manInput1 )
-    //console.log("maninput2 = ", manInput2 )
-    console.log("inputFields1 = ", inputFields1)
-    console.log("inputFields2 = ", inputFields2)
+    console.log("first console = ", event.target.value)
+    console.log("before manInput1 = ", manInput1)
+    //let data1 = inputFields1;
+    //console.log("Data1 = ", data1)
+    //data1[index]['value'] = event.target.value;
+    //console.log("Data1 = ", data1)
+    //setinputFields1(data1);
+    manInput1[index]['value'] = event.target.value
+    console.log("updated maninput1 = ", manInput1 )
+    console.log("CHECKING maninput2 = ", manInput2 )
+    //console.log("inputFields1 = ", inputFields1 )
+    //console.log("inputFields2 = ", inputFields2 )
   }
 
   const handleFormChange2 = (event, index) => {
     //console.log("first console = ", event.target.className)
     //console.log("fisrt checking inputfields2 = ", inputFields2)
-    console.log("right dot value = ", event.target.value)
-    //console.log("before manInput2 = ", manInput2)
-    //console.log("before manInput1 = ", manInput1)
-    let data2 = [...inputFields2];
-    data2[index]['value'] = event.target.value;
-    //console.log(" Data2 = ", data2)
-    setinputFields2(data2);
-    //manInput2[index]['value'] = event.target.value
-    //console.log("maninput1 = ", manInput1 )
-    //console.log("maninput2 = ", manInput2 )
+    console.log("first console = ", event.target.value)
+    console.log("before manInput2 = ", manInput2)
+    console.log("before manInput1 = ", manInput1)
+    //let data2 = inputFields2;
+    //console.log("before Data2 = ", data2)
+    //data2[index]['value'] = event.target.value;
+    //console.log(" After Data2 = ", data2)
+    //setinputFields1(data1);
+    manInput2[index]['value'] = event.target.value
+    
+    console.log("updated maninput1 = ", manInput1 )
+    console.log("updated maninput2 = ", manInput2 )
     //console.log("inputFields1 = ", inputFields1 )
-    console.log("inputFields2 = ", inputFields2)
+    //console.log("inputFields2 = ", inputFields2 )
   }
 
   const handleOnClick = () => {
@@ -197,8 +208,10 @@ export const Test = () => {
           }
         })
       );
+
     };
   });
+
 
   useEffect(() => {
     if (counter < 2) {
@@ -234,6 +247,7 @@ export const Test = () => {
           for (var key in corrdata) {
             var arr = corrdata[key];
             corr_matrix.push(arr[arr.length - 1]['matrix'])
+
             setcorrelation_matrix((corr_matrix))
           }
         })
@@ -262,20 +276,20 @@ export const Test = () => {
             var arr = data[key];
             console.log("setting input fields = ", arr);
             setinputFields1(
-              JSON.parse(JSON.stringify(Array.from(arr)))
+              Array.from(arr)
             );
-            setinputFields2(
-              JSON.parse(JSON.stringify(Array.from(arr)))
-            );
-            //manInput1 = (Array.from(arr));
-            //manInput1 = JSON.parse(JSON.stringify(Array.from(arr)));
-            //console.log("manInput1 assigning = ", manInput1);
-            //manInput2 = JSON.parse(JSON.stringify(Array.from(arr)));
-            //console.log("manInput2 assigning = ", manInput2)
+            manInput1 = (Array.from(arr));
+            console.log("manInput assigning = ", manInput1);
+            manInput2 = (Array.from(arr));
+            console.log("manInput assigning = ", manInput2)
           }
+          
         })
       );
     }
+
+
+
   });
 
 
@@ -408,6 +422,7 @@ export const Test = () => {
                 {state.psoiterations}
                 {<img className="infoicon" src={infoicon} title="Select the maximum iterations for particle swarm optimization (PSO)." />}
               </div>
+
             </div>
 
             <br />
@@ -415,6 +430,8 @@ export const Test = () => {
               <Button variant="primary" size="md" type='submit'>Upload</Button>
               <button type='reset' onClick={handleReset}>Reset values</button>
               <div >
+
+
                 <div className='features_checkbox'>
                   <br />
                   {formFields.slice(0, -1).map((form, index) => {
@@ -434,6 +451,7 @@ export const Test = () => {
                       </div>
                     )
                   })}
+
                 </div>
 
                 <br />
@@ -466,8 +484,12 @@ export const Test = () => {
               }}
 
             /></div>
+
+
             <br />
+
             <br />
+
 
           </Popup>
           {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
@@ -476,7 +498,6 @@ export const Test = () => {
           <Popup trigger={<button> Limit Input Boundries</button>} position="right top" onOpen={() => setcounter4(0)}>
             <div>
               {inputFields1.map((form, index) => {
-                //console.log("inputFields1 with html = ", inputFields1)
 
                 return (
                   <div className='random-class'>
@@ -484,27 +505,33 @@ export const Test = () => {
                       {form.name}
                       <br />
                       <div className="slidercontainer">
+
                         <input
                           type="range"
                           min={form.min}
                           max={form.max}
-                          step={(form.max - form.min) / 50}
+                         
+                          step = {(form.max-form.min)/50}
                           onChange={event => handleFormChange1(event, index)}
                           className="thumb thumb--left"
                         />
+
                         <input
                           type="range"
                           min={form.min}
                           max={form.max}
-                          step={(form.max - form.min) / 50}
+                          
+                          step = {(form.max-form.min)/50}
                           onChange={event => handleFormChange2(event, index)}
                           className="thumb thumb--right"
                         />
+
+
                         <div className="slider">
                           <div className="slider__track" />
                           <div ref={range} className="slider__range" />
-                          <div className="slider__left-value">{parseFloat(form.value).toFixed(2)}</div>
-                          <div className="slider__right-value">{parseFloat(inputFields2[index].value).toFixed(2)}</div>
+                          <div className="slider__left-value">{form.min}</div>
+                          <div className="slider__right-value">{form.max}</div>
                         </div>
                         <br />
                         <br />
@@ -513,16 +540,27 @@ export const Test = () => {
                   </div>
                 )
               })}
+
+
             </div>
+
+
           </Popup>
+
+
         </div>
+
+
         <div className='corrbtn'>
           <Button variant="primary" size="md" type='button' onClick={handleOnClick}>Train Model</Button>
           <div className="training_status">
             <p>Training Status : {status}</p>
           </div>
+
         </div>
+
       </div>
+
 
     </Fragment>
   )
