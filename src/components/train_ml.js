@@ -79,6 +79,7 @@ export const Test = () => {
 
   const handleOnChange = (position) => {
     setcounter5(0)
+    setcounter4(0)
     const updatedCheckedState = checkedState.map((item, index) =>
       index === position ? !item : item
     );
