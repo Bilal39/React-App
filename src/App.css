@@ -162,6 +162,13 @@ body {
   justify-content: center;
 }
 
+.boundriesbtn{
+  padding: 1% 0 0 0;
+}
+.slidercontainer{
+  margin-top: 2%;
+}
+
 .features_checkbox {
   margin-left: 42px;
 }

@@ -34,6 +34,7 @@ export const Test = () => {
   const [inputFields2, setinputFields2] = useState([]);
   const [count3, setCount3] = useState(0);
   const [counter4, setcounter4] = useState(0);
+  const [counter5, setcounter5] = useState(0);
   const range = useRef(null);
   const [limitBoundries, setlimitBoundries] = useState(false);
   console.log("Limit boundries flag = ", limitBoundries)
@@ -77,6 +78,7 @@ export const Test = () => {
   }
 
   const handleOnChange = (position) => {
+    setcounter5(0)
     const updatedCheckedState = checkedState.map((item, index) =>
       index === position ? !item : item
     );
@@ -89,17 +91,20 @@ export const Test = () => {
     //console.log("first console = ", event.target.className)
     console.log("left dot Value = ", event.target.value)
     //console.log("before manInput1 = ", manInput1)
-    let data1 = [...inputFields1];
-    console.log(" before Data1 = ", data1)
-    data1[index]['value'] = event.target.value;
-    console.log("after Data1 = ", data1)
-    setinputFields1(data1);
-    //manInput1[index]['value'] = event.target.value
-    //console.log("maninput1 = ", manInput1 )
-    //console.log("maninput2 = ", manInput2 )
-    console.log("inputFields1 = ", inputFields1)
-    console.log("inputFields2 = ", inputFields2)
-    console.log("Limit boundries flag = ", limitBoundries)
+    if (event.target.value < inputFields2[index].value) {
+      let data1 = [...inputFields1];
+      console.log(" before Data1 = ", data1)
+      data1[index]['value'] = event.target.value;
+      console.log("after Data1 = ", data1)
+      setinputFields1(data1);
+      //manInput1[index]['value'] = event.target.value
+      //console.log("maninput1 = ", manInput1 )
+      //console.log("maninput2 = ", manInput2 )
+      console.log("inputFields1 = ", inputFields1)
+      console.log("inputFields2 = ", inputFields2)
+      console.log("Limit boundries flag = ", limitBoundries)
+    }
+
   }
 
   const handleFormChange2 = (event, index) => {
@@ -109,6 +114,7 @@ export const Test = () => {
     console.log("right dot value = ", event.target.value)
     //console.log("before manInput2 = ", manInput2)
     //console.log("before manInput1 = ", manInput1)
+    if (event.target.value > inputFields1[index].value) {
     let data2 = [...inputFields2];
     data2[index]['value'] = event.target.value;
     //console.log(" Data2 = ", data2)
@@ -119,6 +125,12 @@ export const Test = () => {
     //console.log("inputFields1 = ", inputFields1 )
     console.log("inputFields2 = ", inputFields2)
     console.log("Limit boundries flag = ", limitBoundries)
+    }
+  }
+
+  const handleResetCounter = (event) => {
+    setcounter4(0)
+    setcounter5(0)
   }
 
   const handleOnClick = () => {
@@ -189,6 +201,8 @@ export const Test = () => {
       });
 
     setcounter2(0)
+    setcounter5(0)
+
   }
 
 
@@ -271,6 +285,8 @@ export const Test = () => {
             });
         });
 
+      if (counter5 < 1) {
+      setcounter5(counter5 + 1)
       fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/input_config`).then((res) =>
         res.json().then((data) => {
           //console.log('data', data);
@@ -292,6 +308,7 @@ export const Test = () => {
           }
         })
       );
+      }
     }
   });
 
@@ -462,7 +479,7 @@ export const Test = () => {
         </form>
         <div className='corrbtn'>
           <br />
-          <Popup trigger={<button> Show Correlation</button>} position="right top" onOpen={() => setcounter(0)}>
+          <Popup trigger={<button> Correlation Heatmap</button>} position="right top" onOpen={() => setcounter(0)}>
             <div><Plot
               data={[
                 {
@@ -490,7 +507,8 @@ export const Test = () => {
           {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
 
           <br />
-          <Popup trigger={<button> Limit Input Boundries</button>} position="right top" onOpen={() => setcounter4(0)}>
+          <div className='boundriesbtn'>
+          <Popup trigger={<button> Limit Input Boundries</button>} position="right top" onOpen={() => setcounter4(0)} className='popup-height'>
             <div>
               {inputFields1.map((form, index) => {
                 //console.log("inputFields1 with html = ", inputFields1)
@@ -505,6 +523,7 @@ export const Test = () => {
                           type="range"
                           min={form.min}
                           max={form.max}
+                          value = {form.value}
                           step={(form.max - form.min) / 50}
                           onChange={event => handleFormChange1(event, index)}
                           className="thumb thumb--left"
@@ -513,6 +532,7 @@ export const Test = () => {
                           type="range"
                           min={form.min}
                           max={form.max}
+                          value = {inputFields2[index].value}
                           step={(form.max - form.min) / 50}
                           onChange={event => handleFormChange2(event, index)}
                           className="thumb thumb--right"
@@ -531,7 +551,12 @@ export const Test = () => {
                 )
               })}
             </div>
+            <button type='button' onClick={handleResetCounter}>Reset values</button>
           </Popup>
+          {<img className="infoicon" width="25" height="18" src={infoicon} title="Select the range for inputs." />}
+
+          <br />
+          </div>
         </div>
         <div className='corrbtn'>
           <Button variant="primary" size="md" type='button' onClick={handleOnClick}>Train Model</Button>
