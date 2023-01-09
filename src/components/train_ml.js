@@ -35,6 +35,8 @@ export const Test = () => {
   const [count3, setCount3] = useState(0);
   const [counter4, setcounter4] = useState(0);
   const range = useRef(null);
+  const [limitBoundries, setlimitBoundries] = useState(false);
+  console.log("Limit boundries flag = ", limitBoundries)
 
 
   const handleUpload = (event) => {
@@ -83,6 +85,7 @@ export const Test = () => {
   };
 
   const handleFormChange1 = (event, index) => {
+    setlimitBoundries(true);
     //console.log("first console = ", event.target.className)
     console.log("left dot Value = ", event.target.value)
     //console.log("before manInput1 = ", manInput1)
@@ -96,9 +99,11 @@ export const Test = () => {
     //console.log("maninput2 = ", manInput2 )
     console.log("inputFields1 = ", inputFields1)
     console.log("inputFields2 = ", inputFields2)
+    console.log("Limit boundries flag = ", limitBoundries)
   }
 
   const handleFormChange2 = (event, index) => {
+    setlimitBoundries(true);
     //console.log("first console = ", event.target.className)
     //console.log("fisrt checking inputfields2 = ", inputFields2)
     console.log("right dot value = ", event.target.value)
@@ -113,10 +118,22 @@ export const Test = () => {
     //console.log("maninput2 = ", manInput2 )
     //console.log("inputFields1 = ", inputFields1 )
     console.log("inputFields2 = ", inputFields2)
+    console.log("Limit boundries flag = ", limitBoundries)
   }
 
   const handleOnClick = () => {
     let count = 1
+    let temp_object = {}
+
+    temp_object["limit_flag"] = limitBoundries
+    temp_object["lower_bounds"] = inputFields1
+    temp_object["upper_bounds"] = inputFields2
+    console.log("This is the latest object to go in python backend", temp_object)
+
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/boundries_data`, {
+      method: 'POST',
+      body: JSON.stringify(temp_object),
+    })
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/upload`, {
       method: 'POST',

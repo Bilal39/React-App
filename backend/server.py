@@ -12,7 +12,6 @@ import json
 import pandas as pd
 
 
-
 # Initializing flask app
 app = Flask(__name__)
 CORS(app)
@@ -26,6 +25,7 @@ graph_data_dict = {}
 smooth_func_dict = {}
 histogram_data = {}
 max_min_dict = {}
+limit_boundries_data = []
 output_result["output_value"] = "---"
 output_result['unit_value'] = "----"
 training_status = {'mstatus': "in progress .."}
@@ -119,6 +119,14 @@ def correlation_data():
     # Returning an api for showing in reactjs
     return corr_data
 
+@app.route('/boundries_data',  methods=["POST"])
+def low_up_boundries():
+    payload = json.loads(request.data)
+    #print("Boundries data = ", payload)
+    limit_boundries_data.append(payload)
+    return "ok"
+
+
 @app.route('/upload',  methods=["POST"])
 def upload_file():
     payload = json.loads(request.data)
@@ -137,8 +145,9 @@ def upload_file():
     updated_file = "updated_object_file.txt"
     data_df.to_csv(updated_file, sep = ",", index = False)
     
+    #print("@@ This is the limit_boundries_data = ", limit_boundries_data[0])
     # Running modules
-    train_r_squared, test_r_squared, graph_data_list, smooth_funct_list, output_data_list, max_min_list = model_training(updated_file)
+    train_r_squared, test_r_squared, graph_data_list, smooth_funct_list, output_data_list, max_min_list = model_training(updated_file, limit_boundries_data[-1])
     #max_min_list = maxima_minima(updated_file)
     #print("Max_Min_list = ", max_min_list)
 

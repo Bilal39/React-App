@@ -10,7 +10,7 @@ import math
 import random
 
 
-def model_training(file_name):
+def model_training(file_name, data_range):
 
     nbr_input_track_file_path = os.path.join(
         os.getcwd(), 'assests', "nbr_of_inputs.ini")
@@ -98,7 +98,7 @@ def model_training(file_name):
 
     # Fitting Gam model
     gam = LinearGAM(n_splines=splines).gridsearch(x_train, y_train, lam=lams)
-    #gam.summary()  # printing summary of the model
+    # gam.summary()  # printing summary of the model
 
     # Plotting Smooth Function graphs
     titles = data_df.columns[0:input_column_nbr]
@@ -145,7 +145,6 @@ def model_training(file_name):
     training_r_squared = round(r2_score(y_train, gam_predictions_training), 2)
     if math.isnan(training_r_squared) == True:
         training_r_squared = 0
-    
 
     # Calculating R2 RMSE Values for testing data
     gam_predictions_testing = gam.predict(x_test)
@@ -155,8 +154,6 @@ def model_training(file_name):
     testing_r_squared = round(r2_score(y_test, gam_predictions_testing), 2)
     if math.isnan(testing_r_squared) == True:
         testing_r_squared = 0
-
-
 
     # Preparing Data for Training Plot
     train_data_dict['name'] = "Training Plot"
@@ -178,184 +175,140 @@ def model_training(file_name):
     test_data_dict['rsqaured'] = testing_r_squared
     final_data_list.append(test_data_dict)
 
-
     # Gam Function
-    def gam_function(variables):
-      x = [variables]
-      modelmat = gam._modelmat(x, term=-1)
-      coeff = gam.coef_[gam.terms.get_coef_indices(-1)]
-      return modelmat.dot(coeff).flatten()
-    
-    
 
-    
-    #------------------------------------------------------------------------------
+    def gam_function(variables):
+        x = [variables]
+        modelmat = gam._modelmat(x, term=-1)
+        coeff = gam.coef_[gam.terms.get_coef_indices(-1)]
+        return modelmat.dot(coeff).flatten()
+
+    # ------------------------------------------------------------------------------
     # TO CUSTOMIZE THIS PSO CODE TO SOLVE UNCONSTRAINED OPTIMIZATION PROBLEMS, CHANGE THE PARAMETERS IN THIS SECTION ONLY:
     # THE FOLLOWING PARAMETERS MUST BE CHANGED.
-    
+
     nv = len(X_train.columns)      # number of variables
 
-    
     # THE FOLLOWING PARAMETERS ARE OPTINAL.
     particle_size = psoparticles         # number of particles
     iterations = psoiterations           # max number of iterations
-    w=0.85                    # inertia constant
-    c1=1                    # cognative constant
-    c2=0.5                     # social constant
+    w = 0.85                    # inertia constant
+    c1 = 1                    # cognative constant
+    c2 = 0.5                     # social constant
     # END OF THE CUSTOMIZATION SECTION
-    #------------------------------------------------------------------------------
-    
+    # ------------------------------------------------------------------------------
+
     class Particle:
-        def __init__(self,bounds):
-            self.particle_position=[]                     # particle position
-            self.particle_velocity=[]                     # particle velocity
-            self.local_best_particle_position=[]          # best position of the particle
-            self.fitness_local_best_particle_position= initial_fitness
-            self.fitness_particle_position=initial_fitness
+        def __init__(self, bounds):
+            self.particle_position = []                     # particle position
+            self.particle_velocity = []                     # particle velocity
+            self.local_best_particle_position = []          # best position of the particle
+            self.fitness_local_best_particle_position = initial_fitness
+            self.fitness_particle_position = initial_fitness
 
             for i in range(nv):
-              self.particle_position.append(random.uniform(bounds [i][0],bounds [i][1])) 
-              self.particle_velocity.append(random.uniform(-1,1))
+                self.particle_position.append(
+                    random.uniform(bounds[i][0], bounds[i][1]))
+                self.particle_velocity.append(random.uniform(-1, 1))
 
-        def evaluate(self,objective_function):
-            self.fitness_particle_position=objective_function(self.particle_position)
+        def evaluate(self, objective_function):
+            self.fitness_particle_position = objective_function(
+                self.particle_position)
             if mm == -1:
                 if self.fitness_particle_position < self.fitness_local_best_particle_position:
-                    self.local_best_particle_position = self.particle_position                  # update the local best
-                    self.fitness_local_best_particle_position = self.fitness_particle_position  # update the fitness of the local best
+                    # update the local best
+                    self.local_best_particle_position = self.particle_position
+                    # update the fitness of the local best
+                    self.fitness_local_best_particle_position = self.fitness_particle_position
 
             if mm == 1:
                 if self.fitness_particle_position > self.fitness_local_best_particle_position:
-                    self.local_best_particle_position = self.particle_position                  # update the local best
+                    # update the local best
+                    self.local_best_particle_position = self.particle_position
                     self.fitness_local_best_particle_position = self.fitness_particle_position
 
-        def update_velocity(self,global_best_particle_position):
+        def update_velocity(self, global_best_particle_position):
             for i in range(nv):
-                r1=random.random()
-                r2=random.random()
-    
-                cognitive_velocity = c1*r1*(self.local_best_particle_position[i] - self.particle_position[i])
-                social_velocity = c2*r2*(global_best_particle_position[i] - self.particle_position[i])
-                self.particle_velocity[i] = w*self.particle_velocity[i]+ cognitive_velocity + social_velocity
-    
-        def update_position(self,bounds):
+                r1 = random.random()
+                r2 = random.random()
+
+                cognitive_velocity = c1*r1 * \
+                    (self.local_best_particle_position[i] -
+                     self.particle_position[i])
+                social_velocity = c2*r2 * \
+                    (global_best_particle_position[i] -
+                     self.particle_position[i])
+                self.particle_velocity[i] = w*self.particle_velocity[i] + \
+                    cognitive_velocity + social_velocity
+
+        def update_position(self, bounds):
             for i in range(nv):
-                self.particle_position[i]=self.particle_position[i]+self.particle_velocity[i]
-    
+                self.particle_position[i] = self.particle_position[i] + \
+                    self.particle_velocity[i]
+
                 # check and repair to satisfy the upper bounds
-                if self.particle_position[i]>bounds[i][1]:
-                    self.particle_position[i]=bounds[i][1]
+                if self.particle_position[i] > bounds[i][1]:
+                    self.particle_position[i] = bounds[i][1]
 
                 if self.particle_position[i] < bounds[i][0]:
-                	self.particle_position[i]=bounds[i][0]              
+                    self.particle_position[i] = bounds[i][0]
+
     class PSO():
-        def __init__(self,objective_function,bounds,particle_size,iterations):
-        
-            fitness_global_best_particle_position=initial_fitness
-            global_best_particle_position=[]
-    
-            swarm_particle=[]
+        def __init__(self, objective_function, bounds, particle_size, iterations):
+
+            fitness_global_best_particle_position = initial_fitness
+            global_best_particle_position = []
+
+            swarm_particle = []
             for i in range(particle_size):
                 swarm_particle.append(Particle(bounds))
-            A=[]
+            A = []
 
             for i in range(iterations):
                 for j in range(particle_size):
                     swarm_particle[j].evaluate(objective_function)
                     if mm == -1:
-                      if swarm_particle[j].fitness_particle_position < fitness_global_best_particle_position:
-                        global_best_particle_position = list(swarm_particle[j].particle_position)
-                        fitness_global_best_particle_position = float(swarm_particle[j].fitness_particle_position)
+                        if swarm_particle[j].fitness_particle_position < fitness_global_best_particle_position:
+                            global_best_particle_position = list(
+                                swarm_particle[j].particle_position)
+                            fitness_global_best_particle_position = float(
+                                swarm_particle[j].fitness_particle_position)
                     if mm == 1:
-                      if swarm_particle[j].fitness_particle_position > fitness_global_best_particle_position:
-                        global_best_particle_position = list(swarm_particle[j].particle_position)
-                        fitness_global_best_particle_position = float(swarm_particle[j].fitness_particle_position)
+                        if swarm_particle[j].fitness_particle_position > fitness_global_best_particle_position:
+                            global_best_particle_position = list(
+                                swarm_particle[j].particle_position)
+                            fitness_global_best_particle_position = float(
+                                swarm_particle[j].fitness_particle_position)
                 #print("\n Iteration = ", i)
                 #print('Optimal solution:', global_best_particle_position)
                 #print('Objective function value:' , fitness_global_best_particle_position)
                 for j in range(particle_size):
-                  swarm_particle[j].update_velocity(global_best_particle_position)
-                  swarm_particle[j].update_position(bounds)
+                    swarm_particle[j].update_velocity(
+                        global_best_particle_position)
+                    swarm_particle[j].update_position(bounds)
 
-                A.append(fitness_global_best_particle_position) 
+                A.append(fitness_global_best_particle_position)
 
             if mm == 1:
                 maxima.append(global_best_particle_position)
-                maxima_output.append(round(fitness_global_best_particle_position,3))
+                maxima_output.append(
+                    round(fitness_global_best_particle_position, 3))
             else:
                 minima.append(global_best_particle_position)
-                minima_output.append(round(fitness_global_best_particle_position,3))
+                minima_output.append(
+                    round(fitness_global_best_particle_position, 3))
             #print('Optimal solution:', global_best_particle_position)
             #print('Objective function value:' , fitness_global_best_particle_position)
             #print('Evolutionary process of the objective function value:')
 
+            # plt.plot(A)
 
-            #plt.plot(A)
-    
-    ## Bounds
+    # Bounds
     #bounds = []
-    #for column in X_train.columns:
+    # for column in X_train.columns:
     #  min_val = (X_train[column].min())
     #  max_val = (X_train[column].max())
-    #  bounds.append((min_val,max_val)) 
-
-    for iter in range(5):
-        #print(iter)
-        # Dynamic Bounds
-        bounds = []
-        for column in X_train.columns:
-          min_val = (X_train[column].min())
-          max_val = (X_train[column].max())
-          min_rand_value = round(float(np.random.uniform(min_val,max_val,1)),3)
-          max_rand_value = round(float(np.random.uniform(min_val,max_val,1)),3)
-
-          if min_rand_value <= max_rand_value:
-            pass
-          else:
-            temp_value = min_rand_value
-            min_rand_value = max_rand_value
-            max_rand_value = temp_value
-
-          bounds.append((min_rand_value,max_rand_value)) 
-        
-        all_bounds.append(bounds[0])
-
-        mm = 1                           # if minimization problem, mm = -1; if maximization problem, mm = 1
-        if mm == -1:
-	        initial_fitness = float("inf") # for minimization problem
-
-        if mm == 1:
-	        initial_fitness = -float("inf") # for maximization problem
-
-        PSO(gam_function, bounds, particle_size, iterations)
-
-
-
-        mm = -1                           # if minimization problem, mm = -1; if maximization problem, mm = 1
-        if mm == -1:
-	        initial_fitness = float("inf") # for minimization problem
-
-        if mm == 1:
-	        initial_fitness = -float("inf") # for maximization problem
-
-        PSO(gam_function, bounds, particle_size, iterations)
-
-    #print("\nMAXIMA point values = ", maxima)
-    #print("Maxima_output = ", maxima_output)
-    #print("All bounds = ", all_bounds)
-    #print("minima_output = ", minima_output)
-    #print("\nMinima point values = ", minima)
-    #maxima_output, minima_output, all_bounds = zip(*sorted(zip(maxima_output, minima_output,all_bounds)))
-    #sorted_maxima_output, sorted_maxima_bounds = zip(*sorted(zip(maxima_output, all_bounds)))
-    #sorted_minima_output, sorted_minima_bounds = zip(*sorted(zip(minima_output, all_bounds)))
-    
-    sorted_maxima_output, sorted_maxima_bounds = zip(*sorted(zip(maxima_output, maxima),reverse=True))
-    sorted_minima_output, sorted_minima_bounds = zip(*sorted(zip(minima_output, minima)))
-    
-    ##print("\nSorted Maxima_output = ", sorted_maxima_output)
-    ##print("sorted minima bounds = ", sorted_maxima_bounds)
-    ##print("\nSorted minima_output = ", sorted_minima_output)
-    ##print("Sorted minima bounds = ", sorted_minima_bounds)
+    #  bounds.append((min_val,max_val))
 
     # Reading User Input Parameters
     with open("object_file.txt", encoding='utf-8-sig') as f:
@@ -366,27 +319,7 @@ def model_training(file_name):
                 unit = "units"
             break
     
-    #str2 = "Input values for Max Output = {} , O/P = {}  ".format(predictions_dict[max_pred_val],max_pred_val)
-    #str2 = "Max Output Value = {} {}, Based on Input values = {}".format(round(maxima_output[0],3),unit, [round(item, 3) for item in maxima[0]] )
-    #str3 = "Min Output Value = {} {}, Based on Input values = {}".format(round(minima_output[0],2), unit, [round(item, 3) for item in minima[0]])
-
-    #str2 = "Output = {} {}, Based on Input = {} '\n' \n <br/> Output = {} {}, Based on Input = {}\n  ".format(round(sorted_maxima_output[0],3),unit, [round(item, 3) for item in sorted_maxima_bounds[0]],
-    #                                                                                                                               round(sorted_maxima_output[1],3),unit, [round(item, 3) for item in sorted_maxima_bounds[1]])
-    #str3 = "Output = {} {}, Based on Input = {} '\n' Output = {} {}, Based on Input = {}\n".format(round(sorted_minima_output[0],2), unit, [round(item, 3) for item in sorted_minima_bounds[0]],
-           
-    #                                                                                                                       round(sorted_minima_output[1],2), unit, [round(item, 3) for item in sorted_minima_bounds[1]])
-    str2 = "Top 5 Maxima Values"
-    str3 = "Output = {} {}, Based on Input = {}".format(round(sorted_maxima_output[0],3),unit, [round(item, 3) for item in sorted_maxima_bounds[0]])
-    str4 = "Output = {} {}, Based on Input = {}".format(round(sorted_maxima_output[1],3),unit, [round(item, 3) for item in sorted_maxima_bounds[1]])
-    str5 = "Output = {} {}, Based on Input = {}".format(round(sorted_maxima_output[2],3),unit, [round(item, 3) for item in sorted_maxima_bounds[2]])
-    str6 = "Output = {} {}, Based on Input = {}".format(round(sorted_maxima_output[3],3),unit, [round(item, 3) for item in sorted_maxima_bounds[3]])
-    str7 = "Output = {} {}, Based on Input = {}".format(round(sorted_maxima_output[4],3),unit, [round(item, 3) for item in sorted_maxima_bounds[4]])
-    str8 = "Top 5 Minima Values"
-    str9 = "Output = {} {}, Based on Input = {}".format(round(sorted_minima_output[0],3), unit, [round(item, 3) for item in sorted_minima_bounds[0]])
-    str10 = "Output = {} {}, Based on Input = {}".format(round(sorted_minima_output[1],3), unit, [round(item, 3) for item in sorted_minima_bounds[1]])
-    str11 = "Output = {} {}, Based on Input = {}".format(round(sorted_minima_output[2],3), unit, [round(item, 3) for item in sorted_minima_bounds[2]])
-    str12 = "Output = {} {}, Based on Input = {}".format(round(sorted_minima_output[3],3), unit, [round(item, 3) for item in sorted_minima_bounds[3]])
-    str13 = "Output = {} {}, Based on Input = {}".format(round(sorted_minima_output[4],3), unit, [round(item, 3) for item in sorted_minima_bounds[4]])
+    #print("Train model data ranges = ", data_range)
 
     
     col_str = "Input values follows following order:"
@@ -396,23 +329,180 @@ def model_training(file_name):
         col_str += "', "
     str1 = col_str[:-2]
 
-    str_list = []
-    temp_dict = {}
-    temp_dict['str1'] = str1
-    temp_dict['str2'] = str2
-    temp_dict['str3'] = str3
-    temp_dict['str4'] = str4
-    temp_dict['str5'] = str5
-    temp_dict['str6'] = str6
-    temp_dict['str7'] = str7
-    temp_dict['str8'] = str8
-    temp_dict['str9'] = str9
-    temp_dict['str10'] = str10
-    temp_dict['str11'] = str11
-    temp_dict['str12'] = str12
-    temp_dict['str13'] = str13
-    str_list.append(temp_dict)
+    if data_range['limit_flag'] is True:
+        #print("Yes it is true!!!!!!!!!!!!!!")
+        bounds = []
+        for index, column in enumerate(X_train.columns):
+            #min_val = data_range['lower_bounds']
+            #print("\nIndex = ", index)
+            #print("\ncolumn = ", column)
+            for reference in range(len(X_train.columns)):
+                #print("reference = ", data_range['lower_bounds'][reference]['name'])
+                if column == data_range['lower_bounds'][reference]['name']:
+                    min_val = data_range['lower_bounds'][reference]['value']
+                    max_val = data_range['upper_bounds'][reference]['value']
 
+                    if min_val <= max_value:
+                        pass
+                    else:
+                        temp_value = min_val
+                        min_val = max_val
+                        max_val = temp_value
+
+                    min_val = data_range['lower_bounds'][reference]['value']
+                    max_val = data_range['upper_bounds'][reference]['value']
+
+                    bounds.append((float(min_val), float(max_val)))
+        
+        #all_bounds.append(bounds)
+        #print("All bounds = ", bounds)
+
+        # if minimization problem, mm = -1; if maximization problem, mm = 1
+        mm = 1
+        if mm == -1:
+            initial_fitness = float("inf")  # for minimization problem
+        if mm == 1:
+            initial_fitness = -float("inf")  # for maximization problem
+        PSO(gam_function, bounds, particle_size, iterations)
+
+        # if minimization problem, mm = -1; if maximization problem, mm = 1
+        mm = -1
+        if mm == -1:
+            initial_fitness = float("inf")  # for minimization problem
+        if mm == 1:
+            initial_fitness = -float("inf")  # for maximization problem
+        PSO(gam_function, bounds, particle_size, iterations)
+
+        #print( " maxima_output, maxima = ", maxima_output, maxima)
+        #print( " minima_output, minima = ", minima_output, minima)
+
+        str2 = "Max Output Value = {} {}, Based on Input values = {}".format( round(maxima_output[0],3),unit, [round(item, 3) for item in maxima[0]])
+        str3 = "Min Output Value = {} {}, Based on Input values = {}".format(round(minima_output[0],3),unit, [round(item, 3) for item in minima[0]])
+        
+        str_list = []
+        temp_dict = {}
+        temp_dict['str1'] = str1
+        temp_dict['str2'] = str2
+        temp_dict['str3'] = str3
+        str_list.append(temp_dict)
+
+
+
+
+    else:
+        for iter in range(5):
+            # print(iter)
+            # Dynamic Bounds
+            bounds = []
+            for column in X_train.columns:
+                min_val = (X_train[column].min())
+                max_val = (X_train[column].max())
+                min_rand_value = round(
+                    float(np.random.uniform(min_val, max_val, 1)), 3)
+                max_rand_value = round(
+                    float(np.random.uniform(min_val, max_val, 1)), 3)
+
+                if min_rand_value <= max_rand_value:
+                    pass
+                else:
+                    temp_value = min_rand_value
+                    min_rand_value = max_rand_value
+                    max_rand_value = temp_value
+
+                bounds.append((min_rand_value, max_rand_value))
+
+            all_bounds.append(bounds[0])
+
+            # if minimization problem, mm = -1; if maximization problem, mm = 1
+            mm = 1
+            if mm == -1:
+                initial_fitness = float("inf")  # for minimization problem
+
+            if mm == 1:
+                initial_fitness = -float("inf")  # for maximization problem
+
+            PSO(gam_function, bounds, particle_size, iterations)
+
+            # if minimization problem, mm = -1; if maximization problem, mm = 1
+            mm = -1
+            if mm == -1:
+                initial_fitness = float("inf")  # for minimization problem
+
+            if mm == 1:
+                initial_fitness = -float("inf")  # for maximization problem
+
+            PSO(gam_function, bounds, particle_size, iterations)
+
+        #print("\nMAXIMA point values = ", maxima)
+        #print("Maxima_output = ", maxima_output)
+        #print("All bounds = ", all_bounds)
+        #print("minima_output = ", minima_output)
+        #print("\nMinima point values = ", minima)
+        #maxima_output, minima_output, all_bounds = zip(*sorted(zip(maxima_output, minima_output,all_bounds)))
+        #sorted_maxima_output, sorted_maxima_bounds = zip(*sorted(zip(maxima_output, all_bounds)))
+        #sorted_minima_output, sorted_minima_bounds = zip(*sorted(zip(minima_output, all_bounds)))
+
+        sorted_maxima_output, sorted_maxima_bounds = zip(
+            *sorted(zip(maxima_output, maxima), reverse=True))
+        sorted_minima_output, sorted_minima_bounds = zip(
+            *sorted(zip(minima_output, minima)))
+
+        ##print("\nSorted Maxima_output = ", sorted_maxima_output)
+        ##print("sorted minima bounds = ", sorted_maxima_bounds)
+        ##print("\nSorted minima_output = ", sorted_minima_output)
+        ##print("Sorted minima bounds = ", sorted_minima_bounds)
+
+
+
+        #str2 = "Input values for Max Output = {} , O/P = {}  ".format(predictions_dict[max_pred_val],max_pred_val)
+        #str2 = "Max Output Value = {} {}, Based on Input values = {}".format(round(maxima_output[0],3),unit, [round(item, 3) for item in maxima[0]] )
+        #str3 = "Min Output Value = {} {}, Based on Input values = {}".format(round(minima_output[0],2), unit, [round(item, 3) for item in minima[0]])
+
+        # str2 = "Output = {} {}, Based on Input = {} '\n' \n <br/> Output = {} {}, Based on Input = {}\n  ".format(round(sorted_maxima_output[0],3),unit, [round(item, 3) for item in sorted_maxima_bounds[0]],
+        #                                                                                                                               round(sorted_maxima_output[1],3),unit, [round(item, 3) for item in sorted_maxima_bounds[1]])
+        # str3 = "Output = {} {}, Based on Input = {} '\n' Output = {} {}, Based on Input = {}\n".format(round(sorted_minima_output[0],2), unit, [round(item, 3) for item in sorted_minima_bounds[0]],
+
+        #                                                                                                                       round(sorted_minima_output[1],2), unit, [round(item, 3) for item in sorted_minima_bounds[1]])
+        str2 = "Top 5 Maxima Values"
+        str3 = "Output = {} {}, Based on Input = {}".format(round(
+            sorted_maxima_output[0], 3), unit, [round(item, 3) for item in sorted_maxima_bounds[0]])
+        str4 = "Output = {} {}, Based on Input = {}".format(round(
+            sorted_maxima_output[1], 3), unit, [round(item, 3) for item in sorted_maxima_bounds[1]])
+        str5 = "Output = {} {}, Based on Input = {}".format(round(
+            sorted_maxima_output[2], 3), unit, [round(item, 3) for item in sorted_maxima_bounds[2]])
+        str6 = "Output = {} {}, Based on Input = {}".format(round(
+            sorted_maxima_output[3], 3), unit, [round(item, 3) for item in sorted_maxima_bounds[3]])
+        str7 = "Output = {} {}, Based on Input = {}".format(round(
+            sorted_maxima_output[4], 3), unit, [round(item, 3) for item in sorted_maxima_bounds[4]])
+        str8 = "Top 5 Minima Values"
+        str9 = "Output = {} {}, Based on Input = {}".format(round(
+            sorted_minima_output[0], 3), unit, [round(item, 3) for item in sorted_minima_bounds[0]])
+        str10 = "Output = {} {}, Based on Input = {}".format(round(
+            sorted_minima_output[1], 3), unit, [round(item, 3) for item in sorted_minima_bounds[1]])
+        str11 = "Output = {} {}, Based on Input = {}".format(round(
+            sorted_minima_output[2], 3), unit, [round(item, 3) for item in sorted_minima_bounds[2]])
+        str12 = "Output = {} {}, Based on Input = {}".format(round(
+            sorted_minima_output[3], 3), unit, [round(item, 3) for item in sorted_minima_bounds[3]])
+        str13 = "Output = {} {}, Based on Input = {}".format(round(
+            sorted_minima_output[4], 3), unit, [round(item, 3) for item in sorted_minima_bounds[4]])
+
+
+        str_list = []
+        temp_dict = {}
+        temp_dict['str1'] = str1
+        temp_dict['str2'] = str2
+        temp_dict['str3'] = str3
+        temp_dict['str4'] = str4
+        temp_dict['str5'] = str5
+        temp_dict['str6'] = str6
+        temp_dict['str7'] = str7
+        temp_dict['str8'] = str8
+        temp_dict['str9'] = str9
+        temp_dict['str10'] = str10
+        temp_dict['str11'] = str11
+        temp_dict['str12'] = str12
+        temp_dict['str13'] = str13
+        str_list.append(temp_dict)
 
     return training_r_squared, testing_r_squared, final_data_list, smooth_funct_list, output_data_list, str_list
 
