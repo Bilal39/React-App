@@ -23,21 +23,23 @@ export const Test = () => {
   const [file, setFile] = useState();
   const [status, setStatus] = useState('---');
   const [formFields, setFormFields] = useState([]);
+  const [formFields2, setFormFields2] = useState([]);
   const [checkedState, setCheckedState] = useState([]);
   const [corrNames, setcorrNames] = useState([]);
   const [correlation_names, setcorrelation_names] = useState([]);
   const [correlation_val, setcorrelation_val] = useState([]);
   const [correlation_matrix, setcorrelation_matrix] = useState([]);
-  const [counter, setcounter] = useState(0);
+  const [counter, setcounter] = useState(5);
   const [counter2, setcounter2] = useState(10);
   const [inputFields1, setinputFields1] = useState([]);
   const [inputFields2, setinputFields2] = useState([]);
   const [count3, setCount3] = useState(0);
   const [counter4, setcounter4] = useState(0);
   const [counter5, setcounter5] = useState(0);
+  const [counter6, setcounter6] = useState(0);
   const range = useRef(null);
   const [limitBoundries, setlimitBoundries] = useState(false);
-  console.log("Limit boundries flag = ", limitBoundries)
+
 
 
   const handleUpload = (event) => {
@@ -47,31 +49,6 @@ export const Test = () => {
     data.append('file', event.target.files[0])
     setFile(data)
   }
-
-
-  //const handleFormChange = (event, index) => {
-  //  //console.log("first console = ", event.target.className)
-  //  console.log("first console = ", event.target.value)
-  //
-  //  if (event.target.className === "thumb thumb--left"){
-  //    console.log("left thumb")
-  //    let data1 = [...inputFields1];
-  //    console.log("Data1 = ", data1)
-  //    //data1[index]['value'] = event.target.value;
-  //    //setinputFields1(data1);
-  //  }
-  //  else {
-  //    console.log("right thumb")
-  //    let data2 = inputFields2;
-  //    data2[index]['value'] = event.target.value;
-  //    console.log("Data2 = ", data2)
-  //    //setinputFields2(data2);
-  //
-  //  }
-  //  //console.log("Second console =", data[index][event.target.name])
-  //  console.log("inputFields1 = ", inputFields1 )
-  //  console.log("inputFields2 = ", inputFields2 )
-  //}
 
   const handleReset = (event) => {
     setState(initialState)
@@ -89,43 +66,31 @@ export const Test = () => {
 
   const handleFormChange1 = (event, index) => {
     setlimitBoundries(true);
-    //console.log("first console = ", event.target.className)
-    console.log("left dot Value = ", event.target.value)
-    //console.log("before manInput1 = ", manInput1)
+    //console.log("left dot Value = ", event.target.value)
     if (event.target.value < inputFields2[index].value) {
       let data1 = [...inputFields1];
-      console.log(" before Data1 = ", data1)
+      //console.log(" before Data1 = ", data1)
       data1[index]['value'] = event.target.value;
-      console.log("after Data1 = ", data1)
+      //console.log("after Data1 = ", data1)
       setinputFields1(data1);
-      //manInput1[index]['value'] = event.target.value
-      //console.log("maninput1 = ", manInput1 )
-      //console.log("maninput2 = ", manInput2 )
-      console.log("inputFields1 = ", inputFields1)
-      console.log("inputFields2 = ", inputFields2)
-      console.log("Limit boundries flag = ", limitBoundries)
+      //console.log("inputFields1 = ", inputFields1)
+      //console.log("inputFields2 = ", inputFields2)
+      //console.log("Limit boundries flag = ", limitBoundries)
     }
 
   }
 
   const handleFormChange2 = (event, index) => {
     setlimitBoundries(true);
-    //console.log("first console = ", event.target.className)
-    //console.log("fisrt checking inputfields2 = ", inputFields2)
-    console.log("right dot value = ", event.target.value)
-    //console.log("before manInput2 = ", manInput2)
-    //console.log("before manInput1 = ", manInput1)
+    //console.log("right dot value = ", event.target.value)
+
     if (event.target.value > inputFields1[index].value) {
-    let data2 = [...inputFields2];
-    data2[index]['value'] = event.target.value;
-    //console.log(" Data2 = ", data2)
-    setinputFields2(data2);
-    //manInput2[index]['value'] = event.target.value
-    //console.log("maninput1 = ", manInput1 )
-    //console.log("maninput2 = ", manInput2 )
-    //console.log("inputFields1 = ", inputFields1 )
-    console.log("inputFields2 = ", inputFields2)
-    console.log("Limit boundries flag = ", limitBoundries)
+      let data2 = [...inputFields2];
+      data2[index]['value'] = event.target.value;
+      //console.log(" Data2 = ", data2)
+      setinputFields2(data2);
+      //console.log("inputFields2 = ", inputFields2)
+      //console.log("Limit boundries flag = ", limitBoundries)
     }
   }
 
@@ -141,7 +106,6 @@ export const Test = () => {
     temp_object["limit_flag"] = limitBoundries
     temp_object["lower_bounds"] = inputFields1
     temp_object["upper_bounds"] = inputFields2
-    console.log("This is the latest object to go in python backend", temp_object)
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/boundries_data`, {
       method: 'POST',
@@ -165,7 +129,7 @@ export const Test = () => {
           res.json()
             .then((statusData) => {
               setStatus(statusData.mstatus);
-              console.log("bringing data from backend = ", statusData)
+              //console.log("bringing data from backend = ", statusData)
               if (statusData.mstatus === "Done!") {
                 setStatus(statusData.mstatus);
                 clearInterval(timerId)
@@ -178,6 +142,7 @@ export const Test = () => {
 
   const handleUploadImage = (event) => {
     //console.log('Upload Handler')
+    setcounter6(0)
     event.preventDefault();
 
 
@@ -201,8 +166,29 @@ export const Test = () => {
           });
       });
 
+    setcounter(0)
     setcounter2(0)
     setcounter5(0)
+
+    let count1 = 0;
+    let intervalId = setInterval(() => {
+      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
+        res.json().then((graph_data) => {
+          for (var key in graph_data) {
+            var arr = graph_data[key];
+            //console.log("Histogram Data arr = ", arr);
+            setFormFields2(
+              Array.from(arr)
+            );
+          }
+        })
+      );
+
+      count1 += 1;
+      if (count1 === 2) {
+        clearInterval(intervalId);
+      }
+    }, 250);
 
   }
 
@@ -272,7 +258,7 @@ export const Test = () => {
       );
     };
 
-    if (counter4 < 2) {
+    if (counter4 < 3) {
       setcounter4(counter4 + 1)
       //console.log("Bringing Input Config!!!!")
 
@@ -286,29 +272,29 @@ export const Test = () => {
             });
         });
 
-      if (counter5 < 1) {
-      setcounter5(counter5 + 1)
-      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/input_config`).then((res) =>
-        res.json().then((data) => {
-          //console.log('data', data);
+      if (counter5 < 3) {
+        setcounter5(counter5 + 1)
+        fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/input_config`).then((res) =>
+          res.json().then((data) => {
+            //console.log('data', data);
 
-          for (var key in data) {
-            var arr = data[key];
-            console.log("setting input fields = ", arr);
-            setinputFields1(
-              JSON.parse(JSON.stringify(Array.from(arr)))
-            );
-            setinputFields2(
-              JSON.parse(JSON.stringify(Array.from(arr)))
-            );
-            //manInput1 = (Array.from(arr));
-            //manInput1 = JSON.parse(JSON.stringify(Array.from(arr)));
-            //console.log("manInput1 assigning = ", manInput1);
-            //manInput2 = JSON.parse(JSON.stringify(Array.from(arr)));
-            //console.log("manInput2 assigning = ", manInput2)
-          }
-        })
-      );
+            for (var key in data) {
+              var arr = data[key];
+              //console.log("setting input fields = ", arr);
+              setinputFields1(
+                JSON.parse(JSON.stringify(Array.from(arr)))
+              );
+              setinputFields2(
+                JSON.parse(JSON.stringify(Array.from(arr)))
+              );
+              //manInput1 = (Array.from(arr));
+              //manInput1 = JSON.parse(JSON.stringify(Array.from(arr)));
+              //console.log("manInput1 assigning = ", manInput1);
+              //manInput2 = JSON.parse(JSON.stringify(Array.from(arr)));
+              //console.log("manInput2 assigning = ", manInput2)
+            }
+          })
+        );
       }
     }
   });
@@ -478,8 +464,44 @@ export const Test = () => {
             </div>
           </div>
         </form>
+
         <div className='corrbtn'>
-          <br />
+          
+        <Popup trigger={<button> Histogram</button>} position="right top" >
+          {formFields2.map((form, index) => {
+            return (
+              <div key={index}>
+                <Plot
+                  data={[
+                    {
+                      name: "Histogram",
+                      x: form.data,
+                      nbinsx: form.bin_size,
+                      type: "histogram",
+                      marker: { color: 'blue' },
+                    },
+                  ]}
+                  layout={{
+                    width: 640, height: 640, title: "Histogram", xaxis: {
+                      title: "Output Values", showgrid: true, gridcolor: '#bdbdbd',
+                      gridwidth: 1,
+                    },
+                    yaxis: {
+                      title: "Number of times", showgrid: true, gridcolor: '#bdbdbd',
+                      gridwidth: 1,
+                    }
+                  }}
+                />
+              </div>
+            )
+          })}
+          
+
+        </Popup>
+        {<img className="infoicon" width="25" height="18" src={infoicon} title="Plot histogram for the output." />}
+        </div>
+
+        <div className='corrbtn'>
           <Popup trigger={<button> Correlation Heatmap</button>} position="right top" onOpen={() => setcounter(0)}>
             <div><Plot
               data={[
@@ -509,62 +531,64 @@ export const Test = () => {
 
           <br />
           <div className='boundriesbtn'>
-          <Popup trigger={<button> Limit Input Boundries</button>} position="right top" onOpen={() => setcounter4(0)} className='popup-height'>
-            <div>
-              {inputFields1.map((form, index) => {
-                //console.log("inputFields1 with html = ", inputFields1)
+            <Popup trigger={<button> Limit Input Boundries</button>} position="right top" onOpen={() => setcounter4(0)} className='popup-height'>
+              <div>
+                {inputFields1.map((form, index) => {
+                  //console.log("inputFields1 with html = ", inputFields1)
 
-                return (
-                  <div className='random-class'>
-                    <div key={index}>
-                      {form.name}
-                      <br />
-                      <div className="slidercontainer">
-                        <input
-                          type="range"
-                          min={form.min}
-                          max={form.max}
-                          value = {form.value}
-                          step={(form.max - form.min) / 50}
-                          onChange={event => handleFormChange1(event, index)}
-                          className="thumb thumb--left"
-                        />
-                        <input
-                          type="range"
-                          min={form.min}
-                          max={form.max}
-                          value = {inputFields2[index].value}
-                          step={(form.max - form.min) / 50}
-                          onChange={event => handleFormChange2(event, index)}
-                          className="thumb thumb--right"
-                        />
-                        <div className="slider">
-                          <div className="slider__track" />
-                          <div ref={range} className="slider__range" />
-                          <div className="slider__left-value">{parseFloat(form.value).toFixed(2)}</div>
-                          <div className="slider__right-value">{parseFloat(inputFields2[index].value).toFixed(2)}</div>
+                  return (
+                    <div className='random-class'>
+                      <div key={index}>
+                        {form.name}
+                        <br />
+                        <div className="slidercontainer">
+                          <input
+                            type="range"
+                            min={form.min}
+                            max={form.max}
+                            value={form.value}
+                            step={(form.max - form.min) / 50}
+                            onChange={event => handleFormChange1(event, index)}
+                            className="thumb thumb--left"
+                          />
+                          <input
+                            type="range"
+                            min={form.min}
+                            max={form.max}
+                            value={inputFields2[index].value}
+                            step={(form.max - form.min) / 50}
+                            onChange={event => handleFormChange2(event, index)}
+                            className="thumb thumb--right"
+                          />
+                          <div className="slider">
+                            <div className="slider__track" />
+                            <div ref={range} className="slider__range" />
+                            <div className="slider__left-value">{parseFloat(form.value).toFixed(2)}</div>
+                            <div className="slider__right-value">{parseFloat(inputFields2[index].value).toFixed(2)}</div>
+                          </div>
+                          <br />
+                          <br />
                         </div>
-                        <br />
-                        <br />
                       </div>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
-            <button type='button' onClick={handleResetCounter}>Reset values</button>
-          </Popup>
-          {<img className="infoicon" width="25" height="18" src={infoicon} title="Select the range for inputs." />}
+                  )
+                })}
+              </div>
+              <button type='button' onClick={handleResetCounter}>Reset values</button>
+            </Popup>
+            {<img className="infoicon" width="25" height="18" src={infoicon} title="Select the range for inputs." />}
 
-          <br />
+            <br />
           </div>
         </div>
         <div className='corrbtn'>
+          <br/>
           <Button variant="primary" size="md" type='button' onClick={handleOnClick}>Train Model</Button>
           <div className="training_status">
             <p>Training Status : {status}</p>
           </div>
         </div>
+        <br/>
       </div>
 
     </Fragment>

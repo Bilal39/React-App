@@ -26,6 +26,7 @@ smooth_func_dict = {}
 histogram_data = {}
 max_min_dict = {}
 limit_boundries_data = []
+nbr_of_bins = {}
 output_result["output_value"] = "---"
 output_result['unit_value'] = "----"
 training_status = {'mstatus': "in progress .."}
@@ -34,6 +35,7 @@ training_status = {'mstatus': "in progress .."}
 uploads_dir = os.path.join(app.instance_path, 'uploads')
 input_nbr_path = os.path.join(os.getcwd(), 'assests', "nbr_of_inputs.ini") 
 predictor_default_value_path = os.path.join(os.getcwd(), 'assests', "predictor_default_value.ini")
+input_parameters_path = os.path.join(os.getcwd(), 'assests', "input_parameters.ini")
 
 # Truncating file to reset default values
 with open(predictor_default_value_path, 'r+') as f:
@@ -43,11 +45,10 @@ with open(predictor_default_value_path, 'r+') as f:
 @app.route('/parameter',  methods={"POST"})
 def getting_form():
     training_status['mstatus'] = 'in progress ..'
-    input_parameters_path = os.path.join(
-        os.getcwd(), 'assests', "input_parameters.ini")
     payload = json.loads(request.data)
     #print("Payload = ")
     #print(payload)
+    nbr_of_bins['bin'] = payload['bin']
 
     with open(input_parameters_path, 'w+') as f:
         f.write(str(payload['lambdaval']))
@@ -74,8 +75,21 @@ def getting_file_from_frontend():
 
     # Reading the data
     data_df = pd.read_csv(file_path, header=1)
+    
     # Splitting Data into Inputs
     x = data_df.iloc[:, :-1]
+    y = data_df.iloc[:, -1]
+    
+    print("nbr_of_bins = ", nbr_of_bins['bin'])
+    
+    hist_dict = {}
+    output_data_list = []
+    hist_dict['data'] = y.tolist()
+    hist_dict['bin_size'] = int(nbr_of_bins['bin'])
+    output_data_list.append(hist_dict)
+    #print("output_data_list = ", output_data_list)
+    histogram_data['data'] = output_data_list
+    
     # Getting Column names
     columns_names['data'] = data_df.columns.tolist()
     #print(columns_names)

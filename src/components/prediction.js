@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 function Prediction() {
   const [formFields, setFormFields] = useState([]);
   const [count1, setCount1] = useState(0);
-  console.log('formFields', formFields)
+  //console.log('formFields', formFields)
   useEffect(() => {
     (async () => {
       await fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/input_config`).then((res) =>
@@ -13,7 +13,7 @@ function Prediction() {
 
           for (var key in data) {
             var arr = data[key];
-            console.log("arr = ", arr);
+            //console.log("arr = ", arr);
             setFormFields(
               Array.from(arr)
             );
@@ -32,16 +32,16 @@ function Prediction() {
 
   }
   const handleFormChange = (event, index) => {
-    console.log("first console = ",event.target)
+    //console.log("first console = ",event.target.value)
     let data = [...formFields];
-    console.log("Second console =", data[index][event.target.name])
+    //console.log("Second console =", data[index][event.target.name])
     data[index]['value'] = event.target.value;
     setFormFields(data);
   }
 
   const submit = (e) => {
     e.preventDefault();
-    console.log(formFields)
+    //console.log(formFields)
 
     e.preventDefault();
 
@@ -80,7 +80,7 @@ function Prediction() {
   useEffect(() => {
     // Using fetch to fetch the api from 
     // flask server it will be redirected to proxy
-    console.log("count1 changed! =", count1);
+    //console.log("count1 changed! =", count1);
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/outputval`).then((res) =>
       res.json().then((outputdata) => {
         // Setting a data from api

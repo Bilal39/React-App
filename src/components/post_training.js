@@ -9,7 +9,6 @@ export default function () {
 
   const [formFields, setFormFields] = useState([]);
   const [formFields2, setFormFields2] = useState([]);
-  const [formFields3, setFormFields3] = useState([]);
   const [formFields4, setFormFields4] = useState([]);
   const [disp, setDisp] = useState(false);
 
@@ -41,24 +40,6 @@ export default function () {
             var arr = graph_data[key];
             //console.log("smooth function data getting arr = ", arr);
             setFormFields2(
-              Array.from(arr)
-            );
-          }
-
-        })
-      );
-    })();
-  }, []);
-
-
-  useEffect(() => {
-    (async () => {
-      await fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
-        res.json().then((graph_data) => {
-          for (var key in graph_data) {
-            var arr = graph_data[key];
-            //console.log("Histogram Data arr = ", arr);
-            setFormFields3(
               Array.from(arr)
             );
           }
@@ -113,37 +94,6 @@ export default function () {
                     },
                     yaxis: {
                       title: "Predicted Values", showgrid: true, gridcolor: '#bdbdbd',
-                      gridwidth: 1,
-                    }
-                  }}
-                />
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="disp_results">
-          <h1 className="page-header">Histogram</h1>
-          {formFields3.map((form, index) => {
-            return (
-              <div key={index}>
-                <Plot
-                  data={[
-                    {
-                      name: "Histogram",
-                      x: form.data,
-                      nbinsx: form.bin_size,
-                      type: "histogram",
-                      marker: { color: 'blue' },
-                    },
-                  ]}
-                  layout={{
-                    width: 640, height: 640, title: "Histogram", xaxis: {
-                      title: "Output Values", showgrid: true, gridcolor: '#bdbdbd',
-                      gridwidth: 1,
-                    },
-                    yaxis: {
-                      title: "Number of times", showgrid: true, gridcolor: '#bdbdbd',
                       gridwidth: 1,
                     }
                   }}
@@ -209,7 +159,7 @@ export default function () {
           <h1 className="page-header">Maxima Minima Values</h1>
           <br />
           {formFields4.map((form, index) => {
-            console.log(" Form =  ", form)
+            //console.log(" Form =  ", form)
             return (
               <div key={index}>
                 <Button variant="primary" size="md" type="button" onClick={() => setDisp(!disp)}>

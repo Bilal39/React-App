@@ -157,13 +157,17 @@ body {
 }
 
 .corrbtn {
-  padding: 2% 0 0 350px;
+  padding: 1% 0 0 350px;
   align-items: center;
   justify-content: center;
 }
 
 .boundriesbtn{
   padding: 1% 0 0 0;
+}
+
+.popup-height {
+  height: 500px;
 }
 .slidercontainer{
   margin-top: 2%;
