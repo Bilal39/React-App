@@ -337,20 +337,21 @@ def model_training(file_name, data_range):
             #print("\nIndex = ", index)
             #print("\ncolumn = ", column)
             for reference in range(len(X_train.columns)):
-                #print("reference = ", data_range['lower_bounds'][reference]['name'])
+                #print("lower bound values = ", data_range['lower_bounds'][reference])
+                #print("upper bound values = ", data_range['upper_bounds'][reference])
                 if column == data_range['lower_bounds'][reference]['name']:
-                    min_val = data_range['lower_bounds'][reference]['value']
-                    max_val = data_range['upper_bounds'][reference]['value']
+                    min_val = float(data_range['lower_bounds'][reference]['value'])
+                    max_val = float(data_range['upper_bounds'][reference]['value'])
 
-                    if min_val <= max_value:
+                    if min_val <= max_val:
                         pass
                     else:
                         temp_value = min_val
                         min_val = max_val
                         max_val = temp_value
 
-                    min_val = data_range['lower_bounds'][reference]['value']
-                    max_val = data_range['upper_bounds'][reference]['value']
+                    #min_val = data_range['lower_bounds'][reference]['value']
+                    #max_val = data_range['upper_bounds'][reference]['value']
 
                     bounds.append((float(min_val), float(max_val)))
         
@@ -385,8 +386,6 @@ def model_training(file_name, data_range):
         temp_dict['str2'] = str2
         temp_dict['str3'] = str3
         str_list.append(temp_dict)
-
-
 
 
     else:

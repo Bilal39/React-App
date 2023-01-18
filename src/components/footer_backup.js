@@ -3,7 +3,7 @@ import qeeriLogo from '../assests/images/qeeri-logo.png'
 import qnrfLogo from '../assests/images/qnrf-logo.png'
 import qeeri2Logo from '../assests/images/qeeri_logo.png'
 import { Link } from 'react-router-dom'
-
+import { CDBFooter, CDBBox, CDBFooterLink, CDBBtn, CDBIcon, CDBContainer } from 'cdbreact';
 
 export default function header(props) {
   return (
@@ -40,7 +40,41 @@ export default function header(props) {
           </div>
         </div>
       </nav>
+      <CDBFooter className="shadow">
+        <CDBBox
+          display="flex"
+          justifyContent="between"
+          alignItems="center"
+          className="mx-auto py-4 flex-wrap"
+          style={{ width: '80%' }}
+        >
+          <CDBBox display="flex" alignItems="center">
+            <a href="/" className="d-flex align-items-center p-0 text-dark">
+              <img
+                alt="logo"
+                src={qeeri2Logo}
+                width="150px"
+              />
+            </a>
+          </CDBBox>
+          <CDBBox>
+            <small className="ml-2">&copy; Copyright ©2022 All rights reserved to Hamad Bin Khalifa University.</small>
+          </CDBBox>
+          <CDBBox display="flex">
+            <CDBBtn flat color="grey" className="p-2">
+              <CDBFooterLink href="https://www.facebook.com/Qatar-Environment-Energy-Research-Institute-QEERI-811838925494210/community/">
+                <CDBIcon fab icon="facebook-f" />
+              </CDBFooterLink>
+            </CDBBtn>
 
+            <CDBBtn flat color="grey" className="mx-3 p-2">
+              <CDBFooterLink href="https://twitter.com/qeeri_qa">
+                <CDBIcon fab icon="twitter" />
+              </CDBFooterLink>
+            </CDBBtn>
+          </CDBBox>
+        </CDBBox>
+      </CDBFooter>
 
     </>
   )

@@ -73,9 +73,6 @@ export const Test = () => {
       data1[index]['value'] = event.target.value;
       //console.log("after Data1 = ", data1)
       setinputFields1(data1);
-      //console.log("inputFields1 = ", inputFields1)
-      //console.log("inputFields2 = ", inputFields2)
-      //console.log("Limit boundries flag = ", limitBoundries)
     }
 
   }
@@ -89,8 +86,6 @@ export const Test = () => {
       data2[index]['value'] = event.target.value;
       //console.log(" Data2 = ", data2)
       setinputFields2(data2);
-      //console.log("inputFields2 = ", inputFields2)
-      //console.log("Limit boundries flag = ", limitBoundries)
     }
   }
 
@@ -100,7 +95,6 @@ export const Test = () => {
   }
 
   const handleOnClick = () => {
-    let count = 1
     let temp_object = {}
 
     temp_object["limit_flag"] = limitBoundries
@@ -193,7 +187,6 @@ export const Test = () => {
   }
 
 
-
   useEffect(() => {
     //console.log("Entering if condition, counter value = ", counter2)
     if (counter2 < 2) {
@@ -231,8 +224,7 @@ export const Test = () => {
       }
       setcorrNames([temp_list]);
       //console.log("Corr Names = ", corrNames)
-      const corr_names = []
-      const corr_val = []
+
       var corr_matrix = []
 
       fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/data_for_corr`, {
@@ -466,39 +458,39 @@ export const Test = () => {
         </form>
 
         <div className='corrbtn'>
-          
-        <Popup trigger={<button> Histogram</button>} position="right top" >
-          {formFields2.map((form, index) => {
-            return (
-              <div key={index}>
-                <Plot
-                  data={[
-                    {
-                      name: "Histogram",
-                      x: form.data,
-                      nbinsx: form.bin_size,
-                      type: "histogram",
-                      marker: { color: 'blue' },
-                    },
-                  ]}
-                  layout={{
-                    width: 640, height: 640, title: "Histogram", xaxis: {
-                      title: "Output Values", showgrid: true, gridcolor: '#bdbdbd',
-                      gridwidth: 1,
-                    },
-                    yaxis: {
-                      title: "Number of times", showgrid: true, gridcolor: '#bdbdbd',
-                      gridwidth: 1,
-                    }
-                  }}
-                />
-              </div>
-            )
-          })}
-          
 
-        </Popup>
-        {<img className="infoicon" width="25" height="18" src={infoicon} title="Plot histogram for the output." />}
+          <Popup trigger={<button> Histogram</button>} position="right top" >
+            {formFields2.map((form, index) => {
+              return (
+                <div key={index}>
+                  <Plot
+                    data={[
+                      {
+                        name: "Histogram",
+                        x: form.data,
+                        nbinsx: form.bin_size,
+                        type: "histogram",
+                        marker: { color: 'blue' },
+                      },
+                    ]}
+                    layout={{
+                      width: 640, height: 640, title: "Histogram", xaxis: {
+                        title: "Output Values", showgrid: true, gridcolor: '#bdbdbd',
+                        gridwidth: 1,
+                      },
+                      yaxis: {
+                        title: "Number of times", showgrid: true, gridcolor: '#bdbdbd',
+                        gridwidth: 1,
+                      }
+                    }}
+                  />
+                </div>
+              )
+            })}
+
+
+          </Popup>
+          {<img className="infoicon" width="25" height="18" src={infoicon} title="Plot histogram for the output." />}
         </div>
 
         <div className='corrbtn'>
@@ -531,7 +523,7 @@ export const Test = () => {
 
           <br />
           <div className='boundriesbtn'>
-            <Popup trigger={<button> Limit Input Boundries</button>} position="right top" onOpen={() => setcounter4(0)} className='popup-height'>
+            <Popup trigger={<button> Limit Input Boundries for PSO</button>} position="right top" onOpen={() => setcounter4(0)} className='popup-height'>
               <div>
                 {inputFields1.map((form, index) => {
                   //console.log("inputFields1 with html = ", inputFields1)
@@ -582,13 +574,13 @@ export const Test = () => {
           </div>
         </div>
         <div className='corrbtn'>
-          <br/>
+          <br />
           <Button variant="primary" size="md" type='button' onClick={handleOnClick}>Train Model</Button>
           <div className="training_status">
             <p>Training Status : {status}</p>
           </div>
         </div>
-        <br/>
+        <br />
       </div>
 
     </Fragment>
