@@ -22,19 +22,19 @@ export default function header(props) {
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link className="nav-link active" aria-current="page" to="/home">Home</Link>
+                <Link className="nav-link active" aria-current="page" to="/AMT/home">Home</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link active" to="/train_model">Train Model</Link>
+                <Link className="nav-link active" to="/AMT/train_model">Train Model</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link active" to="/post_training">Result</Link>
+                <Link className="nav-link active" to="/AMT/extrema">Extrema</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link active" to="/prediction">Prediction</Link>
+                <Link className="nav-link active" to="/AMT/prediction">Prediction</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link active" to="/about">About</Link>
+                <Link className="nav-link active" to="/AMT/about">About</Link>
               </li>
             </ul>
           </div>

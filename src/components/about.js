@@ -3,43 +3,47 @@ import React from 'react'
 export default function () {
   return (
     <>
-    <body>
-    <div className="background-Image">
-      <div class="about_content">
-        <div>
-          <h2 className='about-headings'>About Graphical User Interfance</h2>
-          <p className='about-paragraph'>In this GUI, functionality is provided to upload a CSV file, tune hyperparameters of the model, train and test the model and finally predict output values for the given inputs. Generalized Additive Model (GAM) is used as a machine learning model.</p>
-        </div>
+      <body>
+        <div className="background-Image">
+          <div class="about_content">
+            <div>
+              <h2 className='about-headings'>About Graphical User Interfance</h2>
+              <p className='about-paragraph'>This Graphical User Interface (GUI) offers a comprehensive suite of features to facilitate the seamless
+                implementation and utilization of machine learning models.
+                At the heart of the GUI lies the capability to upload a CSV file,
+                which serves as the foundation for the training and testing of the Generalized Additive Model (GAM) algorithm.
+                The GUI also provides a flexible platform for the tuning of hyperparameters, allowing for optimal performance of the model.
+              </p>
+              <p className='about-paragraph'>
+                Upon completion of the training and testing phase, the GUI empowers the user to predict output values for given inputs with ease and accuracy.
+                This integration of robust functionalities within a seamless and intuitive interface makes the GUI a valuable tool
+                for both novice and experienced practitioners of machine learning.</p>
+            </div>
 
-        <div>
-          <h2 className='about-headings'>GAM Introduction</h2>
-          <p className='about-paragraph'>In statistics, a generalized additive model (GAM) is a generalized linear model in which the linear response variable depends linearly on unknown smooth functions of some predictor variables, and interest focuses on inference about these smooth functions.</p>
-        </div>
+            <div>
+              <h2 className='about-headings'>GAM Introduction</h2>
+              <p className='about-paragraph'>Within the realm of statistics, the Generalized Additive Model (GAM) stands as a pioneering methodology that embodies the principles of Generalized Linear Models (GLMs). The defining characteristic of a GAM is the utilization of non-linear and continuous functions to model the relationship between the linear response variable and the predictor variables. This departure from traditional linear models allows for a more nuanced and sophisticated representation of complex relationships between variables.
+              </p>
+              <p className='about-paragraph'>
+                The emphasis of inference in GAMs is directed towards the estimation of these smooth functions and the extraction of meaningful insights from the data. By leveraging the flexibility of non-linear functions, GAMs provide a more comprehensive understanding of the underlying relationships and patterns in the data, thereby facilitating informed decision-making and predictive accuracy.
+              </p>
+              <p className='about-paragraph'>
+                In conclusion, the Generalized Additive Model stands as a remarkable tool for statistical inference and analysis, offering a new perspective on the relationships between variables and enabling a deeper understanding of the underlying patterns in the data.</p>
+            </div>
 
-        <div>
-          <h2 className='about-headings'>Why using GAM?</h2>
-          <p className='about-paragraph'>Interpretability, flexibility/automation, and regularization are the reasons for using GAM. When a model contains nonlinear effects, GAM provides a regularized and interpretable solution while other methods generally lack at least one of these three features. In other words, GAMs strike a nice balance between the interpretable, yet biased, linear model, and the extremely flexible, “black box” learning algorithms.</p>
-        </div>
+            <div>
+              <h2 className='about-headings'>Why using GAM?</h2>
+              <p className='about-paragraph'>The Generalized Additive Model (GAM) has garnered significant attention and usage due to its exceptional combination of interpretability, flexibility, and regularization. In the realm of statistical modeling, it is not uncommon to encounter models that possess nonlinear effects, which can lead to difficulties in interpretation and regularization.
+              </p><p className='about-paragraph'>
+                However, the GAM offers a unique solution that strikes a harmonious balance between the interpretability and bias of linear models and the extreme flexibility of "black box" learning algorithms. By leveraging the power of non-linear functions, GAMs provide a regularized and interpretable representation of the relationships between variables while still retaining the ability to capture complex nonlinear effects.
+              </p> <p className='about-paragraph'>
+                Additionally, the automation inherent in GAMs provides the added benefit of ease-of-use and reduces the need for manual intervention. This combination of interpretability, flexibility, and regularization make the Generalized Additive Model an invaluable tool for statistical analysis and prediction.</p>
+            </div>
 
-        <div >
-          <h2 className='about-headings'>Directions to train a model.</h2>
-          <p className='about-paragraph'><b>1.</b> Upload a CSV format file.</p>
-          <p className='about-paragraph'><b>2.</b> Set parameters for model training.</p>
-          <p className='about-paragraph'><b>3.</b> Click on “upload” button.</p>
-          <p className='about-paragraph'><b>4.</b> After clicking upload button, select input features you want to train the model on.</p>
-          <p className='about-paragraph'><b>5.</b> There should be 'no' serial number column in the file.</p>
-        </div>
 
-        <div >
-          <h2 className='about-headings'>Instructions to Predict Values.</h2>
-          <p className='about-paragraph'><b>1.</b> Set input values.</p>
-          <p className='about-paragraph'><b>2.</b> After setting all values, click on “Submit Input Values”.</p>
-          <p className='about-paragraph'><b>3.</b> To predict a value, click on “Check Result”.</p>
+          </div>
         </div>
-
-      </div>
-      </div>
       </body>
-        </>
+    </>
   )
 }

@@ -1,19 +1,15 @@
 import os
-import pickle
+import joblib
 
 
-def predictor_func(input_values):
-    train_model_path = os.path.join(os.getcwd(), 'assests', "gam_model.pkl")
+def predictor_func(input_values, model_file_name):
+    train_model_path = os.path.join(os.getcwd(), 'assests',"trained_models", model_file_name)
 
-    # load model
-    with open(train_model_path, 'rb') as f:
-        gam = pickle.load(f)
-
-    print("input values to be predicted = ", input_values)
-    print(type(input_values[0]))
+    # load the model
+    gam = joblib.load(train_model_path)
+    
     output_prediction = gam.predict([input_values])
     output_prediction = round(output_prediction[0],3)
-    #print("output_prediction = ", output_prediction)
 
     return output_prediction
 

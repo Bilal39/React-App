@@ -46,12 +46,14 @@ def input_manger():
             temp_dict['value'] = predictor_input_values[n]
 
         input_data_list.append(temp_dict)
+    #print("input_data_list = ", input_data_list)
 
     input_dict["data"] = input_data_list
+    print("input_dict = ", input_dict)
     return input_dict
 
 #input_dict = input_manger()
-# print(input_dict)
+#print(input_dict)
 
 
 if __name__ == "__main__":

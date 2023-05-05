@@ -1,15 +1,17 @@
 # Importing Libraries
-from flask import Flask
+from flask import Flask, send_file
 from flask_cors import CORS
 from flask import request
 from werkzeug.utils import secure_filename
 import os
 from train_model import model_training
+from extrema import pso_execution
 from correlation_data import correlation_among_data
 from predictor import predictor_func
 from input_config import input_manger
 import json
 import pandas as pd
+import joblib
 
 
 # Initializing flask app
@@ -30,12 +32,23 @@ nbr_of_bins = {}
 output_result["output_value"] = "---"
 output_result['unit_value'] = "----"
 training_status = {'mstatus': "in progress .."}
+save_model_flag = 0
+pretrained_model = {"flag": 0, "unit": "units"}
+csv_file = {'base_name':'', "custom_name":"", "model_counter":0}
 
 # Create a directory in a known location to save files to.
 uploads_dir = os.path.join(app.instance_path, 'uploads')
-input_nbr_path = os.path.join(os.getcwd(), 'assests', "nbr_of_inputs.ini") 
-predictor_default_value_path = os.path.join(os.getcwd(), 'assests', "predictor_default_value.ini")
-input_parameters_path = os.path.join(os.getcwd(), 'assests', "input_parameters.ini")
+input_nbr_path = os.path.join(os.getcwd(), 'assests', "nbr_of_inputs.ini")
+predictor_default_value_path = os.path.join(
+    os.getcwd(), 'assests', "predictor_default_value.ini")
+input_parameters_path = os.path.join(
+    os.getcwd(), 'assests', "input_parameters.ini")
+
+pre_trained_model_path = os.path.join(
+    os.getcwd(), 'assests', "pre_trained_model.pkl")
+
+trained_models_path = os.path.join(
+            os.getcwd(), "assests", "trained_models")
 
 # Truncating file to reset default values
 with open(predictor_default_value_path, 'r+') as f:
@@ -47,7 +60,7 @@ def getting_form():
     training_status['mstatus'] = 'in progress ..'
     payload = json.loads(request.data)
     #print("Payload = ")
-    #print(payload)
+    # print(payload)
     nbr_of_bins['bin'] = payload['bin']
 
     with open(input_parameters_path, 'w+') as f:
@@ -60,28 +73,39 @@ def getting_form():
         f.write(str(payload['bin']))
         f.write('\n')
         f.write(str(payload['shuffledata']))
-        f.write('\n')
-        f.write(str(payload['psoparticles']))
-        f.write('\n')
-        f.write(str(payload['psoiterations']))
 
     return 'ok'
 
+
 @app.route('/file_transfer',  methods=["POST"])
 def getting_file_from_frontend():
+
     file1 = request.files.get("file")
     file_path = "object_file.txt"
     file1.save(secure_filename(file_path))
+    
+    # Get a list of all files in the folder
+    files = os.listdir(trained_models_path)
+    
+    # Check if the number of files exceeds 5
+    if len(files) > 1:
+        print("deleting files since surpassed 1 files@@@@@@@")
+        # Iterate over all the files in the folder and delete them
+        for filename in files:
+            file_path = os.path.join(trained_models_path, filename)
+            os.remove(file_path)
+
+    # Extracting name from user uploaded file
+    if csv_file['base_name'] != os.path.splitext(file1.filename)[0]:
+        csv_file['base_name'] = os.path.splitext(file1.filename)[0]
+        csv_file["model_counter"] = 0
 
     # Reading the data
     data_df = pd.read_csv(file_path, header=1)
-    
-    # Splitting Data into Inputs
-    x = data_df.iloc[:, :-1]
+
+    # Defining output values
     y = data_df.iloc[:, -1]
-    
-    print("nbr_of_bins = ", nbr_of_bins['bin'])
-    
+
     hist_dict = {}
     output_data_list = []
     hist_dict['data'] = y.tolist()
@@ -89,10 +113,9 @@ def getting_file_from_frontend():
     output_data_list.append(hist_dict)
     #print("output_data_list = ", output_data_list)
     histogram_data['data'] = output_data_list
-    
+
     # Getting Column names
     columns_names['data'] = data_df.columns.tolist()
-    #print(columns_names)
 
     # Truncating file to reset default values
     with open(predictor_default_value_path, 'r+') as f:
@@ -100,11 +123,13 @@ def getting_file_from_frontend():
 
     return "ok"
 
+
 @app.route('/col_names')
 def col_names_trans():
 
     # Returning an api for showing in reactjs
     return columns_names
+
 
 @app.route('/data_for_corr',  methods=["POST"])
 def inputs_for_corr():
@@ -114,18 +139,18 @@ def inputs_for_corr():
     file_path = "object_file.txt"
 
     # Calling funtion for column names and correlation data
-    column_names, corr_data_list = correlation_among_data(file_path,checked_array)
-    #print("These are the column names = ", column_names)
-    #print("\nThis is the corr_data_list = ", corr_data_list)
+    column_names, corr_data_list = correlation_among_data(
+        file_path, checked_array)
 
     # Storing column names in a dict to fetch easily
-    columns_names['data'] = column_names    
+    columns_names['data'] = column_names
     corr_data['data'] = corr_data_list
 
-    #print(payload)
+    # print(payload)
 
     # Returning an api for showing in reactjs
     return "OK"
+
 
 @app.route('/cor_data')
 def correlation_data():
@@ -133,19 +158,31 @@ def correlation_data():
     # Returning an api for showing in reactjs
     return corr_data
 
+
 @app.route('/boundries_data',  methods=["POST"])
 def low_up_boundries():
+    training_status['mstatus'] = "in progress .."
     payload = json.loads(request.data)
-    #print("Boundries data = ", payload)
     limit_boundries_data.append(payload)
+
+
+    max_min_list = pso_execution(limit_boundries_data[-1],csv_file['custom_name'],pretrained_model["flag"])
+    #print("MAX_MIN_List we are getting =", max_min_list)
+    max_min_dict['data'] = max_min_list
+    training_status['mstatus'] = "Done!"
+
     return "ok"
 
 
 @app.route('/upload',  methods=["POST"])
 def upload_file():
+    training_status['mstatus'] = "in progress .."
     payload = json.loads(request.data)
-
     file_name = "object_file.txt"
+
+    csv_file['custom_name'] = "{}_model_{}.pkl".format(csv_file['base_name'], csv_file['model_counter'])
+    csv_file['model_counter'] = (csv_file['model_counter']+1) 
+
     # Reading the data
     data_df = pd.read_csv(file_name, header=1)
     col_names = data_df.columns.tolist()
@@ -157,16 +194,12 @@ def upload_file():
             pass
 
     updated_file = "updated_object_file.txt"
-    data_df.to_csv(updated_file, sep = ",", index = False)
-    
-    #print("@@ This is the limit_boundries_data = ", limit_boundries_data[0])
-    # Running modules
-    train_r_squared, test_r_squared, graph_data_list, smooth_funct_list, output_data_list, max_min_list = model_training(updated_file, limit_boundries_data[-1])
-    #max_min_list = maxima_minima(updated_file)
-    #print("Max_Min_list = ", max_min_list)
+    data_df.to_csv(updated_file, sep=",", index=False)
+
+    train_r_squared, test_r_squared, graph_data_list, smooth_funct_list, output_data_list, save_model_flag = model_training(
+        updated_file, csv_file['custom_name'])
 
     # Updating data to fetch
-    max_min_dict['data'] = max_min_list
     graph_data_dict["graph_data"] = graph_data_list
     smooth_func_dict['data'] = smooth_funct_list
     histogram_data['data'] = output_data_list
@@ -197,11 +230,13 @@ def results():
     # Returning an api for showing in reactjs
     return graph_data_dict
 
+
 @app.route('/smooth_func_data')
 def smooth_func_data_points():
 
     # Returning an api for showing in reactjs
     return smooth_func_dict
+
 
 @app.route('/histogram_data')
 def histogram_data_to_fetch():
@@ -209,17 +244,20 @@ def histogram_data_to_fetch():
     # Returning an api for showing in reactjs
     return histogram_data
 
+
 @app.route('/max_min_data')
 def maxima_minima_data():
 
     # Returning an api for showing in reactjs
     return max_min_dict
 
+
 @app.route("/update_data_file", methods={"POST"})
 def update_user_data_file():
     payload = json.loads(request.data)
 
     file_name = "object_file.txt"
+    
     # Reading the data
     data_df = pd.read_csv(file_name, header=1)
     col_names = data_df.columns.tolist()
@@ -231,19 +269,16 @@ def update_user_data_file():
             pass
 
     updated_file = "updated_object_file.txt"
-    data_df.to_csv(updated_file, sep = ",", index = False)
+    data_df.to_csv(updated_file, sep=",", index=False)
 
     return "ok"
 
+
 @app.route("/input_config", methods={"GET"})
 def input_config():
-    # Reading User Input Parameters
-    #with open(input_nbr_path) as f:
-    #    lines = f.readlines()
-    #    for line in lines:
-    #        inputnumber = str(line)
+    pretrained_model['flag'] = 0
+    pretrained_model['unit'] = "units"
     input_dict = input_manger()
-    #print("This is Input dict ..... = ", input_dict)
 
     return input_dict
 
@@ -253,40 +288,86 @@ def get_prediction():
     input_values = []
     payload = json.loads(request.data)
 
-    # print(payload)
+    #print("payload = ", payload)
     for item in payload:
         input_values.append(item['value'])
-    
-    # Writing prediction input values
-    with open(predictor_default_value_path, 'w+') as f:
-        for element in input_values:
-            f.write(str(element))
-            f.write('\n')
 
-    output_prediction = predictor_func(input_values)
+    if pretrained_model["flag"] == 0:
+        # Writing prediction input values
+        with open(predictor_default_value_path, 'w+') as f:
+            for element in input_values:
+                f.write(str(element))
+                f.write('\n')
+
+        output_prediction = predictor_func(input_values, csv_file['custom_name'])
+
+        # Reading User Input Parameters
+        with open("object_file.txt", encoding='utf-8-sig') as f:
+            lines = f.readlines()
+            for line in lines:
+                unit = str(line.split(',')[0])
+                if unit == "Enter output unit":
+                    unit = "units"
+                break
+
+    else:
+        # load the model
+        print("Input Dict before  =  ", input_dict)
+        model = joblib.load(os.path.join(
+            os.getcwd(), "assests", "user_trained_model.pkl"))
+        output_prediction = round(model.predict([input_values])[0], 3)
+        unit = pretrained_model["unit"]
+
     output_result['output_value'] = output_prediction
-
-    # Reading User Input Parameters
-    with open("object_file.txt", encoding='utf-8-sig') as f:
-        lines = f.readlines()
-        for line in lines:
-            unit = str(line.split(',')[0])
-            if unit == "Enter output unit":
-                unit = "units"
-            break
-
     output_result['unit_value'] = unit
 
-    return {"output_prediction": output_prediction}
-
-
-@app.route('/outputval')
-def output_value():
-    
     return {
         "output_prediction": output_result['output_value'],
         "unit_prediction": output_result['unit_value']
     }
+
+@app.route('/model_file_name')
+def trained_model_name():
+
+    # Returning an api for showing in reactjs
+    return {"model_name":csv_file['custom_name']}
+
+@app.route('/saved_model')
+def transfer_trained_model():
+    #path for trained model
+    #print("csv_file['custom_name'] = ", csv_file['custom_name'])
+    saved_model = os.path.join(os.getcwd(), 'assests', "trained_models", csv_file['custom_name'])
+    
+    #returning trained model
+    return send_file(saved_model, as_attachment=True)
+
+
+@app.route('/pre_trained_model', methods=['POST'])
+def receiving_pre_trained_model():
+    pretrained_model["flag"] = 1
+    file1 = request.files.get("file")
+    file1.save(os.path.join(os.getcwd(), "assests", "user_trained_model.pkl"))
+
+    # load the model
+    model = joblib.load(file1)
+
+    input_dict = {}
+    input_data_list = []
+    for index, col_name in enumerate(model.input_info['names']):
+        temp_dict = {}
+        temp_dict['name'] = col_name
+        temp_dict['max'] = model.input_info['max'][index]
+        temp_dict['min'] = model.input_info['min'][index]
+        temp_dict['value'] = round(
+            (model.input_info['max'][index]+model.input_info['min'][index])/2, 2)
+        input_data_list.append(temp_dict)
+
+    pretrained_model["unit"] = model.input_info["unit"]
+
+    input_dict["data"] = input_data_list
+    #console.log("")
+
+    return input_dict
 
 
 # Running app
