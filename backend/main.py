@@ -21,6 +21,7 @@ CORS(app)
 # To store results
 columns_names = {}
 corr_data = {}
+input_parameters_dict = {"data":""}
 results_dict = {}
 output_result = {}
 graph_data_dict = {}
@@ -60,19 +61,21 @@ def getting_form():
     training_status['mstatus'] = 'in progress ..'
     payload = json.loads(request.data)
     #print("Payload = ")
-    # print(payload)
+    print(payload)
     nbr_of_bins['bin'] = payload['bin']
 
-    with open(input_parameters_path, 'w+') as f:
-        f.write(str(payload['lambdaval']))
-        f.write('\n')
-        f.write(str(payload['splines']))
-        f.write('\n')
-        f.write(str(payload['splitpercent']))
-        f.write('\n')
-        f.write(str(payload['bin']))
-        f.write('\n')
-        f.write(str(payload['shuffledata']))
+    input_parameters_dict["data"] = payload
+
+    #with open(input_parameters_path, 'w+') as f:
+    #    f.write(str(payload['lambdaval']))
+    #    f.write('\n')
+    #    f.write(str(payload['splines']))
+    #    f.write('\n')
+    #    f.write(str(payload['splitpercent']))
+    #    f.write('\n')
+    #    f.write(str(payload['bin']))
+    #    f.write('\n')
+    #    f.write(str(payload['shuffledata']))
 
     return 'ok'
 
@@ -197,7 +200,7 @@ def upload_file():
     data_df.to_csv(updated_file, sep=",", index=False)
 
     train_r_squared, test_r_squared, graph_data_list, smooth_funct_list, output_data_list, save_model_flag = model_training(
-        updated_file, csv_file['custom_name'])
+        updated_file, csv_file['custom_name'], input_parameters_dict["data"])
 
     # Updating data to fetch
     graph_data_dict["graph_data"] = graph_data_list
@@ -312,7 +315,7 @@ def get_prediction():
 
     else:
         # load the model
-        print("Input Dict before  =  ", input_dict)
+        print("Input Dict before  =  ")
         model = joblib.load(os.path.join(
             os.getcwd(), "assests", "user_trained_model.pkl"))
         output_prediction = round(model.predict([input_values])[0], 3)

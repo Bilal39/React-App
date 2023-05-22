@@ -3,6 +3,7 @@ import numpy as np
 import os
 import random
 import joblib
+import xgboost as xgb
 
 
 # def model_training(file_name, data_range):
@@ -15,7 +16,9 @@ def pso_execution(pso_data, model_file_name, trained_flag):
     else:
         model_saving_path = os.path.join(os.getcwd(), 'assests', "user_trained_model.pkl")
 
-    gam = joblib.load(model_saving_path)
+    model = joblib.load(model_saving_path)
+
+    print("model.input_info = ", model.input_info)
 
     # initializing list and dictionaries
     maxima = []
@@ -32,17 +35,30 @@ def pso_execution(pso_data, model_file_name, trained_flag):
     y = data_df.iloc[:, -1]   
 
     # Gam Function
-    def gam_function(variables):
+    def model_function(variables):
+        #print("variables = ", variables)
         x = [variables]
-        modelmat = gam._modelmat(x, term=-1)
-        coeff = gam.coef_[gam.terms.get_coef_indices(-1)]
-        return modelmat.dot(coeff).flatten()
+        try:
+            # GAM Model
+            modelmat = model._modelmat(x, term=-1)
+            coeff = model.coef_[model.terms.get_coef_indices(-1)]
+            output = modelmat.dot(coeff).flatten()
+        except:
+            try:
+                # Scikit learn models
+                output = model.predict(x)
+            except:
+                # For XGBoost model
+                dx = xgb.DMatrix(x)
+                output = model.predict(dx)
+
+        return output
 
     # ------------------------------------------------------------------------------
     # TO CUSTOMIZE THIS PSO CODE TO SOLVE UNCONSTRAINED OPTIMIZATION PROBLEMS, CHANGE THE PARAMETERS IN THIS SECTION ONLY:
     # THE FOLLOWING PARAMETERS MUST BE CHANGED.
 
-    nv = len(gam.input_info['max'])      # number of variables
+    nv = len(model.input_info['max'])      # number of variables
 
     # THE FOLLOWING PARAMETERS ARE OPTINAL.
     # particle_size = psoparticles         # number of particles
@@ -175,7 +191,7 @@ def pso_execution(pso_data, model_file_name, trained_flag):
             break
 
     col_str = "Input values follows following order:"
-    for element in gam.input_info['names']:
+    for element in model.input_info['names']:
         col_str += " '"
         col_str += element
         col_str += "', "
@@ -184,8 +200,8 @@ def pso_execution(pso_data, model_file_name, trained_flag):
 
     if pso_data['limit_flag'] is True:
         bounds = []
-        for index, column in enumerate(gam.input_info['names']):
-            for reference in range(len(gam.input_info['names'])):
+        for index, column in enumerate(model.input_info['names']):
+            for reference in range(len(model.input_info['names'])):
                 if column == pso_data['lower_bounds'][reference]['name']:
                     min_val = float(
                         pso_data['lower_bounds'][reference]['value'])
@@ -229,9 +245,9 @@ def pso_execution(pso_data, model_file_name, trained_flag):
             # print(iter)
             # Dynamic Bounds
             bounds = []
-            for index, element in enumerate(gam.input_info['max']):
-                min_val = gam.input_info['min'][index]
-                max_val = gam.input_info['max'][index]
+            for index, element in enumerate(model.input_info['max']):
+                min_val = model.input_info['min'][index]
+                max_val = model.input_info['max'][index]
 
                 min_rand_value = round(
                     float(np.random.uniform(min_val, max_val, 1)), 3)
@@ -259,14 +275,14 @@ def pso_execution(pso_data, model_file_name, trained_flag):
         if mm == 1:
             initial_fitness = -float("inf")  # for maximization problem
 
-        PSO(gam_function, bounds, pso_particles, pso_iterations)
+        PSO(model_function, bounds, pso_particles, pso_iterations)
         # if minimization problem, mm = -1; if maximization problem, mm = 1
         mm = -1
         if mm == -1:
             initial_fitness = float("inf")  # for minimization problem
         if mm == 1:
             initial_fitness = -float("inf")  # for maximization problem
-        PSO(gam_function, bounds, pso_particles, pso_iterations)
+        PSO(model_function, bounds, pso_particles, pso_iterations)
 
         #print("\nMAXIMA point values = ", maxima)
         #print("Maxima_output = ", maxima_output)
