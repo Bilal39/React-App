@@ -9,6 +9,7 @@ import math
 import joblib
 from sklearn.ensemble import RandomForestRegressor
 import xgboost as xgb
+from sklearn.svm import SVR
 
 
 #def model_training(file_name, data_range):
@@ -20,7 +21,7 @@ def model_training(file_name,original_file_name, input_parameters_dict):
     #    os.getcwd(), 'assests', "input_parameters.ini")
     model_saving_path = os.path.join(os.getcwd(), 'assests', "trained_models", original_file_name)
 
-    print("input_parameters_dict = ", input_parameters_dict)
+    #print("input_parameters_dict = ", input_parameters_dict)
     def select_points(lst, x):
         interval = len(lst) // x
         if interval == 0:
@@ -217,7 +218,16 @@ def model_training(file_name,original_file_name, input_parameters_dict):
 
         # Train the XGBoost model
         model = xgb.train(params, dtrain, n_estimators)
-        print("@@@@@@@@@@@@@@ XGB TRAINED @@@@@@@@@@@@@@@@@@@")
+        
+    elif input_parameters_dict['model'] == 3: # SVR Model Execution
+        cost_value = int(input_parameters_dict['cost'])
+        epsilon_value = float(input_parameters_dict['epsilon'])
+        
+        # Train the SVR model
+        model = SVR(C=cost_value, epsilon=epsilon_value)
+        model.fit(x_train, y_train)
+        print("@@@@@@@@@@@@@@ SVR TRAINED @@@@@@@@@@@@@@@@@@@")
+
         
 
     
