@@ -1,7 +1,6 @@
 import React from 'react'
 import qeeriLogo from '../assests/images/qeeri-logo.png'
-import qnrfLogo from '../assests/images/qnrf-logo.png'
-import qeeri2Logo from '../assests/images/qeeri_logo.png'
+import amtLogo from '../assests/images/amt-logo.png'
 import { Link } from 'react-router-dom'
 
 
@@ -9,9 +8,9 @@ export default function header(props) {
   return (
     <>
       <header>
+      <img src={amtLogo} className='amtlogo' alt="amt_logo" />
         <img src={qeeriLogo} className='qeerilogo' alt="qeeri_logo" />
-        <img src={qnrfLogo} className='qnrflogo' alt="qnrfLogo" />
-        <h2>{props.header}</h2>
+        
       </header>
 
       <nav className="navbar navbar-expand-lg bg-light">
