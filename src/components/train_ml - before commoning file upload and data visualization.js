@@ -2,7 +2,7 @@ import infoicon from '../assests/images/info_icon.png'
 import qeeriLogo from '../assests/images/qeeri-logo.png'
 import func_legend from '../assests/images/functions_legends.png'
 import res_legend from '../assests/images/result_legend.png'
-import qnrfLogo from '../assests/images/qnrf.png'
+import amtLogo from '../assests/images/amt-logo.png'
 import Plot from 'react-plotly.js';
 import Button from 'react-bootstrap/Button';
 import React, { useState, Fragment, useEffect } from "react";
@@ -81,6 +81,7 @@ export const Test = () => {
   const [checkedState, setCheckedState] = useState([]);
   const [corrNames, setcorrNames] = useState([]);
   const [correlation_matrix, setcorrelation_matrix] = useState([]);
+  const [inputCols, setinputCols] = useState([]);
   const [counter, setcounter] = useState(5);
   const [counter2, setcounter2] = useState(10);
   const [counter3, setcounter3] = useState(0);
@@ -120,11 +121,17 @@ export const Test = () => {
     const updatedCheckedState = checkedState.map((item, index) =>
       index === position ? !item : item
     );
-
     setCheckedState(updatedCheckedState);
   };
 
   const handleOnClick = () => {
+    setinputCols([])
+    checkedState.slice(0, checkedState.length - 1).forEach(mylocalfunc)
+    function mylocalfunc(item, index, arr) {
+      if (item === true) {
+        setinputCols((prevList) => [...prevList, formFields[index]]);
+      }
+    }
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/upload`, {
       method: 'POST',
@@ -566,19 +573,19 @@ export const Test = () => {
     );
   }
 
-  const getStateAsTable = () => {
+  const getStateAsTable = (stateName) => {
     const data = [];
-    const stateKeys = Object.keys(state2);
+    const stateKeys = Object.keys(stateName);
     stateKeys.forEach(key => {
-      data.push({ name: key, value: state2[key] });
+      data.push({ name: key, value: stateName[key] });
     });
     return data;
   };
 
   let task_flag = 0
-  const saveAsPDF = () => {
+  const saveAsPDF = (stateName) => {
     // Generate data array from state
-    const data = getStateAsTable();
+    const data = getStateAsTable(stateName);
 
     // Create new PDF document
     const doc = new jsPDF()
@@ -586,11 +593,30 @@ export const Test = () => {
     doc.setFontSize(22); doc.setFont('helvetica', 'bold'); doc.setTextColor(70, 180, 250);
 
     //Adding Logos
-    const img = new Image(); img.src = qeeriLogo;
+    const img = new Image(); img.src = amtLogo;
     img.onload = function () {
       // Add image to PDF document
+      console.log("img = ", img)
       doc.addImage(this, 'PNG', 0, 0, 50, 30); // adjust x, y, width, and height as needed
     }
+    // Adding Logos
+    //const img = new Image();
+    //img.src = qeeriLogo;
+//
+    //// Create a promise to wait for the image to load
+    //const imgLoadPromise = new Promise((resolve, reject) => {
+    //  img.onload = resolve;
+    //  img.onerror = reject;
+    //});
+//
+    //// Wait for the image to load
+    //imgLoadPromise.then(() => {
+    //  // Add image to PDF document
+    //  console.log("img =", img);
+    //  doc.addImage(img, 'PNG', 0, 0, 50, 30); // adjust x, y, width, and height as needed
+    //})
+    //console.log("imgLoadPromise = ", imgLoadPromise)
+
 
     // Add text at top center of the document
     let topMargin = 30; let xaxismargin = 15; const text = 'Model Report';
@@ -616,7 +642,7 @@ export const Test = () => {
     });
 
     doc.setFontSize(8); doc.setTextColor(250, 50, 50); doc.setFont('helvetica', 'bold');
-    topMargin += 60
+    topMargin += 72
     doc.text(`User uploaded file : ${fileName} `, xaxismargin, topMargin);
     topMargin += 10; doc.setFontSize(12); doc.setTextColor(0, 0, 0);
     //doc.setFont('helvetica', 'bold');
@@ -626,8 +652,9 @@ export const Test = () => {
     // Adding selected input names
     doc.setFont('helvetica', 'normal');
     let feature_names = []
-    formFields4.forEach((field) => {
-      feature_names.push(field.feature_name)
+    console.log("formFields4 = ", formFields4)
+    inputCols.forEach((field) => {
+      feature_names.push(field)
     })
     doc.setFontSize(8);
     for (let i = 0; i < feature_names.length; i++) {
@@ -652,7 +679,7 @@ export const Test = () => {
 
         const divElement = document.getElementById(`traintestPlot-${index}`);
         const canvasElement = document.createElement('canvas');
-        canvasElement.width = divElement.offsetWidth; canvasElement.height = divElement.offsetHeight;
+        canvasElement.width = 720; canvasElement.height = 486;
         const ctx = canvasElement.getContext('2d'); const parser = new DOMParser();
         const svgElement = parser.parseFromString(divElement.innerHTML, 'image/svg+xml').querySelector('svg');
         const svgString = new XMLSerializer().serializeToString(svgElement);
@@ -722,7 +749,7 @@ export const Test = () => {
                   resolve();
 
                   // Add labels, text, and titles
-                  doc.setFontSize(8); doc.setFont('helvetica', 'bold'); 
+                  doc.setFontSize(8); doc.setFont('helvetica', 'bold');
                   doc.text(`Smooth function for ${form.feature_name}`, formfield_plots_x_axis + 45, topMargin + 5, { align: 'center' });
                   doc.setFont('helvetica', 'normal');
                   doc.text(form.feature_name, formfield_plots_x_axis + 45, topMargin + 60, { align: 'center' });
@@ -1015,7 +1042,7 @@ export const Test = () => {
                           htmlFor='lamda-value'
                           type="range"
                           min="3"
-                          max="8"
+                          max="20"
                           value={state.lambdaval}
                           onChange={(e) => setState({ ...state, 'lambdaval': e.target.value })}
                         />
@@ -1119,7 +1146,7 @@ export const Test = () => {
                   <br />
                   <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
                   <br /><br />
-                  <Button onClick={saveAsPDF} disabled={shouldDisableButton()} >Download Report</Button>
+                  <Button onClick={() => saveAsPDF(state)} disabled={shouldDisableButton()} >Download Report</Button>
                   <h1 className="page-header">Smooth Functions</h1>
                   <br /><br /><br />
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center' }}>
@@ -1270,7 +1297,7 @@ export const Test = () => {
                   <br />
                   <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
                   <br /><br />
-                  <Button onClick={saveAsPDF} disabled={shouldDisableButton()} >Download Report</Button>
+                  <Button onClick={() => saveAsPDF(state2)} disabled={shouldDisableButton()} >Download Report</Button>
 
                 </div>
                 <br /><br /><br /><br />
@@ -1318,7 +1345,7 @@ A lower learning rate improves generalization by slowing down model convergence,
                         />
                         {state3.n_estimators}
                         {<img className="infoicon" src={infoicon} title="The number of decision trees in the random forest. 
-                        Increase it until the model's performance plateaus on the validation set, 
+                        Increase it until the model's performance plateaus on the testing set, 
                         considering the risk of overfitting with an excessively high number of trees." />}
                       </div>
 
@@ -1434,7 +1461,7 @@ A lower learning rate improves generalization by slowing down model convergence,
                   <br />
                   <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
                   <br /><br />
-                  <Button onClick={saveAsPDF} disabled={shouldDisableButton()} >Download Report</Button>
+                  <Button onClick={() => saveAsPDF(state3)} disabled={shouldDisableButton()} >Download Report</Button>
 
                 </div>
                 <br /><br /><br /><br />
@@ -1581,7 +1608,7 @@ A lower learning rate improves generalization by slowing down model convergence,
                   <br />
                   <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
                   <br /><br />
-                  <Button onClick={saveAsPDF} disabled={shouldDisableButton()} >Download Report</Button>
+                  <Button onClick={() => saveAsPDF(state4)} disabled={shouldDisableButton()} >Download Report</Button>
 
                 </div>
                 <br /><br /><br /><br />
@@ -1720,7 +1747,7 @@ A lower learning rate improves generalization by slowing down model convergence,
                   <br />
                   <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
                   <br /><br />
-                  <Button onClick={saveAsPDF} disabled={shouldDisableButton()} >Download Report</Button>
+                  <Button onClick={() => saveAsPDF(state5)} disabled={shouldDisableButton()} >Download Report</Button>
 
                 </div>
                 <br /><br /><br /><br />

@@ -122,10 +122,23 @@ body {
   margin-right: 20px;
 }
 
+.training_content {
+  padding: 2% 0 0 20%;
+  align-items: center;
+  justify-content: center;
+}
 
 .about-headings {
   color: lightskyblue;
   margin-left: 3%;
+  margin-top: 1%;
+  text-shadow: 2px 2px 3px #ebebf9;
+  font-weight: bold;
+}
+
+.about-headings-train {
+  color: lightskyblue;
+  margin-left: 2%;
   margin-top: 1%;
   text-shadow: 2px 2px 3px #ebebf9;
   font-weight: bold;
@@ -169,10 +182,11 @@ body {
   margin-left: 40px;
 }
 
+
 .left {
   width: 20%;
   padding: 2% 0 0 2%;
-  float: left;
+  float:left;
   color: #ff0000;
   line-height: 12pt;
 }
@@ -191,9 +205,8 @@ body {
 }
 
 .corrbtn {
-  padding: 1% 0 0 350px;
-  align-items: center;
-  justify-content: center;
+  padding: 1% 0 0 40px;
+
 }
 
 .boundriesbtn{
@@ -213,6 +226,7 @@ body {
 
 .training_status {
   margin-top: 2%;
+  padding: 0 0 0 40px;
   font-weight: bold;
   font-style: italic;
   font-size: large;

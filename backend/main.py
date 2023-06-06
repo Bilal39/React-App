@@ -82,6 +82,7 @@ def getting_form():
 
 @app.route('/file_transfer',  methods=["POST"])
 def getting_file_from_frontend():
+    print("Yes file transfer triggered !!!!")
 
     file1 = request.files.get("file")
     file_path = "object_file.txt"
@@ -112,7 +113,8 @@ def getting_file_from_frontend():
     hist_dict = {}
     output_data_list = []
     hist_dict['data'] = y.tolist()
-    hist_dict['bin_size'] = int(nbr_of_bins['bin'])
+    #hist_dict['bin_size'] = int(nbr_of_bins['bin'])
+    hist_dict['bin_size'] = int(15)
     output_data_list.append(hist_dict)
     #print("output_data_list = ", output_data_list)
     histogram_data['data'] = output_data_list

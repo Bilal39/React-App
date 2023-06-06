@@ -87,13 +87,14 @@ export const Test = () => {
   const [counter3, setcounter3] = useState(0);
   const [counter4, setcounter4] = useState(0);
   const [counter7, setcounter7] = useState(5);
+  const [counter8, setcounter8] = useState(10);
   const [corrFlag, setcorrFlag] = useState(0);
   const [modelFlag, setmodelFlag] = useState(1); // if 1, it is GAM model otherwise no GAM.
 
 
   const handleUpload = (event) => {
-    setcorrFlag(0)
-    setcounter4(0)
+    setcorrFlag(1)
+    setcounter4(counter4 + 1)
     setcounter3(0)
     setCheckedState([]);
     setFormFields([]);
@@ -107,6 +108,58 @@ export const Test = () => {
     console.log("event.target.files[0] = ", event.target.files[0].name)
     setfileName(event.target.files[0].name)
     setFile(data)
+    setcounter8(0)
+
+  }
+
+  if (counter8 == 0) {
+    setcounter8(counter8 + 1)
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/file_transfer`, {
+      method: 'POST',
+      body: file,
+    })
+      .then((response) => {
+        response.json()
+          .then((body) => {
+          });
+      });
+
+    setcounter(0)
+    setcounter2(0)
+
+    let count1 = 0;
+    let intervalId = setInterval(() => {
+      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
+        res.json().then((graph_data) => {
+          for (var key in graph_data) {
+            var arr = graph_data[key];
+            setFormFields2(
+              Array.from(arr)
+            );
+          }
+        })
+      );
+      count1 += 1;
+      if (count1 === 2) {
+        clearInterval(intervalId);
+      }
+    }, 250);
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/col_names`).then((res) =>
+      res.json().then((data) => {
+
+        setCheckedState(new Array(data['data'].length).fill(true))
+        for (var key in data) {
+          var arr = data[key];
+          setFormFields(
+            Array.from(arr)
+          );
+          setcorrNames(
+            Array.from(arr)
+          );
+        }
+      })
+    );
+
   }
 
   const handleReset = (event) => {
@@ -165,21 +218,20 @@ export const Test = () => {
     //console.log('getStatus Counting: ', timerId);
   }
 
-  // For GAM Model
-  const handleUploadImage = (event) => {
+  // General
+  const handleUploadImageGen = (e, param_state, flag_value) => {
     //console.log('Upload Handler')
-    setmodelFlag(1)
+    e.preventDefault(); // Prevent default form submission behavior
+    setmodelFlag(flag_value)
     setcounter4(counter4 + 1)
     setformFields3([]);
     setformFields4([]);
-    setcorrFlag(1)
-    event.preventDefault();
-    setCheckedState([])
+    //setCheckedState([])
     setStatus('----')
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/parameter`, {
       method: 'POST',
-      body: JSON.stringify(state),
+      body: JSON.stringify(param_state),
     })
       .then((response) => {
         response.json()
@@ -187,54 +239,17 @@ export const Test = () => {
           });
       });
 
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/file_transfer`, {
-      method: 'POST',
-      body: file,
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
-
-    setcounter(0)
-    setcounter2(0)
-
-    let count1 = 0;
-    let intervalId = setInterval(() => {
-      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
-        res.json().then((graph_data) => {
-          for (var key in graph_data) {
-            var arr = graph_data[key];
-            //console.log("Histogram Data arr = ", arr);
-            setFormFields2(
-              Array.from(arr)
-            );
-          }
-        })
-      );
-      count1 += 1;
-      if (count1 === 2) {
-        clearInterval(intervalId);
+    setinputCols([])
+    checkedState.slice(0, checkedState.length - 1).forEach(mylocalfunc)
+    function mylocalfunc(item, index, arr) {
+      if (item === true) {
+        setinputCols((prevList) => [...prevList, formFields[index]]);
       }
-    }, 250);
-  }
+    }
 
-  // For RFR Model
-  const handleUploadImage2 = (event) => {
-    //console.log('Upload Handler')
-    setmodelFlag(0)
-    setcounter4(counter4 + 1)
-    setformFields3([]);
-    setformFields4([]);
-    setcorrFlag(1)
-    event.preventDefault();
-    setCheckedState([])
-    setStatus('----')
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/parameter`, {
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/upload`, {
       method: 'POST',
-      body: JSON.stringify(state2),
+      body: JSON.stringify(checkedState),
     })
       .then((response) => {
         response.json()
@@ -242,223 +257,26 @@ export const Test = () => {
           });
       });
 
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/file_transfer`, {
-      method: 'POST',
-      body: file,
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
+    //setcounter3(counter3 + 1)
 
-    setcounter(0)
-    setcounter2(0)
-
-    let count1 = 0;
-    let intervalId = setInterval(() => {
-      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
-        res.json().then((graph_data) => {
-          for (var key in graph_data) {
-            var arr = graph_data[key];
-            //console.log("Histogram Data arr = ", arr);
-            setFormFields2(
-              Array.from(arr)
-            );
-          }
+    const timerId = setInterval(() => {
+      //console.log('setInterval', count);
+      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/training_status`)
+        .then((res) => {
+          res.json()
+            .then((statusData) => {
+              setStatus(statusData.mstatus);
+              //console.log("bringing data from backend = ", statusData)
+              if (statusData.mstatus === "Done!") {
+                setStatus(statusData.mstatus);
+                clearInterval(timerId)
+                setcounter7(0)
+                setcounter3(counter3 + 1)
+              }
+            })
         })
-      );
-      count1 += 1;
-      if (count1 === 2) {
-        clearInterval(intervalId);
-      }
-    }, 250);
+    }, 1200);
   }
-
-  // For XGBoost Model
-  const handleUploadImage3 = (event) => {
-    //console.log('Upload Handler')
-    setmodelFlag(0)
-    setcounter4(counter4 + 1)
-    setformFields3([]);
-    setformFields4([]);
-    setcorrFlag(1)
-    event.preventDefault();
-    setCheckedState([])
-    setStatus('----')
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/parameter`, {
-      method: 'POST',
-      body: JSON.stringify(state3),
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/file_transfer`, {
-      method: 'POST',
-      body: file,
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
-
-    setcounter(0)
-    setcounter2(0)
-
-    let count1 = 0;
-    let intervalId = setInterval(() => {
-      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
-        res.json().then((graph_data) => {
-          for (var key in graph_data) {
-            var arr = graph_data[key];
-            //console.log("Histogram Data arr = ", arr);
-            setFormFields2(
-              Array.from(arr)
-            );
-          }
-        })
-      );
-      count1 += 1;
-      if (count1 === 2) {
-        clearInterval(intervalId);
-      }
-    }, 250);
-  }
-
-  // For SVR Model
-  const handleUploadImage4 = (event) => {
-    //console.log('Upload Handler')
-    setmodelFlag(0)
-    setcounter4(counter4 + 1)
-    setformFields3([]);
-    setformFields4([]);
-    setcorrFlag(1)
-    event.preventDefault();
-    setCheckedState([])
-    setStatus('----')
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/parameter`, {
-      method: 'POST',
-      body: JSON.stringify(state4),
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/file_transfer`, {
-      method: 'POST',
-      body: file,
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
-
-    setcounter(0)
-    setcounter2(0)
-
-    let count1 = 0;
-    let intervalId = setInterval(() => {
-      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
-        res.json().then((graph_data) => {
-          for (var key in graph_data) {
-            var arr = graph_data[key];
-            //console.log("Histogram Data arr = ", arr);
-            setFormFields2(
-              Array.from(arr)
-            );
-          }
-        })
-      );
-      count1 += 1;
-      if (count1 === 2) {
-        clearInterval(intervalId);
-      }
-    }, 250);
-  }
-
-  // For Linear regression Model
-  const handleUploadImage5 = (event) => {
-    //console.log('Upload Handler')
-    setmodelFlag(0)
-    setcounter4(counter4 + 1)
-    setformFields3([]);
-    setformFields4([]);
-    setcorrFlag(1)
-    event.preventDefault();
-    setCheckedState([])
-    setStatus('----')
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/parameter`, {
-      method: 'POST',
-      body: JSON.stringify(state5),
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/file_transfer`, {
-      method: 'POST',
-      body: file,
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
-
-    setcounter(0)
-    setcounter2(0)
-
-    let count1 = 0;
-    let intervalId = setInterval(() => {
-      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
-        res.json().then((graph_data) => {
-          for (var key in graph_data) {
-            var arr = graph_data[key];
-            //console.log("Histogram Data arr = ", arr);
-            setFormFields2(
-              Array.from(arr)
-            );
-          }
-        })
-      );
-      count1 += 1;
-      if (count1 === 2) {
-        clearInterval(intervalId);
-      }
-    }, 250);
-  }
-  if (counter2 < 1) {
-    setcounter2(counter2 + 1)
-    //console.log("Inside useeffect!!!!!")
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/col_names`).then((res) =>
-      res.json().then((data) => {
-
-        setCheckedState(new Array(data['data'].length).fill(true))
-        for (var key in data) {
-          var arr = data[key];
-          setFormFields(
-            Array.from(arr)
-          );
-          setcorrNames(
-            Array.from(arr)
-          );
-        }
-      })
-    );
-  };
 
   useEffect(() => {
     if (counter < 2) {
@@ -472,7 +290,7 @@ export const Test = () => {
         }
       }
       if (corrFlag === 1) {
-        console.log("CorrFlag ===1 ")
+        //console.log("CorrFlag ===1 ")
         setcorrNames([temp_list]);
         //console.log("Corr Names = ", corrNames)
 
@@ -529,28 +347,7 @@ export const Test = () => {
       })
     );
   }
-  //{
-  //  name: "Data Points",
-  //  x: form.data_points_xaxis,
-  //  y: form.selected_smooth_points,
-  //  type: 'scatter',
-  //  mode: 'markers',
-  //  marker: { color: 'red' },
-  ////},
-  //function downloadPkl() {
-  //  fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/saved_model`).then((res) =>
-  //    res.blob().then((blob) => {
-  //      const filename = res.headers.get('Content-Disposition').split('filename=')[1];
-  //      const url = window.URL.createObjectURL(blob);
-  //      const link = document.createElement('a');
-  //      link.href = url;
-  //      link.download = filename;
-  //      document.body.appendChild(link);
-  //      link.click();
-  //      document.body.removeChild(link);
-  //    })
-  //  );
-  //}
+
   function downloadPkl() {
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/model_file_name`).then((res) =>
       res.json().then((model_name) => {
@@ -599,23 +396,6 @@ export const Test = () => {
       console.log("img = ", img)
       doc.addImage(this, 'PNG', 0, 0, 50, 30); // adjust x, y, width, and height as needed
     }
-    // Adding Logos
-    //const img = new Image();
-    //img.src = qeeriLogo;
-//
-    //// Create a promise to wait for the image to load
-    //const imgLoadPromise = new Promise((resolve, reject) => {
-    //  img.onload = resolve;
-    //  img.onerror = reject;
-    //});
-//
-    //// Wait for the image to load
-    //imgLoadPromise.then(() => {
-    //  // Add image to PDF document
-    //  console.log("img =", img);
-    //  doc.addImage(img, 'PNG', 0, 0, 50, 30); // adjust x, y, width, and height as needed
-    //})
-    //console.log("imgLoadPromise = ", imgLoadPromise)
 
 
     // Add text at top center of the document
@@ -723,7 +503,7 @@ export const Test = () => {
       // Map formFields4 to imagePromises2
       const imagePromises2 = formFields4.map((form, index) => {
         return new Promise((resolve, reject) => {
-          console.log("Value for modelFlag = ", modelFlag)
+          //console.log("Value for modelFlag = ", modelFlag)
           if (modelFlag == 1) {
             const img3 = new Image();
             img3.src = func_legend;
@@ -988,775 +768,558 @@ export const Test = () => {
 
         </div>
         <br />
-        <h5 className="about-headings">Select Machine Learning Model</h5>
+        <div className="training_content">
+          <h5 className="about-headings-train">Upload a data file</h5>
 
-        <Tab.Container id="my-tabs" defaultActiveKey="/home">
-          <Nav variant="pills">
-            <Nav.Item>
-              <Nav.Link eventKey="link-1">GAM</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="link-2">Random Forest</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="link-3">XGBoost</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="link-4">SVR</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="link-5">Linear Regression</Nav.Link>
-            </Nav.Item>
-          </Nav>
+          <div className="file_upload">
+            <input type='file' name='file' accept='.csv' onChange={handleUpload} required />
+            <a href={require("../assests/template.csv")} download="template.csv">Download Sample Template</a>
+          </div>
+          <br />
 
-          <Tab.Content>
-            <Tab.Pane eventKey="link-1">
-              <Container>
-                <form className="uploader" id='formEle' onSubmit={handleUploadImage}>
-                  <div className="training_content">
-                    <div className="file_upload">
-                      <input type='file' name='file' accept='.csv' onChange={handleUpload} required />
-                      <a href={require("../assests/template.csv")} download="template.csv">Download Sample Template</a>
+          {formFields.length > 1 && (
+            <div >
+              <div className='features_checkbox'>
+                <p ><em style={{ color: 'red' }}>Please select input features to train a model:</em></p>
+                {formFields.slice(0, -1).map((form, index) => {
+
+                  return (
+                    <div key={index}>
+                      <input
+                        type="checkbox"
+                        id={`custom-checkbox-${index}`}
+                        name={form}
+                        checked={checkedState[index]}
+                        onChange={() => handleOnChange(index)}
+                      />
+                      <span> - </span>
+                      {form}
                     </div>
-                    <br />
-                    <h2 className="ml-header">Parameters for ML model</h2>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+          <br />
+          <div className='corrbtn'>
+            {renderHistogram()}
+            {<img className="infoicon" width="25" height="18" src={infoicon} title="Plot histogram for the output." />}
+          </div>
 
-                    <div className="range_sliders">
-                      <div>
-                        <label id='spline-value'>Number of Splines </label>
-                        <input
-                          htmlFor='spline-value'
-                          type="range"
-                          min="4"
-                          max="90"
-                          value={state.splines}
-                          onChange={(e) => setState({ ...state, 'splines': e.target.value })}
-                        />
-                        {state.splines}
-                        {<img className="infoicon" src={infoicon} title="Greater number of splines will have more bendings/curves(complexity) in the smooth functions and vice versa." />}
-                      </div>
+          <div className='corrbtn'>
+            {renderCorrHeatmap()}
+            {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
+            <br />
+          </div>
+          <br />
+          <h5 className="about-headings-train">Select Machine Learning Model</h5>
+        </div>
 
-                      <div>
-                        <lable id='lamda-value'>Lambda Value  </lable>
-                        <input
-                          htmlFor='lamda-value'
-                          type="range"
-                          min="3"
-                          max="20"
-                          value={state.lambdaval}
-                          onChange={(e) => setState({ ...state, 'lambdaval': e.target.value })}
-                        />
-                        {state.lambdaval}
-                        {<img className="infoicon" src={infoicon} title="Balance the lambda value. The greater the value, the better will be the training but may lead to overfitting." />}
-                      </div>
+        {fileName ? (
 
-                      <div>
-                        <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
-                        <input
-                          htmlFor='split-value'
-                          type="range"
-                          min="50"
-                          max="100"
-                          value={state.splitpercent}
-                          onChange={(e) => setState({ ...state, 'splitpercent': e.target.value })}
-                        />
-                        {state.splitpercent}
-                        {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
-                      </div>
+          <Tab.Container id="my-tabs" defaultActiveKey="/home">
+            <div className="training_content">
+              <Nav variant="pills">
+                <Nav.Item>
+                  <Nav.Link eventKey="link-1">GAM</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="link-2">Random Forest</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="link-3">XGBoost</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="link-4">SVR</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="link-5">Linear Regression</Nav.Link>
+                </Nav.Item>
+              </Nav>
+            </div>
 
-                      <div>
-                        <lable id='bin-value'>Bins size for histogram </lable>
-                        <input
-                          htmlFor='bin-value'
-                          type="range"
-                          min="2"
-                          max="50"
-                          value={state.bin}
-                          onChange={(e) => setState({ ...state, 'bin': e.target.value })}
-                        />
-                        {state.bin}
-                        {<img className="infoicon" src={infoicon} title="The towers or bars of a histogram are called bins. The greater the size of the bin, the more data division will be." />}
-                      </div>
 
-                      <div>
-                        <lable className="shufflecheckbox" >Shuffle Data </lable>
-                        <input
-                          type="checkbox"
-                          name="isChecked"
-                          onChange={(e) => setState({ ...state, 'shuffledata': e.target.checked })}
-                        />
-                        {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
-                      </div>
-                    </div>
+            <Tab.Content>
+              <Tab.Pane eventKey="link-1">
+                <Container>
+                  <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state, 1)}>
+                    <div className="corrbtn">
+                      <br />
+                      <h2 className="ml-header">Parameters for ML model</h2>
 
-                    <br />
-                    <div className="upload button">
-                      <Button variant="primary" size="md" type='submit'>Upload</Button>
-                      <button type='button' onClick={handleReset}>Reset values</button>
-                      <div >
-                        <div className='features_checkbox'>
-                          <br />
-                          {formFields.slice(0, -1).map((form, index) => {
-
-                            return (
-                              <div key={index}>
-                                <input
-                                  type="checkbox"
-                                  id={`custom-checkbox-${index}`}
-                                  name={form}
-                                  checked={checkedState[index]}
-                                  onChange={() => handleOnChange(index)}
-                                />
-                                <span> - </span>
-                                {form}
-                              </div>
-                            )
-                          })}
+                      <div className="range_sliders">
+                        <div>
+                          <label id='spline-value'>Number of Splines </label>
+                          <input
+                            htmlFor='spline-value'
+                            type="range"
+                            min="4"
+                            max="90"
+                            value={state.splines}
+                            onChange={(e) => setState({ ...state, 'splines': e.target.value })}
+                          />
+                          {state.splines}
+                          {<img className="infoicon" src={infoicon} title="Greater number of splines will have more bendings/curves(complexity) in the smooth functions and vice versa." />}
                         </div>
-                        <br /><br />
+
+                        <div>
+                          <lable id='lamda-value'>Lambda Value  </lable>
+                          <input
+                            htmlFor='lamda-value'
+                            type="range"
+                            min="3"
+                            max="20"
+                            value={state.lambdaval}
+                            onChange={(e) => setState({ ...state, 'lambdaval': e.target.value })}
+                          />
+                          {state.lambdaval}
+                          {<img className="infoicon" src={infoicon} title="Balance the lambda value. The greater the value, the better will be the training but may lead to overfitting." />}
+                        </div>
+
+                        <div>
+                          <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
+                          <input
+                            htmlFor='split-value'
+                            type="range"
+                            min="50"
+                            max="100"
+                            value={state.splitpercent}
+                            onChange={(e) => setState({ ...state, 'splitpercent': e.target.value })}
+                          />
+                          {state.splitpercent}
+                          {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
+                        </div>
+
+                        <div>
+                          <lable className="shufflecheckbox" >Shuffle Data </lable>
+                          <input
+                            type="checkbox"
+                            name="isChecked"
+                            onChange={(e) => setState({ ...state, 'shuffledata': e.target.checked })}
+                          />
+                          {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
+                        </div>
+                      </div>
+
+                      <br />
+                      <div className="upload button">
+                        <Button variant="primary" size="md" type='submit'>Train Model</Button>
+                        <button type='button' onClick={handleReset}>Reset values</button>
+                      </div>
+                      <div className="training_status">
+                        <p>Training Status : {status}</p>
                       </div>
                     </div>
-                  </div>
-                </form>
-                <div className='corrbtn'>
-                  {renderHistogram()}
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="Plot histogram for the output." />}
-                </div>
+                  </form>
 
-
-                <div className='corrbtn'>
-                  {renderCorrHeatmap()}
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
                   <br />
-                </div>
-
-                <div className='corrbtn'>
-                  <br />
-                  <Button variant="primary" size="md" type='button' onClick={handleOnClick} disabled={DisableTrainButton()}>Train Model</Button>
-                  <div className="training_status">
-                    <p>Training Status : {status}</p>
+                  <h1 className="page-header">Training Result</h1>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+                    {renderTrainingPlot()}
                   </div>
-                </div>
-                <br />
-                <h1 className="page-header">Training Result</h1>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                  {renderTrainingPlot()}
-                </div>
-                <div className="disp_results">
-                  <br />
-                  <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
-                  <br /><br />
-                  <Button onClick={() => saveAsPDF(state)} disabled={shouldDisableButton()} >Download Report</Button>
-                  <h1 className="page-header">Smooth Functions</h1>
-                  <br /><br /><br />
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center' }}>
-                    {renderSmoothFunc()}
-                  </div>
-
-                </div>
-
-              </Container>
-            </Tab.Pane>
-            <Tab.Pane eventKey="link-2">
-              <Container>
-                <form className="uploader" id='formEle' onSubmit={handleUploadImage2}>
-                  <div className="training_content">
-                    <div className="file_upload">
-                      <input type='file' name='file' accept='.csv' onChange={handleUpload} required />
-                      <a href={require("../assests/template.csv")} download="template.csv">Download Sample Template</a>
-                    </div>
+                  <div className="disp_results">
                     <br />
-                    <h2 className="ml-header">Parameters for ML model</h2>
+                    <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
+                    <br /><br />
+                    <Button onClick={() => saveAsPDF(state)} disabled={shouldDisableButton()} >Download Report</Button>
+                    <h1 className="page-header">Smooth Functions</h1>
+                    <br /><br /><br />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center' }}>
+                      {renderSmoothFunc()}
+                    </div>
 
-                    <div className="range_sliders">
-                      <div>
-                        <label id='estimator-value'>Number of Estimators (trees) </label>
-                        <input
-                          htmlFor='estimator-value'
-                          type="range"
-                          min="10"
-                          max="500"
-                          step={15}
-                          value={state2.n_estimators}
-                          onChange={(e) => setState2({ ...state2, 'n_estimators': e.target.value })}
-                        />
-                        {state2.n_estimators}
-                        {<img className="infoicon" src={infoicon} title="The number of decision trees in the random forest. 
+                  </div>
+
+                </Container>
+              </Tab.Pane>
+              <Tab.Pane eventKey="link-2">
+                <Container>
+                  <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state2, 0)}>
+                    <div className="corrbtn">
+                      <br />
+                      <h2 className="ml-header">Parameters for ML model</h2>
+
+                      <div className="range_sliders">
+                        <div>
+                          <label id='estimator-value'>Number of Estimators (trees) </label>
+                          <input
+                            htmlFor='estimator-value'
+                            type="range"
+                            min="10"
+                            max="500"
+                            step={15}
+                            value={state2.n_estimators}
+                            onChange={(e) => setState2({ ...state2, 'n_estimators': e.target.value })}
+                          />
+                          {state2.n_estimators}
+                          {<img className="infoicon" src={infoicon} title="The number of decision trees in the random forest. 
                         A higher number of trees (e.g., 100-500) tends to improve the model's performance,
                         find a balance considering computational resources and model accuracy." />}
-                      </div>
+                        </div>
 
-                      <div>
-                        <lable id='max_depth-value'>Max Depth</lable>
-                        <input
-                          htmlFor='max_depth-value'
-                          type="range"
-                          min="0"
-                          max="32"
-                          value={state2.max_depth}
-                          onChange={(e) => setState2({ ...state2, 'max_depth': e.target.value })}
-                        />
-                        {state2.max_depth}
-                        {<img className="infoicon" src={infoicon} title="The maximum depth of the tree. 
+                        <div>
+                          <lable id='max_depth-value'>Max Depth</lable>
+                          <input
+                            htmlFor='max_depth-value'
+                            type="range"
+                            min="0"
+                            max="32"
+                            value={state2.max_depth}
+                            onChange={(e) => setState2({ ...state2, 'max_depth': e.target.value })}
+                          />
+                          {state2.max_depth}
+                          {<img className="infoicon" src={infoicon} title="The maximum depth of the tree. 
                         If set to none allows the decision trees in a Random Forest Regressor to grow until a minimum number of samples per leaf is reached.
                         If set manually, start with a moderate value (e.g., 5-10) to prevent overfitting and balance complexity," />}
-                      </div>
-
-                      <div>
-                        <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
-                        <input
-                          htmlFor='split-value'
-                          type="range"
-                          min="50"
-                          max="100"
-                          value={state2.splitpercent}
-                          onChange={(e) => setState2({ ...state2, 'splitpercent': e.target.value })}
-                        />
-                        {state2.splitpercent}
-                        {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
-                      </div>
-
-                      <div>
-                        <lable id='bin-value'>Bins size for histogram </lable>
-                        <input
-                          htmlFor='bin-value'
-                          type="range"
-                          min="2"
-                          max="50"
-                          value={state2.bin}
-                          onChange={(e) => setState2({ ...state2, 'bin': e.target.value })}
-                        />
-                        {state2.bin}
-                        {<img className="infoicon" src={infoicon} title="The towers or bars of a histogram are called bins. The greater the size of the bin, the more data division will be." />}
-                      </div>
-
-                      <div>
-                        <lable className="shufflecheckbox" >Shuffle Data </lable>
-                        <input
-                          type="checkbox"
-                          name="isChecked"
-                          onChange={(e) => setState2({ ...state2, 'shuffledata': e.target.checked })}
-                        />
-                        {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
-                      </div>
-                    </div>
-
-                    <br />
-                    <div className="upload button">
-                      <Button variant="primary" size="md" type='submit'>Upload</Button>
-                      <button type='button' onClick={handleReset}>Reset values</button>
-                      <div >
-                        <div className='features_checkbox'>
-                          <br />
-                          {formFields.slice(0, -1).map((form, index) => {
-
-                            return (
-                              <div key={index}>
-                                <input
-                                  type="checkbox"
-                                  id={`custom-checkbox-${index}`}
-                                  name={form}
-                                  checked={checkedState[index]}
-                                  onChange={() => handleOnChange(index)}
-                                />
-                                <span> - </span>
-                                {form}
-                              </div>
-                            )
-                          })}
                         </div>
-                        <br /><br />
+
+                        <div>
+                          <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
+                          <input
+                            htmlFor='split-value'
+                            type="range"
+                            min="50"
+                            max="100"
+                            value={state2.splitpercent}
+                            onChange={(e) => setState2({ ...state2, 'splitpercent': e.target.value })}
+                          />
+                          {state2.splitpercent}
+                          {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
+                        </div>
+
+                        <div>
+                          <lable className="shufflecheckbox" >Shuffle Data </lable>
+                          <input
+                            type="checkbox"
+                            name="isChecked"
+                            onChange={(e) => setState2({ ...state2, 'shuffledata': e.target.checked })}
+                          />
+                          {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
+                        </div>
+                      </div>
+
+                      <br />
+                      <div className="upload button">
+                        <Button variant="primary" size="md" type='submit'>Train Model</Button>
+                        <button type='button' onClick={handleReset}>Reset values</button>
+                      </div>
+                      <div className="training_status">
+                        <p>Training Status : {status}</p>
                       </div>
                     </div>
+                  </form>
+
+                  <br />
+                  <h1 className="page-header">Training Result</h1>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+                    {renderTrainingPlot()}
                   </div>
-                </form>
-                <div className='corrbtn'>
-                  {renderHistogram()}
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="Plot histogram for the output." />}
-                </div>
-
-                <div className='corrbtn'>
-                  {renderCorrHeatmap()}
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
-                  <br />
-                </div>
-
-                <div className='corrbtn'>
-                  <br />
-                  <Button variant="primary" size="md" type='button' onClick={handleOnClick} disabled={DisableTrainButton()}>Train Model</Button>
-                  <div className="training_status">
-                    <p>Training Status : {status}</p>
-                  </div>
-                </div>
-                <br />
-                <h1 className="page-header">Training Result</h1>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                  {renderTrainingPlot()}
-                </div>
-                <div className="disp_results">
-                  <br />
-                  <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
-                  <br /><br />
-                  <Button onClick={() => saveAsPDF(state2)} disabled={shouldDisableButton()} >Download Report</Button>
-
-                </div>
-                <br /><br /><br /><br />
-
-
-              </Container>
-            </Tab.Pane>
-            <Tab.Pane eventKey="link-3">
-              <Container>
-                <form className="uploader" id='formEle' onSubmit={handleUploadImage3}>
-                  <div className="training_content">
-                    <div className="file_upload">
-                      <input type='file' name='file' accept='.csv' onChange={handleUpload} required />
-                      <a href={require("../assests/template.csv")} download="template.csv">Download Sample Template</a>
-                    </div>
+                  <div className="disp_results">
                     <br />
-                    <h2 className="ml-header">Parameters for ML model</h2>
+                    <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
+                    <br /><br />
+                    <Button onClick={() => saveAsPDF(state2)} disabled={shouldDisableButton()} >Download Report</Button>
 
-                    <div className="range_sliders">
-                      <div>
-                        <label id='learning-value'>Learning rate</label>
-                        <input
-                          htmlFor='learning-value'
-                          type="range"
-                          min="0.01"
-                          max="1.0"
-                          step={0.01}
-                          value={state3.learn_rate}
-                          onChange={(e) => setState3({ ...state3, 'learn_rate': e.target.value })}
-                        />
-                        {state3.learn_rate}
-                        {<img className="infoicon" src={infoicon} title="
+                  </div>
+                  <br /><br /><br /><br />
+
+
+                </Container>
+              </Tab.Pane>
+              <Tab.Pane eventKey="link-3">
+                <Container>
+                  <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state3, 0)}>
+                    <div className="corrbtn">
+                      <br />
+                      <h2 className="ml-header">Parameters for ML model</h2>
+
+                      <div className="range_sliders">
+                        <div>
+                          <label id='learning-value'>Learning rate</label>
+                          <input
+                            htmlFor='learning-value'
+                            type="range"
+                            min="0.01"
+                            max="1.0"
+                            step={0.01}
+                            value={state3.learn_rate}
+                            onChange={(e) => setState3({ ...state3, 'learn_rate': e.target.value })}
+                          />
+                          {state3.learn_rate}
+                          {<img className="infoicon" src={infoicon} title="
 A lower learning rate improves generalization by slowing down model convergence, while a higher learning rate accelerates convergence but increases the risk of overfitting." />}
-                      </div>
-                      <div>
-                        <label id='estimator-value'>Number of Estimators (trees) </label>
-                        <input
-                          htmlFor='estimator-value'
-                          type="range"
-                          min="10"
-                          max="500"
-                          step={15}
-                          value={state3.n_estimators}
-                          onChange={(e) => setState3({ ...state3, 'n_estimators': e.target.value })}
-                        />
-                        {state3.n_estimators}
-                        {<img className="infoicon" src={infoicon} title="The number of decision trees in the random forest. 
-                        Increase it until the model's performance plateaus on the validation set, 
+                        </div>
+                        <div>
+                          <label id='estimator-value'>Number of Estimators (trees) </label>
+                          <input
+                            htmlFor='estimator-value'
+                            type="range"
+                            min="10"
+                            max="500"
+                            step={15}
+                            value={state3.n_estimators}
+                            onChange={(e) => setState3({ ...state3, 'n_estimators': e.target.value })}
+                          />
+                          {state3.n_estimators}
+                          {<img className="infoicon" src={infoicon} title="The number of decision trees in the random forest. 
+                        Increase it until the model's performance plateaus on the testing set, 
                         considering the risk of overfitting with an excessively high number of trees." />}
-                      </div>
+                        </div>
 
-                      <div>
-                        <lable id='max_depth-value'>Max Depth  </lable>
-                        <input
-                          htmlFor='max_depth-value'
-                          type="range"
-                          min="0"
-                          max="32"
-                          value={state3.max_depth}
-                          onChange={(e) => setState3({ ...state3, 'max_depth': e.target.value })}
-                        />
-                        {state3.max_depth}
-                        {<img className="infoicon" src={infoicon} title="The maximum depth of the tree. 
+                        <div>
+                          <lable id='max_depth-value'>Max Depth  </lable>
+                          <input
+                            htmlFor='max_depth-value'
+                            type="range"
+                            min="0"
+                            max="32"
+                            value={state3.max_depth}
+                            onChange={(e) => setState3({ ...state3, 'max_depth': e.target.value })}
+                          />
+                          {state3.max_depth}
+                          {<img className="infoicon" src={infoicon} title="The maximum depth of the tree. 
                         If set to '0' allows the decision trees in a Random Forest Regressor to grow until a minimum number of samples per leaf is reached.
                         If set manually, start with a lower value (e.g., 3-6) to promote simpler models and prevent overfitting,
                         then increase it gradually if the model underfits and requires more complex interactions to capture the data's patterns." />}
-                      </div>
-
-                      <div>
-                        <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
-                        <input
-                          htmlFor='split-value'
-                          type="range"
-                          min="50"
-                          max="100"
-                          value={state3.splitpercent}
-                          onChange={(e) => setState3({ ...state3, 'splitpercent': e.target.value })}
-                        />
-                        {state3.splitpercent}
-                        {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
-                      </div>
-
-                      <div>
-                        <lable id='bin-value'>Bins size for histogram </lable>
-                        <input
-                          htmlFor='bin-value'
-                          type="range"
-                          min="2"
-                          max="50"
-                          value={state3.bin}
-                          onChange={(e) => setState3({ ...state3, 'bin': e.target.value })}
-                        />
-                        {state3.bin}
-                        {<img className="infoicon" src={infoicon} title="The towers or bars of a histogram are called bins. The greater the size of the bin, the more data division will be." />}
-                      </div>
-
-                      <div>
-                        <lable className="shufflecheckbox" >Shuffle Data </lable>
-                        <input
-                          type="checkbox"
-                          name="isChecked"
-                          onChange={(e) => setState3({ ...state3, 'shuffledata': e.target.checked })}
-                        />
-                        {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
-                      </div>
-                    </div>
-
-                    <br />
-                    <div className="upload button">
-                      <Button variant="primary" size="md" type='submit'>Upload</Button>
-                      <button type='button' onClick={handleReset}>Reset values</button>
-                      <div >
-                        <div className='features_checkbox'>
-                          <br />
-                          {formFields.slice(0, -1).map((form, index) => {
-
-                            return (
-                              <div key={index}>
-                                <input
-                                  type="checkbox"
-                                  id={`custom-checkbox-${index}`}
-                                  name={form}
-                                  checked={checkedState[index]}
-                                  onChange={() => handleOnChange(index)}
-                                />
-                                <span> - </span>
-                                {form}
-                              </div>
-                            )
-                          })}
                         </div>
-                        <br /><br />
+
+                        <div>
+                          <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
+                          <input
+                            htmlFor='split-value'
+                            type="range"
+                            min="50"
+                            max="100"
+                            value={state3.splitpercent}
+                            onChange={(e) => setState3({ ...state3, 'splitpercent': e.target.value })}
+                          />
+                          {state3.splitpercent}
+                          {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
+                        </div>
+
+                        <div>
+                          <lable className="shufflecheckbox" >Shuffle Data </lable>
+                          <input
+                            type="checkbox"
+                            name="isChecked"
+                            onChange={(e) => setState3({ ...state3, 'shuffledata': e.target.checked })}
+                          />
+                          {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
+                        </div>
+                      </div>
+
+                      <br />
+                      <div className="upload button">
+                        <Button variant="primary" size="md" type='submit'>Train Model</Button>
+                        <button type='button' onClick={handleReset}>Reset values</button>
+                      </div>
+                      <div className="training_status">
+                        <p>Training Status : {status}</p>
                       </div>
                     </div>
+                  </form>
+
+                  <br />
+                  <h1 className="page-header">Training Result</h1>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+                    {renderTrainingPlot()}
                   </div>
-                </form>
-                <div className='corrbtn'>
-                  {renderHistogram()}
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="Plot histogram for the output." />}
-                </div>
-
-                <div className='corrbtn'>
-                  {renderCorrHeatmap()}
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
-                  <br />
-                </div>
-
-                <div className='corrbtn'>
-                  <br />
-                  <Button variant="primary" size="md" type='button' onClick={handleOnClick} disabled={DisableTrainButton()}>Train Model</Button>
-                  <div className="training_status">
-                    <p>Training Status : {status}</p>
-                  </div>
-                </div>
-                <br />
-                <h1 className="page-header">Training Result</h1>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                  {renderTrainingPlot()}
-                </div>
-                <div className="disp_results">
-                  <br />
-                  <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
-                  <br /><br />
-                  <Button onClick={() => saveAsPDF(state3)} disabled={shouldDisableButton()} >Download Report</Button>
-
-                </div>
-                <br /><br /><br /><br />
-
-
-              </Container>
-            </Tab.Pane>
-            <Tab.Pane eventKey="link-4">
-              <Container>
-                <form className="uploader" id='formEle' onSubmit={handleUploadImage4}>
-                  <div className="training_content">
-                    <div className="file_upload">
-                      <input type='file' name='file' accept='.csv' onChange={handleUpload} required />
-                      <a href={require("../assests/template.csv")} download="template.csv">Download Sample Template</a>
-                    </div>
+                  <div className="disp_results">
                     <br />
-                    <h2 className="ml-header">Parameters for ML model</h2>
+                    <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
+                    <br /><br />
+                    <Button onClick={() => saveAsPDF(state3)} disabled={shouldDisableButton()} >Download Report</Button>
 
-                    <div className="range_sliders">
-                      <div>
-                        <label id='cost-value'>C (Cost Value)</label>
-                        <input
-                          htmlFor='cost-value'
-                          type="range"
-                          min="1"
-                          max="1000"
-                          step={15}
-                          value={state4.cost}
-                          onChange={(e) => setState4({ ...state4, 'cost': e.target.value })}
-                        />
-                        {state4.cost}
-                        {<img className="infoicon" src={infoicon} title="It determines the trade-off between training error and margin size;
+                  </div>
+                  <br /><br /><br /><br />
+
+
+                </Container>
+              </Tab.Pane>
+              <Tab.Pane eventKey="link-4">
+                <Container>
+                  <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state4, 0)}>
+                    <div className="corrbtn">
+                      <br />
+                      <h2 className="ml-header">Parameters for ML model</h2>
+
+                      <div className="range_sliders">
+                        <div>
+                          <label id='cost-value'>C (Cost Value)</label>
+                          <input
+                            htmlFor='cost-value'
+                            type="range"
+                            min="1"
+                            max="1000"
+                            step={15}
+                            value={state4.cost}
+                            onChange={(e) => setState4({ ...state4, 'cost': e.target.value })}
+                          />
+                          {state4.cost}
+                          {<img className="infoicon" src={infoicon} title="It determines the trade-off between training error and margin size;
                          start with a small C value to encourage a wider margin and a more generalizable model,
                           and increase it if the model underfits or lacks accuracy on the training set." />}
-                      </div>
-                      <div>
-                        <label id='epsilon-value'>Epsilon (ε) </label>
-                        <input
-                          htmlFor='epsilon-value'
-                          type="range"
-                          min="0.01"
-                          max="1.0"
-                          step={0.01}
-                          value={state4.epsilon}
-                          onChange={(e) => setState4({ ...state4, 'epsilon': e.target.value })}
-                        />
-                        {state4.epsilon}
-                        {<img className="infoicon" src={infoicon} title="It controls the width of the insensitive zone around the regression line;
-                         with a larger ε allowing more training points within the insensitive zone and a smaller ε focusing on minimizing errors outside the margin." />}
-                      </div>
-
-                      <div>
-                        <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
-                        <input
-                          htmlFor='split-value'
-                          type="range"
-                          min="50"
-                          max="100"
-                          value={state4.splitpercent}
-                          onChange={(e) => setState4({ ...state4, 'splitpercent': e.target.value })}
-                        />
-                        {state4.splitpercent}
-                        {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
-                      </div>
-
-                      <div>
-                        <lable id='bin-value'>Bins size for histogram </lable>
-                        <input
-                          htmlFor='bin-value'
-                          type="range"
-                          min="2"
-                          max="50"
-                          value={state4.bin}
-                          onChange={(e) => setState4({ ...state4, 'bin': e.target.value })}
-                        />
-                        {state4.bin}
-                        {<img className="infoicon" src={infoicon} title="The towers or bars of a histogram are called bins. The greater the size of the bin, the more data division will be." />}
-                      </div>
-
-                      <div>
-                        <lable className="shufflecheckbox" >Shuffle Data </lable>
-                        <input
-                          type="checkbox"
-                          name="isChecked"
-                          onChange={(e) => setState4({ ...state4, 'shuffledata': e.target.checked })}
-                        />
-                        {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
-                      </div>
-                    </div>
-
-                    <br />
-                    <div className="upload button">
-                      <Button variant="primary" size="md" type='submit'>Upload</Button>
-                      <button type='button' onClick={handleReset}>Reset values</button>
-                      <div >
-                        <div className='features_checkbox'>
-                          <br />
-                          {formFields.slice(0, -1).map((form, index) => {
-
-                            return (
-                              <div key={index}>
-                                <input
-                                  type="checkbox"
-                                  id={`custom-checkbox-${index}`}
-                                  name={form}
-                                  checked={checkedState[index]}
-                                  onChange={() => handleOnChange(index)}
-                                />
-                                <span> - </span>
-                                {form}
-                              </div>
-                            )
-                          })}
                         </div>
-                        <br /><br />
+                        <div>
+                          <label id='epsilon-value'>Epsilon (ε) </label>
+                          <input
+                            htmlFor='epsilon-value'
+                            type="range"
+                            min="0.01"
+                            max="1.0"
+                            step={0.01}
+                            value={state4.epsilon}
+                            onChange={(e) => setState4({ ...state4, 'epsilon': e.target.value })}
+                          />
+                          {state4.epsilon}
+                          {<img className="infoicon" src={infoicon} title="It controls the width of the insensitive zone around the regression line;
+                         with a larger ε allowing more training points within the insensitive zone and a smaller ε focusing on minimizing errors outside the margin." />}
+                        </div>
+
+                        <div>
+                          <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
+                          <input
+                            htmlFor='split-value'
+                            type="range"
+                            min="50"
+                            max="100"
+                            value={state4.splitpercent}
+                            onChange={(e) => setState4({ ...state4, 'splitpercent': e.target.value })}
+                          />
+                          {state4.splitpercent}
+                          {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
+                        </div>
+
+                        <div>
+                          <lable className="shufflecheckbox" >Shuffle Data </lable>
+                          <input
+                            type="checkbox"
+                            name="isChecked"
+                            onChange={(e) => setState4({ ...state4, 'shuffledata': e.target.checked })}
+                          />
+                          {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
+                        </div>
                       </div>
+
+                      <br />
+                      <div className="upload button">
+                        <Button variant="primary" size="md" type='submit'>Train Model</Button>
+                        <button type='button' onClick={handleReset}>Reset values</button>
+                      </div>
+                      <div className="training_status">
+                      <p>Training Status : {status}</p>
                     </div>
-                  </div>
-                </form>
-                <div className='corrbtn'>
-                  {renderHistogram()}
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="Plot histogram for the output." />}
-                </div>
-
-                <div className='corrbtn'>
-                  {renderCorrHeatmap()}
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
-                  <br />
-                </div>
-
-                <div className='corrbtn'>
-                  <br />
-                  <Button variant="primary" size="md" type='button' onClick={handleOnClick} disabled={DisableTrainButton()}>Train Model</Button>
-                  <div className="training_status">
-                    <p>Training Status : {status}</p>
-                  </div>
-                </div>
-                <br />
-                <h1 className="page-header">Training Result</h1>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                  {renderTrainingPlot()}
-                </div>
-                <div className="disp_results">
-                  <br />
-                  <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
-                  <br /><br />
-                  <Button onClick={() => saveAsPDF(state4)} disabled={shouldDisableButton()} >Download Report</Button>
-
-                </div>
-                <br /><br /><br /><br />
-
-
-              </Container>
-            </Tab.Pane>
-            <Tab.Pane eventKey="link-5">
-              <Container>
-                <form className="uploader" id='formEle' onSubmit={handleUploadImage5}>
-                  <div className="training_content">
-                    <div className="file_upload">
-                      <input type='file' name='file' accept='.csv' onChange={handleUpload} required />
-                      <a href={require("../assests/template.csv")} download="template.csv">Download Sample Template</a>
                     </div>
+                  </form>
+
+                  <br />
+                  <h1 className="page-header">Training Result</h1>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+                    {renderTrainingPlot()}
+                  </div>
+                  <div className="disp_results">
                     <br />
-                    <h2 className="ml-header">Parameters for ML model</h2>
+                    <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
+                    <br /><br />
+                    <Button onClick={() => saveAsPDF(state4)} disabled={shouldDisableButton()} >Download Report</Button>
 
-                    <div className="range_sliders">
-                      <div>
-                        <lable className="shufflecheckbox" id='fit-intercept-value' >fit intercept</lable>
-                        <input
-                          type="checkbox"
-                          name="isChecked"
-                          checked={state5.fit_intercept}
-                          onChange={(e) => setState5({ ...state5, 'fit_intercept': e.target.checked })}
-                        />
-                        {<img className="infoicon" src={infoicon} title="This parameter determines whether to calculate the intercept term of the linear regression model.
+                  </div>
+                  <br /><br /><br /><br />
+
+
+                </Container>
+              </Tab.Pane>
+              <Tab.Pane eventKey="link-5">
+                <Container>
+                  <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state5, 0)}>
+                    <div className="corrbtn">
+                      <br />
+                      <h2 className="ml-header">Parameters for ML model</h2>
+
+                      <div className="range_sliders">
+                        <div>
+                          <lable className="shufflecheckbox" id='fit-intercept-value' >fit intercept</lable>
+                          <input
+                            type="checkbox"
+                            name="isChecked"
+                            checked={state5.fit_intercept}
+                            onChange={(e) => setState5({ ...state5, 'fit_intercept': e.target.checked })}
+                          />
+                          {<img className="infoicon" src={infoicon} title="This parameter determines whether to calculate the intercept term of the linear regression model.
                          If set to True (default), the model will have an intercept term. 
                          If set to False, the model will not have an intercept term, and the regression line will pass through the origin." />}
-                      </div>
-                      <div>
-                        <lable className="shufflecheckbox" id='normalize-value' >normalize</lable>
-                        <input
-                          type="checkbox"
-                          name="isChecked"
-                          onChange={(e) => setState5({ ...state5, 'normalize': e.target.checked })}
-                        />
-                        {<img className="infoicon" src={infoicon} title="This parameter is used to normalize the input features before fitting the model. 
+                        </div>
+                        <div>
+                          <lable className="shufflecheckbox" id='normalize-value' >normalize</lable>
+                          <input
+                            type="checkbox"
+                            name="isChecked"
+                            onChange={(e) => setState5({ ...state5, 'normalize': e.target.checked })}
+                          />
+                          {<img className="infoicon" src={infoicon} title="This parameter is used to normalize the input features before fitting the model. 
                           If set to True, the input features will be normalized to have zero mean and unit variance. 
                           If set to False (default), no normalization will be performed.." />}
-                      </div>
-
-                      <div>
-                        <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
-                        <input
-                          htmlFor='split-value'
-                          type="range"
-                          min="50"
-                          max="100"
-                          value={state5.splitpercent}
-                          onChange={(e) => setState5({ ...state5, 'splitpercent': e.target.value })}
-                        />
-                        {state5.splitpercent}
-                        {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
-                      </div>
-
-                      <div>
-                        <lable id='bin-value'>Bins size for histogram </lable>
-                        <input
-                          htmlFor='bin-value'
-                          type="range"
-                          min="2"
-                          max="50"
-                          value={state5.bin}
-                          onChange={(e) => setState5({ ...state5, 'bin': e.target.value })}
-                        />
-                        {state5.bin}
-                        {<img className="infoicon" src={infoicon} title="The towers or bars of a histogram are called bins. The greater the size of the bin, the more data division will be." />}
-                      </div>
-
-                      <div>
-                        <lable className="shufflecheckbox" >Shuffle Data </lable>
-                        <input
-                          type="checkbox"
-                          name="isChecked"
-                          onChange={(e) => setState5({ ...state5, 'shuffledata': e.target.checked })}
-                        />
-                        {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
-                      </div>
-                    </div>
-
-                    <br />
-                    <div className="upload button">
-                      <Button variant="primary" size="md" type='submit'>Upload</Button>
-                      <button type='button' onClick={handleReset}>Reset values</button>
-                      <div >
-                        <div className='features_checkbox'>
-                          <br />
-                          {formFields.slice(0, -1).map((form, index) => {
-
-                            return (
-                              <div key={index}>
-                                <input
-                                  type="checkbox"
-                                  id={`custom-checkbox-${index}`}
-                                  name={form}
-                                  checked={checkedState[index]}
-                                  onChange={() => handleOnChange(index)}
-                                />
-                                <span> - </span>
-                                {form}
-                              </div>
-                            )
-                          })}
                         </div>
-                        <br /><br />
+
+                        <div>
+                          <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
+                          <input
+                            htmlFor='split-value'
+                            type="range"
+                            min="50"
+                            max="100"
+                            value={state5.splitpercent}
+                            onChange={(e) => setState5({ ...state5, 'splitpercent': e.target.value })}
+                          />
+                          {state5.splitpercent}
+                          {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
+                        </div>
+
+                        <div>
+                          <lable className="shufflecheckbox" >Shuffle Data </lable>
+                          <input
+                            type="checkbox"
+                            name="isChecked"
+                            onChange={(e) => setState5({ ...state5, 'shuffledata': e.target.checked })}
+                          />
+                          {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
+                        </div>
+                      </div>
+
+                      <br />
+                      <div className="upload button">
+                        <Button variant="primary" size="md" type='submit'>Train Model</Button>
+                        <button type='button' onClick={handleReset}>Reset values</button>
+                      </div>
+                      <div className="training_status">
+                        <p>Training Status : {status}</p>
                       </div>
                     </div>
+                  </form>
+
+                  <br />
+                  <h1 className="page-header">Training Result</h1>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+                    {renderTrainingPlot()}
                   </div>
-                </form>
-                <div className='corrbtn'>
-                  {renderHistogram()}
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="Plot histogram for the output." />}
-                </div>
+                  <div className="disp_results">
+                    <br />
+                    <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
+                    <br /><br />
+                    <Button onClick={() => saveAsPDF(state5)} disabled={shouldDisableButton()} >Download Report</Button>
 
-                <div className='corrbtn'>
-                  {renderCorrHeatmap()}
-                  {<img className="infoicon" width="25" height="18" src={infoicon} title="The correlation chart is available after uploading the data file." />}
-                  <br />
-                </div>
-
-                <div className='corrbtn'>
-                  <br />
-                  <Button variant="primary" size="md" type='button' onClick={handleOnClick} disabled={DisableTrainButton()}>Train Model</Button>
-                  <div className="training_status">
-                    <p>Training Status : {status}</p>
                   </div>
-                </div>
-                <br />
-                <h1 className="page-header">Training Result</h1>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                  {renderTrainingPlot()}
-                </div>
-                <div className="disp_results">
-                  <br />
-                  <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
-                  <br /><br />
-                  <Button onClick={() => saveAsPDF(state5)} disabled={shouldDisableButton()} >Download Report</Button>
-
-                </div>
-                <br /><br /><br /><br />
+                  <br /><br /><br /><br />
 
 
-              </Container>
-            </Tab.Pane>
-          </Tab.Content>
-        </Tab.Container>
+                </Container>
+              </Tab.Pane>
+            </Tab.Content>
+          </Tab.Container>
+        ) : (
+          <p ><em style={{ marginLeft: '4em', color: 'red' }}>Please upload a data file first.</em></p>
+
+        )}
 
 
 
