@@ -24,3 +24,5 @@ yarn-error.log*
 
 /backend/amt-gui
 .Spotlight-V100
+.fseventsd
+System Volume Information
