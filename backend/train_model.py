@@ -7,10 +7,17 @@ from sklearn.metrics import mean_squared_error, r2_score
 from pygam import LinearGAM
 import math
 import joblib
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, StackingRegressor
 import xgboost as xgb
 from sklearn.svm import SVR
 from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.ensemble import AdaBoostRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.linear_model import Lasso, Ridge
+from lightgbm import LGBMRegressor
+from xgboost import XGBRegressor
 
 
 # def model_training(file_name, data_range):
@@ -83,6 +90,7 @@ def model_training(file_name, original_file_name, input_parameters_dict):
     else:
         X_train, X_test, y_train, y_test = train_test_split(
             x, y, test_size=testing_percent, shuffle=shufflestatus)
+
         x_train = X_train.values
         x_test = X_test.values
 
@@ -246,6 +254,32 @@ def model_training(file_name, original_file_name, input_parameters_dict):
         model = LinearRegression(normalize=normalize, fit_intercept=fit_intercept)
         model.fit(x_train, y_train)
         print("@@@@@@@@@@@@@@ Linear Regression TRAINED @@@@@@@@@@@@@@@@@@@")
+
+    elif input_parameters_dict['model'] == 5:  # Stacking ML Models
+
+        # Define the base models
+        base_models = [
+            ('rfr', RandomForestRegressor()),
+            ('xgboost', XGBRegressor()),
+            ('svr', SVR()),
+            ('lr', LinearRegression()),
+            ('ada', AdaBoostRegressor()),
+            ('gpr', GaussianProcessRegressor()),
+            ('dt', DecisionTreeRegressor()),
+            ('lasso', Lasso()),
+            ('ridge', Ridge()),
+            ('lgbm', LGBMRegressor())
+        ]
+
+        # Define the final model
+        final_model = LinearRegression()
+
+        # Create the stacking regressor
+        model = StackingRegressor(estimators=base_models, final_estimator=final_model)
+
+        # Fit the stacking regressor on the training data
+        model.fit(X_train, y_train)
+
 
     # set the input information
     model.input_info = {'names': x.columns.tolist(), 'max': x.max(

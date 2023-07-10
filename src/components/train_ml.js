@@ -65,12 +65,21 @@ const initialState5 = {
   model: 4
 };
 
+// Stacking ML Models parameters
+const initialState6 = {
+  splitpercent: 90,
+  bin: 15,
+  shuffledata: false,
+  model: 5
+};
+
 export const Test = () => {
   const [state, setState] = useState(initialState) //for GAM model
   const [state2, setState2] = useState(initialState2)//for RFR model
   const [state3, setState3] = useState(initialState3)//for XGB model
   const [state4, setState4] = useState(initialState4)//for SVR model
   const [state5, setState5] = useState(initialState5)//for Linear Regression model
+  const [state6, setState6] = useState(initialState6)//for Stacking ML Models
   const [file, setFile] = useState();
   const [fileName, setfileName] = useState();
   const [status, setStatus] = useState('----');
@@ -90,6 +99,8 @@ export const Test = () => {
   const [counter8, setcounter8] = useState(10);
   const [corrFlag, setcorrFlag] = useState(0);
   const [modelFlag, setmodelFlag] = useState(1); // if 1, it is GAM model otherwise no GAM.
+  const [activeTab, setActiveTab] = useState('');
+
 
 
   const handleUpload = (event) => {
@@ -168,6 +179,7 @@ export const Test = () => {
     setState3(initialState3)
     setState4(initialState4)
     setState5(initialState5)
+    setState6(initialState6)
   }
 
   const handleOnChange = (position) => {
@@ -217,6 +229,15 @@ export const Test = () => {
     }, 1200);
     //console.log('getStatus Counting: ', timerId);
   }
+
+  const handleTabSelect = (eventKey) => {
+    if (eventKey !== activeTab) {
+      setformFields3([]);
+      setformFields4([]);
+      setStatus('----');
+      setActiveTab(eventKey);
+    }
+  };
 
   // General
   const handleUploadImageGen = (e, param_state, flag_value) => {
@@ -323,7 +344,7 @@ export const Test = () => {
     setcounter7(counter7 + 1)
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/results_update`).then((res) =>
       res.json().then((graph_data) => {
-        console.log('training result = ', graph_data);
+        //console.log('training result = ', graph_data);
         for (var key in graph_data) {
           var arr = graph_data[key];
           //console.log("training testing data arr = ", arr);
@@ -393,13 +414,27 @@ export const Test = () => {
     const img = new Image(); img.src = amtLogo;
     img.onload = function () {
       // Add image to PDF document
-      console.log("img = ", img)
       doc.addImage(this, 'PNG', 0, 0, 50, 30); // adjust x, y, width, and height as needed
+    }
+    let modelName = ""
+
+    if (stateName['model'] === 0) {
+      modelName = "GAM"
+    } else if (stateName['model'] === 1) {
+      modelName = "Random Forest"
+    } else if (stateName['model'] === 2) {
+      modelName = "XGBoost"
+    } else if (stateName['model'] === 3) {
+      modelName = "SVR"
+    } else if (stateName['model'] === 4) {
+      modelName = "Linear Regression"
+    } else if (stateName['model'] === 5) {
+      modelName = "Stacking Models"
     }
 
 
     // Add text at top center of the document
-    let topMargin = 30; let xaxismargin = 15; const text = 'Model Report';
+    let topMargin = 30; let xaxismargin = 15; const text = `Model Report (${modelName})`;
     const textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
     const x = (doc.internal.pageSize.getWidth() - textWidth) / 2;
     doc.text(text, x, topMargin); doc.setLineWidth(0.1);
@@ -432,7 +467,7 @@ export const Test = () => {
     // Adding selected input names
     doc.setFont('helvetica', 'normal');
     let feature_names = []
-    console.log("formFields4 = ", formFields4)
+    //console.log("formFields4 = ", formFields4)
     inputCols.forEach((field) => {
       feature_names.push(field)
     })
@@ -478,7 +513,7 @@ export const Test = () => {
           doc.setFontSize(8);
           doc.setFont('helvetica', 'bold');
 
-          doc.text(form.name, formfield_plots_x_axis + 45, topMargin + 5, { align: 'center' });
+          doc.text(form.name + ` (${modelName})`, formfield_plots_x_axis + 45, topMargin + 5, { align: 'center' });
           doc.setFont('helvetica', 'normal');
           doc.text('Actual Values', formfield_plots_x_axis + 45, topMargin + 60, { align: 'center' });
           doc.text('Predicted Values', formfield_plots_x_axis + 9, topMargin + 25, { angle: -90, align: 'center' });
@@ -631,7 +666,7 @@ export const Test = () => {
     );
   }
 
-  const renderTrainingPlot = () => {
+  const renderTrainingPlot = (modelNameString) => {
     return (
       formFields3.map((form, index) => {
         return (
@@ -649,7 +684,7 @@ export const Test = () => {
                 { type: "line", x: form.xaxis2, y: form.yaxis2, name: "Best fit " },
               ]}
               layout={{
-                width: 720, height: 480, title: form.name, xaxis: {
+                width: 720, height: 480, title: form.name + ` (${modelNameString})`, xaxis: {
                   title: "Actual Values", showgrid: true, gridcolor: '#bdbdbd',
                   gridwidth: 1,
                 },
@@ -819,7 +854,7 @@ export const Test = () => {
 
           <Tab.Container id="my-tabs" defaultActiveKey="/home">
             <div className="training_content">
-              <Nav variant="pills">
+              <Nav variant="pills" onSelect={handleTabSelect}>
                 <Nav.Item>
                   <Nav.Link eventKey="link-1">GAM</Nav.Link>
                 </Nav.Item>
@@ -835,6 +870,9 @@ export const Test = () => {
                 <Nav.Item>
                   <Nav.Link eventKey="link-5">Linear Regression</Nav.Link>
                 </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="link-6">Stacking ML Models</Nav.Link>
+                </Nav.Item>
               </Nav>
             </div>
 
@@ -845,7 +883,7 @@ export const Test = () => {
                   <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state, 1)}>
                     <div className="corrbtn">
                       <br />
-                      <h2 className="ml-header">Parameters for ML model</h2>
+                      <h2 className="ml-header">Set Parameters</h2>
 
                       <div className="range_sliders">
                         <div>
@@ -915,7 +953,7 @@ export const Test = () => {
                   <br />
                   <h1 className="page-header">Training Result</h1>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                    {renderTrainingPlot()}
+                    {renderTrainingPlot("GAM Model")}
                   </div>
                   <div className="disp_results">
                     <br />
@@ -937,7 +975,7 @@ export const Test = () => {
                   <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state2, 0)}>
                     <div className="corrbtn">
                       <br />
-                      <h2 className="ml-header">Parameters for ML model</h2>
+                      <h2 className="ml-header">Set Parameters</h2>
 
                       <div className="range_sliders">
                         <div>
@@ -1010,9 +1048,9 @@ export const Test = () => {
                   </form>
 
                   <br />
-                  <h1 className="page-header">Training Result</h1>
+                  <h1 className="page-header">Training Result </h1>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                    {renderTrainingPlot()}
+                    {renderTrainingPlot("RFR Model")}
                   </div>
                   <div className="disp_results">
                     <br />
@@ -1031,7 +1069,7 @@ export const Test = () => {
                   <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state3, 0)}>
                     <div className="corrbtn">
                       <br />
-                      <h2 className="ml-header">Parameters for ML model</h2>
+                      <h2 className="ml-header">Set Parameters</h2>
 
                       <div className="range_sliders">
                         <div>
@@ -1120,9 +1158,9 @@ A lower learning rate improves generalization by slowing down model convergence,
                   </form>
 
                   <br />
-                  <h1 className="page-header">Training Result</h1>
+                  <h1 className="page-header">Training Result </h1>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                    {renderTrainingPlot()}
+                    {renderTrainingPlot("XGBoost Model")}
                   </div>
                   <div className="disp_results">
                     <br />
@@ -1141,7 +1179,7 @@ A lower learning rate improves generalization by slowing down model convergence,
                   <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state4, 0)}>
                     <div className="corrbtn">
                       <br />
-                      <h2 className="ml-header">Parameters for ML model</h2>
+                      <h2 className="ml-header">Set Parameters</h2>
 
                       <div className="range_sliders">
                         <div>
@@ -1207,15 +1245,15 @@ A lower learning rate improves generalization by slowing down model convergence,
                         <button type='button' onClick={handleReset}>Reset values</button>
                       </div>
                       <div className="training_status">
-                      <p>Training Status : {status}</p>
-                    </div>
+                        <p>Training Status : {status}</p>
+                      </div>
                     </div>
                   </form>
 
                   <br />
-                  <h1 className="page-header">Training Result</h1>
+                  <h1 className="page-header">Training Result </h1>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                    {renderTrainingPlot()}
+                    {renderTrainingPlot("SVR Model")}
                   </div>
                   <div className="disp_results">
                     <br />
@@ -1234,7 +1272,7 @@ A lower learning rate improves generalization by slowing down model convergence,
                   <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state5, 0)}>
                     <div className="corrbtn">
                       <br />
-                      <h2 className="ml-header">Parameters for ML model</h2>
+                      <h2 className="ml-header">Set Parameters</h2>
 
                       <div className="range_sliders">
                         <div>
@@ -1298,15 +1336,77 @@ A lower learning rate improves generalization by slowing down model convergence,
                   </form>
 
                   <br />
-                  <h1 className="page-header">Training Result</h1>
+                  <h1 className="page-header">Training Result </h1>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                    {renderTrainingPlot()}
+                    {renderTrainingPlot("Linear Regression Model")}
                   </div>
                   <div className="disp_results">
                     <br />
                     <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
                     <br /><br />
                     <Button onClick={() => saveAsPDF(state5)} disabled={shouldDisableButton()} >Download Report</Button>
+
+                  </div>
+                  <br /><br /><br /><br />
+
+
+                </Container>
+              </Tab.Pane>
+              <Tab.Pane eventKey="link-6">
+                <Container>
+                  <form className="uploader" id='formEle' onSubmit={(e) => handleUploadImageGen(e, state6, 0)}>
+                    <div className="corrbtn">
+                      <br />
+                      <h2 className="ml-header">Set Parameters</h2>
+
+                      <div className="range_sliders">
+
+                        <div>
+                          <lable id='split-value'>(Training-Testing Data Split) Training % </lable>
+                          <input
+                            htmlFor='split-value'
+                            type="range"
+                            min="50"
+                            max="100"
+                            value={state6.splitpercent}
+                            onChange={(e) => setState6({ ...state6, 'splitpercent': e.target.value })}
+                          />
+                          {state6.splitpercent}
+                          {<img className="infoicon" src={infoicon} title="Please set training data % . Testing data % will be (100% - training%) " />}
+                        </div>
+
+                        <div>
+                          <lable className="shufflecheckbox" >Shuffle Data </lable>
+                          <input
+                            type="checkbox"
+                            name="isChecked"
+                            onChange={(e) => setState6({ ...state6, 'shuffledata': e.target.checked })}
+                          />
+                          {<img className="infoicon" src={infoicon} title="If checked, it will shuffle all the data before training." />}
+                        </div>
+                      </div>
+
+                      <br />
+                      <div className="upload button">
+                        <Button variant="primary" size="md" type='submit'>Train Model</Button>
+                        <button type='button' onClick={handleReset}>Reset values</button>
+                      </div>
+                      <div className="training_status">
+                        <p>Training Status : {status}</p>
+                      </div>
+                    </div>
+                  </form>
+
+                  <br />
+                  <h1 className="page-header">Training Result </h1>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+                    {renderTrainingPlot("RFR Model")}
+                  </div>
+                  <div className="disp_results">
+                    <br />
+                    <Button onClick={downloadPkl} disabled={shouldDisableButton()}>Download Trained Model</Button>
+                    <br /><br />
+                    <Button onClick={() => saveAsPDF(state6)} disabled={shouldDisableButton()} >Download Report</Button>
 
                   </div>
                   <br /><br /><br /><br />
