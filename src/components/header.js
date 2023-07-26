@@ -4,13 +4,13 @@ import amtLogo from '../assests/images/amt-logo.png'
 import { Link } from 'react-router-dom'
 
 
-export default function header(props) {
+export default function header({ modelTrained }) {
   return (
     <>
       <header>
-      <img src={amtLogo} className='amtlogo' alt="amt_logo" />
+        <img src={amtLogo} className='amtlogo' alt="amt_logo" />
         <img src={qeeriLogo} className='qeerilogo' alt="qeeri_logo" />
-        
+
       </header>
 
       <nav className="navbar navbar-expand-lg bg-light">

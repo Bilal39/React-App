@@ -3,10 +3,9 @@ import os
 import pandas as pd
 
 
-def input_manger():
+def input_manger(updated_data_file):
     input_data_list = []
     input_dict = {}
-    input_nbr_path = os.path.join(os.getcwd(), 'assests', "nbr_of_inputs.ini")
     predictor_default_value_path = os.path.join(
         os.getcwd(), 'assests', "predictor_default_value.ini")
 
@@ -25,9 +24,8 @@ def input_manger():
                 predictor_input_values.append(float(line))
 
     # Reading the data
-    data_df = pd.read_csv("updated_object_file.txt")
+    data_df = pd.read_csv(updated_data_file)
     x = data_df.iloc[:, :-1]
-    y = data_df.iloc[:, -1]
 
     for n, heading in enumerate(x.columns):
         temp_dict = {}
@@ -43,17 +41,15 @@ def input_manger():
         if flag == 0:
             temp_dict['value'] = round((max_val.item()+min_val.item())/2, 2)
         else:
+            print("predictor_input_values$$$$$$$$$$$$$$$$$$$$$$$$$$$ = ", predictor_input_values)
             temp_dict['value'] = predictor_input_values[n]
 
         input_data_list.append(temp_dict)
     #print("input_data_list = ", input_data_list)
 
     input_dict["data"] = input_data_list
-    print("input_dict = ", input_dict)
+    #print("input_dict = ", input_dict)
     return input_dict
-
-#input_dict = input_manger()
-#print(input_dict)
 
 
 if __name__ == "__main__":

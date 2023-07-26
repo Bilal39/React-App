@@ -28,9 +28,15 @@ def model_training(file_name, original_file_name, input_parameters_dict):
     # input_parameters_path = os.path.join(
     #    os.getcwd(), 'assests', "input_parameters.ini")
     model_saving_path = os.path.join(
-        os.getcwd(), 'assests', "trained_models", original_file_name)
+        os.getcwd(), 'assests', "trained_models")
+    
+    # Split the filename to get the userid and extension
+    userid = file_name.split("/")[-1].split(".")[0]
+
 
     #print("input_parameters_dict = ", input_parameters_dict)
+    #print("file_name = ",file_name)
+    #print("original_file_name = ", original_file_name)
     def select_points(lst, x):
         interval = len(lst) // x
         if interval == 0:
@@ -42,7 +48,6 @@ def model_training(file_name, original_file_name, input_parameters_dict):
     train_data_dict = {}
     test_data_dict = {}
     hist_dict = {}
-    output_data_list = []
     smooth_funct_list = []
     lower_bound_list = []
     upper_bound_list = []
@@ -79,8 +84,6 @@ def model_training(file_name, original_file_name, input_parameters_dict):
 
     # preparing histogram data
     hist_dict['data'] = y.tolist()
-    hist_dict['bin_size'] = bin
-    output_data_list.append(hist_dict)
 
     # Splitting Data Into training and testing data
     if testing_percent == 0.0:
@@ -96,6 +99,7 @@ def model_training(file_name, original_file_name, input_parameters_dict):
 
     # GAM Model Execution
     if input_parameters_dict['model'] == 0:
+        model_name = "GAM"
         lambdaval = int(input_parameters_dict['lambdaval'])
         splines = int(input_parameters_dict['splines'])
 
@@ -137,9 +141,9 @@ def model_training(file_name, original_file_name, input_parameters_dict):
                                                                 0].values.tolist()
             smooth_func_temp_dict['data_points_yaxis'] = y.values.tolist()
             smooth_func_temp_dict['selected_smooth_points'] = selected_smooth_points
-            print("\ntitle = ", titles[0])
-            print("\nall smooth points = ", model.partial_dependence(
-                term=0, X=XX).tolist())
+            #print("\ntitle = ", titles[0])
+            #print("\nall smooth points = ", model.partial_dependence(
+            #    term=0, X=XX).tolist())
 
             #print("\ndata_points = ", x.iloc[:,0].values.tolist())
             #print("\nselected_smooth_points = ", selected_smooth_points)
@@ -195,6 +199,7 @@ def model_training(file_name, original_file_name, input_parameters_dict):
                 smooth_funct_list.append(smooth_func_temp_dict)
 
     elif input_parameters_dict['model'] == 1:  # RFR Model
+        model_name = "RFR"
         n_estimators = int(input_parameters_dict['n_estimators'])
         max_depth = int(input_parameters_dict['max_depth'])
         if max_depth == 0:
@@ -208,6 +213,7 @@ def model_training(file_name, original_file_name, input_parameters_dict):
         model.fit(x_train, y_train)
 
     elif input_parameters_dict['model'] == 2:  # XGB Model
+        model_name = "XGB"
         learn_rate = float(input_parameters_dict['learn_rate'])
         n_estimators = int(input_parameters_dict['n_estimators'])
         max_depth = int(input_parameters_dict['max_depth'])
@@ -228,6 +234,7 @@ def model_training(file_name, original_file_name, input_parameters_dict):
         model = xgb.train(params, dtrain, n_estimators)
 
     elif input_parameters_dict['model'] == 3:  # SVR Model
+        model_name = "SVR"
         cost_value = int(input_parameters_dict['cost'])
         epsilon_value = float(input_parameters_dict['epsilon'])
 
@@ -236,6 +243,7 @@ def model_training(file_name, original_file_name, input_parameters_dict):
         model.fit(x_train, y_train)
 
     elif input_parameters_dict['model'] == 4:  # Linear Regression Model
+        model_name = "LR"
         fit_intercept = str(input_parameters_dict['fit_intercept'])
         normalize = str(input_parameters_dict['normalize'])
 
@@ -253,9 +261,9 @@ def model_training(file_name, original_file_name, input_parameters_dict):
         # Train the linear regression model
         model = LinearRegression(normalize=normalize, fit_intercept=fit_intercept)
         model.fit(x_train, y_train)
-        print("@@@@@@@@@@@@@@ Linear Regression TRAINED @@@@@@@@@@@@@@@@@@@")
 
     elif input_parameters_dict['model'] == 5:  # Stacking ML Models
+        model_name = "stackingML"
 
         # Define the base models
         base_models = [
@@ -284,10 +292,12 @@ def model_training(file_name, original_file_name, input_parameters_dict):
     # set the input information
     model.input_info = {'names': x.columns.tolist(), 'max': x.max(
     ).tolist(), 'min': x.min().tolist(), "unit": unit}
+    
 
+    pkl_name = "{}_{}_userID_{}.pkl".format(original_file_name,model_name,userid)
+    
     # save the model
-    joblib.dump(model, model_saving_path)
-    save_model_flag = 1
+    joblib.dump(model, os.path.join(model_saving_path,pkl_name))
 
     # Calculating R2 RMSE Values for training data
     if input_parameters_dict['model'] == 2:  # For XGB Format
@@ -349,7 +359,7 @@ def model_training(file_name, original_file_name, input_parameters_dict):
         test_data_dict['rmse'] = testing_rmse
         final_data_list.append(test_data_dict)
 
-    return training_r_squared, testing_r_squared, final_data_list, smooth_funct_list, output_data_list, save_model_flag
+    return final_data_list, smooth_funct_list
 
 
 if __name__ == "__main__":

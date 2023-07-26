@@ -22,9 +22,6 @@ def correlation_among_data(file_path,checked_array):
     #print("data_df.head() = ",data_df.head())
     
 
-    # Getting Column names
-    column_names = data_df.columns.tolist()
-
     ## Getting Correlation among inputs and output
     corr_data_list = []
     
@@ -36,7 +33,7 @@ def correlation_among_data(file_path,checked_array):
     corr_data_list.append(temp_corr_dict)
     #print("column_names = ", column_names)
 
-    return column_names, corr_data_list
+    return corr_data_list
 
 if __name__ == "__main__":
     main()

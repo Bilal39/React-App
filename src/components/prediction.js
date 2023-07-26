@@ -5,12 +5,36 @@ import Button from 'react-bootstrap/Button';
 
 function Prediction() {
   const [formFields, setFormFields] = useState([]);
-  const [count1, setCount1] = useState(0);
+  const [count1, setCount1] = useState(10);
+
+  const [userId, setUserId] = useState('');
+
+
+  useEffect(() => {
+    // Check if user ID exists in local storage
+    const storedUserId = localStorage.getItem('user_id');
+    const storedTabId = sessionStorage.getItem('tab_id');
+
+    if (storedUserId) {
+      // If user ID exists in local storage, set it in state
+      setUserId(storedUserId);
+      console.log("Already stored UserId = ", storedUserId);
+      console.log("Already stored TabId= ", storedTabId);
+    } else {
+      console.log("No ID Found ");
+    }
+    const combinedId = `${String(storedUserId).padStart(4, '0')}_${String(storedTabId).padStart(4, '0')}`;
+    setUserId(combinedId);
+    console.log("already stored Combined ID = ", combinedId);
+    setCount1(0)
+  }, []);
+
   //const [file, setFile] = useState();
 
   const handleUpload = (event) => {
     const data = new FormData()
     data.append('file', event.target.files[0])
+    data.append('userId', userId)
     //setFile(data)
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/pre_trained_model`, {
       method: 'POST',
@@ -32,22 +56,44 @@ function Prediction() {
   }
 
   useEffect(() => {
-    (async () => {
-      await fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/input_config`).then((res) =>
-        res.json().then((data) => {
-          //console.log('data', data);
 
-          for (var key in data) {
-            var arr = data[key];
-            //console.log("arr = ", arr);
-            setFormFields(
-              Array.from(arr)
-            );
-          }
-        })
-      );
-    })();
-  }, [count1]);
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/input_config`,{
+      method: 'POST',
+      body: JSON.stringify(userId),
+    }).then((res) =>
+    res.json().then((data) => {
+      //console.log('data', data);
+
+      for (var key in data) {
+        var arr = data[key];
+        //console.log("arr = ", arr);
+        setFormFields(
+          Array.from(arr)
+        );
+      }
+    })
+  );
+},[count1])
+
+
+
+  //useEffect(() => {
+  //  (async () => {
+  //    await fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/input_config`).then((res) =>
+  //      res.json().then((data) => {
+  //        //console.log('data', data);
+  //
+  //        for (var key in data) {
+  //          var arr = data[key];
+  //          //console.log("arr = ", arr);
+  //          setFormFields(
+  //            Array.from(arr)
+  //          );
+  //        }
+  //      })
+  //    );
+  //  })();
+  //}, [count1]);
 
   const handleReset = (event) => {
     let data = [...formFields];
@@ -67,10 +113,14 @@ function Prediction() {
 
   const submit = (e) => {
     e.preventDefault();
+    const data_to_send = {
+      'formFields': formFields,
+      "userId": userId
+    }
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/predict`, {
       method: 'POST',
-      body: JSON.stringify(formFields),
+      body: JSON.stringify(data_to_send),
     }).then((response) => {
       response.json().then((outputdata) => {
         // Setting a data from api
@@ -84,27 +134,27 @@ function Prediction() {
     });
   }
 
-  function downloadPkl() {
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/model_file_name`).then((res) =>
-      res.json().then((model_name) => {
-        for (var key in model_name) {
-          var arr = model_name[key];
-          //console.log("model_name arr = ", arr);
-          fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/saved_model`).then((res) =>
-            res.blob().then((blob) => {
-              const url = window.URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = arr;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            })
-          );
-        }
-      })
-    );
-  }
+  //function downloadPkl() {
+  //  fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/model_file_name`).then((res) =>
+  //    res.json().then((model_name) => {
+  //      for (var key in model_name) {
+  //        var arr = model_name[key];
+  //        //console.log("model_name arr = ", arr);
+  //        fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/saved_model`).then((res) =>
+  //          res.blob().then((blob) => {
+  //            const url = window.URL.createObjectURL(blob);
+  //            const link = document.createElement('a');
+  //            link.href = url;
+  //            link.download = arr;
+  //            document.body.appendChild(link);
+  //            link.click();
+  //            document.body.removeChild(link);
+  //          })
+  //        );
+  //      }
+  //    })
+  //  );
+  //}
 
   const [outputdata, setoutputdata] = useState({
   });
@@ -143,9 +193,6 @@ function Prediction() {
             <h6><u>Instructions:</u></h6>
             <p><b>1.</b> Set input values.</p>
             <p><b>2.</b> Click on “Predict Output".</p>
-            <br /><br /><br />
-            <p><b>• Download the lastest trained model.</b> </p>
-            <Button variant='primary' size="sm" onClick={downloadPkl}>Download Trained Model</Button>
             <br /><br /><br />
             <p><b>• Upload .pkl file for predictions.</b> </p>
             <input type='file' name='file' accept='.pkl' onChange={handleUpload} required />

@@ -7,18 +7,40 @@ import xgboost as xgb
 
 
 # def model_training(file_name, data_range):
-def pso_execution(pso_data, model_file_name, trained_flag):
+def pso_execution(pso_data,user_id):
+    # Function to get latest created file from a folder with specific suffix
+    def get_latest_file_with_suffix(folder_path, suffix):
+        latest_file = None
+        latest_creation_time = 0
+
+        for file in os.listdir(folder_path):
+            if file.endswith(suffix):
+                file_path = os.path.join(folder_path, file)
+                creation_time = os.path.getctime(file_path)
+
+                if creation_time > latest_creation_time:
+                    latest_file = file_path
+                    latest_creation_time = creation_time
+
+        return latest_file
 
     pso_iterations = int(pso_data['psoiterations'])
     pso_particles = int(pso_data['psoparticles'])
-    if trained_flag == 0:
-        model_saving_path = os.path.join(os.getcwd(), 'assests',"trained_models", model_file_name)
-    else:
-        model_saving_path = os.path.join(os.getcwd(), 'assests', "user_trained_model.pkl")
+    file_path = os.path.join(os.getcwd(), "assests", "data_files", "{}.txt".format(user_id))
+    customized_file_path = os.path.join(os.getcwd(), "assests", "data_files_customized", "{}.txt".format(user_id))
+    trained_models_path = os.path.join(os.getcwd(), "assests", "trained_models")
+    model_saving_path = get_latest_file_with_suffix(trained_models_path, "_{}.pkl".format(user_id))
+    
+    #if trained_flag == 0:
+    #    #model_saving_path = os.path.join(os.getcwd(), 'assests',"trained_models", model_file_name)
+    #    model_saving_path = model_file_name
+    #    #print("model_file_name = ", model_file_name)
+    #else:
+    #    model_saving_path = os.path.join(os.getcwd(), 'assests', "user_trained_model.pkl")
 
     model = joblib.load(model_saving_path)
 
-    print("model.input_info = ", model.input_info)
+    #print("model.input_info = ", model.input_info)
 
     # initializing list and dictionaries
     maxima = []
@@ -28,7 +50,7 @@ def pso_execution(pso_data, model_file_name, trained_flag):
     all_bounds = []
 
     # Reading the data
-    data_df = pd.read_csv("updated_object_file.txt")
+    data_df = pd.read_csv(customized_file_path)
 
     # Splitting Data into Inputs and Outputs
     x = data_df.iloc[:, :-1]
@@ -182,7 +204,7 @@ def pso_execution(pso_data, model_file_name, trained_flag):
         bounds.append((min_val, max_val))
 
     # Reading User Input Parameter
-    with open("object_file.txt", encoding='utf-8-sig') as f:
+    with open(file_path, encoding='utf-8-sig') as f:
         lines = f.readlines()
         for line in lines:
             unit = str(line.split(',')[0])

@@ -1,7 +1,7 @@
 import infoicon from '../assests/images/info_icon.png'
-import qeeriLogo from '../assests/images/qeeri-logo.png'
 import func_legend from '../assests/images/functions_legends.png'
 import res_legend from '../assests/images/result_legend.png'
+import arrowDown from '../assests/images/downarrow.png';
 import amtLogo from '../assests/images/amt-logo.png'
 import Plot from 'react-plotly.js';
 import Button from 'react-bootstrap/Button';
@@ -73,7 +73,7 @@ const initialState6 = {
   model: 5
 };
 
-export const Test = () => {
+export const Test = ({ modelTrained, setModelTrained }) => {
   const [state, setState] = useState(initialState) //for GAM model
   const [state2, setState2] = useState(initialState2)//for RFR model
   const [state3, setState3] = useState(initialState3)//for XGB model
@@ -92,19 +92,17 @@ export const Test = () => {
   const [correlation_matrix, setcorrelation_matrix] = useState([]);
   const [inputCols, setinputCols] = useState([]);
   const [counter, setcounter] = useState(5);
-  const [counter2, setcounter2] = useState(10);
   const [counter3, setcounter3] = useState(0);
   const [counter4, setcounter4] = useState(0);
-  const [counter7, setcounter7] = useState(5);
   const [counter8, setcounter8] = useState(10);
-  const [corrFlag, setcorrFlag] = useState(0);
   const [modelFlag, setmodelFlag] = useState(1); // if 1, it is GAM model otherwise no GAM.
   const [activeTab, setActiveTab] = useState('');
-
+  const [localModelTrained, setLocalModelTrained] = useState(false);
+  const [showArrow, setShowArrow] = useState(true);
+  const [userId, setUserId] = useState('');
 
 
   const handleUpload = (event) => {
-    setcorrFlag(1)
     setcounter4(counter4 + 1)
     setcounter3(0)
     setCheckedState([]);
@@ -116,62 +114,66 @@ export const Test = () => {
 
     const data = new FormData()
     data.append('file', event.target.files[0])
+    data.append('userId', userId)
     console.log("event.target.files[0] = ", event.target.files[0].name)
     setfileName(event.target.files[0].name)
     setFile(data)
     setcounter8(0)
-
   }
 
-  if (counter8 == 0) {
-    setcounter8(counter8 + 1)
+  if (counter8 === 0) {
+    setcounter8(counter8 + 1);
+    console.log("userId before file transfer = ", userId)
+
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/file_transfer`, {
       method: 'POST',
       body: file,
     })
       .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
+        setcounter(0);
+        response.json().then((data_received) => {
+          setCheckedState(new Array(data_received['data_col_names'].length).fill(true));
+          var arr = data_received['data_histogram'];
+          setFormFields2(Array.from(arr));
 
-    setcounter(0)
-    setcounter2(0)
+          var arr2 = data_received['data_col_names'];
+          setFormFields(Array.from(arr2));
+          setcorrNames(Array.from(arr2));
+        });
+      })
+  }
 
-    let count1 = 0;
-    let intervalId = setInterval(() => {
-      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/histogram_data`).then((res) =>
-        res.json().then((graph_data) => {
-          for (var key in graph_data) {
-            var arr = graph_data[key];
-            setFormFields2(
-              Array.from(arr)
-            );
+  useEffect(() => {
+    if (counter < 2) {
+      setcounter(counter + 1)
+      setcorrNames([]);
+      setcorrelation_matrix([]);
+      const temp_list = []
+      for (let i = 0; i < checkedState.length; i++) {
+        if (checkedState[i] == true) {
+          temp_list.push(formFields[i])
+        }
+      }
+      const corr_data_usr_id = { "checkedstate": checkedState, "userId": userId }
+      setcorrNames([temp_list]);
+      //console.log("Corr Names = ", corrNames)
+      var corr_matrix = []
+
+      console.log("JSON.stringify(checkedState) ", JSON.stringify(checkedState))
+      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/cor_data`, {
+        method: 'POST',
+        body: JSON.stringify(corr_data_usr_id),
+      }).then((res) =>
+        res.json().then((corrdata) => {
+          for (var key in corrdata) {
+            var arr = corrdata[key];
+            corr_matrix.push(arr[arr.length - 1]['matrix'])
+            setcorrelation_matrix((corr_matrix))
           }
         })
       );
-      count1 += 1;
-      if (count1 === 2) {
-        clearInterval(intervalId);
-      }
-    }, 250);
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/col_names`).then((res) =>
-      res.json().then((data) => {
-
-        setCheckedState(new Array(data['data'].length).fill(true))
-        for (var key in data) {
-          var arr = data[key];
-          setFormFields(
-            Array.from(arr)
-          );
-          setcorrNames(
-            Array.from(arr)
-          );
-        }
-      })
-    );
-
-  }
+    };
+  });
 
   const handleReset = (event) => {
     setState(initialState)
@@ -188,47 +190,6 @@ export const Test = () => {
     );
     setCheckedState(updatedCheckedState);
   };
-
-  const handleOnClick = () => {
-    setinputCols([])
-    checkedState.slice(0, checkedState.length - 1).forEach(mylocalfunc)
-    function mylocalfunc(item, index, arr) {
-      if (item === true) {
-        setinputCols((prevList) => [...prevList, formFields[index]]);
-      }
-    }
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/upload`, {
-      method: 'POST',
-      body: JSON.stringify(checkedState),
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
-
-    //setcounter3(counter3 + 1)
-
-    const timerId = setInterval(() => {
-      //console.log('setInterval', count);
-      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/training_status`)
-        .then((res) => {
-          res.json()
-            .then((statusData) => {
-              setStatus(statusData.mstatus);
-              //console.log("bringing data from backend = ", statusData)
-              if (statusData.mstatus === "Done!") {
-                setStatus(statusData.mstatus);
-                clearInterval(timerId)
-                setcounter7(0)
-                setcounter3(counter3 + 1)
-              }
-            })
-        })
-    }, 1200);
-    //console.log('getStatus Counting: ', timerId);
-  }
 
   const handleTabSelect = (eventKey) => {
     if (eventKey !== activeTab) {
@@ -248,17 +209,40 @@ export const Test = () => {
     setformFields3([]);
     setformFields4([]);
     //setCheckedState([])
-    setStatus('----')
+    setStatus('in progress ...')
 
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/parameter`, {
+    const data_to_send = {
+      "parameters": param_state, "checkedState": checkedState,
+      "userId": userId, "fileName": fileName
+    }
+
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/upload`, {
       method: 'POST',
-      body: JSON.stringify(param_state),
+      body: JSON.stringify(data_to_send),
+    }).then((res) => {
+      res.json()
+        .then((response) => {
+          setStatus(response.mstatus);
+          //console.log("bringing data from backend = ", response)
+
+          var arr = response["graph_data"];
+          //console.log("training testing data arr = ", arr);
+          setformFields3(
+            Array.from(arr)
+          );
+          var arr2 = response["smooth_func_data"];
+          console.log("smooth function data new arr2 = ", arr2);
+          setformFields4(
+            Array.from(arr2)
+          );
+          if (response.mstatus === "Done!") {
+            setShowArrow(true);
+            setStatus(response.mstatus);
+            setLocalModelTrained(true);
+            setcounter3(counter3 + 1)
+          }
+        })
     })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
 
     setinputCols([])
     checkedState.slice(0, checkedState.length - 1).forEach(mylocalfunc)
@@ -267,128 +251,88 @@ export const Test = () => {
         setinputCols((prevList) => [...prevList, formFields[index]]);
       }
     }
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/upload`, {
-      method: 'POST',
-      body: JSON.stringify(checkedState),
-    })
-      .then((response) => {
-        response.json()
-          .then((body) => {
-          });
-      });
-
-    //setcounter3(counter3 + 1)
-
-    const timerId = setInterval(() => {
-      //console.log('setInterval', count);
-      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/training_status`)
-        .then((res) => {
-          res.json()
-            .then((statusData) => {
-              setStatus(statusData.mstatus);
-              //console.log("bringing data from backend = ", statusData)
-              if (statusData.mstatus === "Done!") {
-                setStatus(statusData.mstatus);
-                clearInterval(timerId)
-                setcounter7(0)
-                setcounter3(counter3 + 1)
-              }
-            })
-        })
-    }, 1200);
   }
+  const generateRandomId = () => {
+    // Generate a random 4-digit number
+    return Math.floor(1000 + Math.random() * 9000);
+  };
 
   useEffect(() => {
-    if (counter < 2) {
-      setcounter(counter + 1)
-      setcorrNames([]);
-      setcorrelation_matrix([]);
-      const temp_list = []
-      for (let i = 0; i < checkedState.length; i++) {
-        if (checkedState[i] == true) {
-          temp_list.push(formFields[i])
-        }
-      }
-      if (corrFlag === 1) {
-        //console.log("CorrFlag ===1 ")
-        setcorrNames([temp_list]);
-        //console.log("Corr Names = ", corrNames)
+    // Check if user ID exists in local storage
+    const storedUserId = localStorage.getItem('user_id');
 
-        var corr_matrix = []
+    if (storedUserId) {
+      // If user ID exists, set it in state
+      console.log("already storedUserId is generated = ", storedUserId);
+    } else {
+      // If user ID doesn't exist, generate a new one and store it in local storage
+      const newUserId = generateRandomId();
+      localStorage.setItem('user_id', newUserId);
+      console.log("Here Unique User ID is generated = ", newUserId);
+    }
 
-        fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/data_for_corr`, {
-          method: 'POST',
-          body: JSON.stringify(checkedState),
-        })
-          .then((response) => {
-            response.json()
-              .then((body) => {
-              });
-          });
+    // Check if tab ID exists in session storage
+    const storedTabId = sessionStorage.getItem('tab_id');
 
-        fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/cor_data`).then((res) =>
-          res.json().then((corrdata) => {
-            for (var key in corrdata) {
-              var arr = corrdata[key];
-              corr_matrix.push(arr[arr.length - 1]['matrix'])
-              setcorrelation_matrix((corr_matrix))
-            }
-          })
-        );
+    if (storedTabId) {
+      // If tab ID exists, set it in state
+      console.log("already storedTabId is generated = ", storedTabId);
+    } else {
+      // If tab ID doesn't exist, generate a new one and store it in session storage
+      const newTabId = generateRandomId();
+      sessionStorage.setItem('tab_id', newTabId);
+      console.log("Here Unique Tab ID is generated = ", newTabId);
+    }
+
+    // Combine user ID and tab ID
+    const combinedId = `${String(storedUserId).padStart(4, '0')}_${String(storedTabId).padStart(4, '0')}`;
+    setUserId(combinedId);
+    console.log("Combined ID = ", combinedId);
+  }, []);
+    
+
+  useEffect(() => {
+    if (localModelTrained) {
+      //console.log("Yes useeffect is activated!!!!!")
+      // Update the modelTrained state in the parent component (App.js)
+      setModelTrained(localModelTrained);
+    }
+  }, [localModelTrained, setModelTrained]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const scrollThreshold = 500; // Adjust this value as needed
+
+      if (scrollPosition > scrollThreshold) {
+        setShowArrow(false);
+      } else {
+        setShowArrow(true);
       }
     };
-  });
 
-  if (counter7 < 3) {
-    setcounter7(counter7 + 1)
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/results_update`).then((res) =>
-      res.json().then((graph_data) => {
-        //console.log('training result = ', graph_data);
-        for (var key in graph_data) {
-          var arr = graph_data[key];
-          //console.log("training testing data arr = ", arr);
-          setformFields3(
-            Array.from(arr)
-          );
-        }
-      })
-    );
-
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/smooth_func_data`).then((res) =>
-      res.json().then((graph_data) => {
-        //console.log('data getting from backend = ', graph_data);
-        for (var key in graph_data) {
-          var arr = graph_data[key];
-          //console.log("smooth function data getting arr = ", arr);
-          setformFields4(
-            Array.from(arr)
-          );
-        }
-      })
-    );
-  }
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   function downloadPkl() {
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/model_file_name`).then((res) =>
-      res.json().then((model_name) => {
-        for (var key in model_name) {
-          var arr = model_name[key];
-          //console.log("model_name arr = ", arr);
-          fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/saved_model`).then((res) =>
-            res.blob().then((blob) => {
-              const url = window.URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = arr;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            })
-          );
-        }
-      })
-    );
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/saved_model`, {
+      method: 'POST',
+      body: JSON.stringify(userId),
+    })
+      .then((res) =>
+        res.blob().then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName.slice(0, -4) + '_userID_' + userId + '.pkl';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        })
+      );
   }
 
   const getStateAsTable = (stateName) => {
@@ -414,7 +358,7 @@ export const Test = () => {
     const img = new Image(); img.src = amtLogo;
     img.onload = function () {
       // Add image to PDF document
-      doc.addImage(this, 'PNG', 0, 0, 50, 30); // adjust x, y, width, and height as needed
+      doc.addImage(this, 'PNG', 0, 0, 60, 30); // adjust x, y, width, and height as needed
     }
     let modelName = ""
 
@@ -434,10 +378,21 @@ export const Test = () => {
 
 
     // Add text at top center of the document
-    let topMargin = 30; let xaxismargin = 15; const text = `Model Report (${modelName})`;
+    let topMargin = 30; let xaxismargin = 15; const text = `Model Report`;
+    const text2 = `(${modelName})`;
+
+
     const textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
     const x = (doc.internal.pageSize.getWidth() - textWidth) / 2;
     doc.text(text, x, topMargin); doc.setLineWidth(0.1);
+    topMargin += 10
+
+    // Center the second text.
+    const text2Width = doc.getStringUnitWidth(text2) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const x2 = (pageWidth / 2) - text2Width / 2;
+
+    doc.text(text2, x2, topMargin); doc.setLineWidth(0.1);
 
     // Reset font size and style
     doc.setFontSize(16); doc.setFont('helvetica', 'normal');
@@ -785,18 +740,17 @@ export const Test = () => {
 
   return (
     <Fragment>
-
       <div className="background-Image">
         <h1 className="page-header">Model Training</h1>
         <div className="left">
           <h6><u>Instructions:</u></h6>
-          <p><b>1.</b> Select the ML model.</p>
-          <p><b>2.</b> Upload a CSV format file.</p>
-          <p><b>3.</b>	Set parameters for model training.</p>
-          <p><b>4.</b>	Click on “upload” button.</p>
-          <p><b>5.</b>	Select input features you want to train the model on and click on "Train Model".</p>
+          <p><b>1.</b> Upload a CSV format file.</p>
+          <p><b>2.</b> Select input features for model training.</p>
+          <p><b>3.</b> Select the ML model.</p>
+          <p><b>4.</b>	Set parameters for model training.</p>
+          <p><b>5.</b>	Click on “Train Model” button.</p>
           <p><br /><b>Note:</b> CSV file:</p>
-          <p><b>i.</b> Should be formatted in the provided sample template format which can be downloaded by clicking “Download Sample Template” link.</p>
+          <p><b>i.</b> Should be formatted as the provided sample template which is available to download by clicking “Download Sample Template” link.</p>
           <p><b>ii.</b>	Can have ‘any’ number of input columns while should have only ‘one’ output column (ordered as a last column).</p>
           <p><b>iii.</b> Should have ‘one’ header row.</p>
           <p><b>iv.</b>	Should have no ‘serial number’ column.</p>
@@ -945,7 +899,7 @@ export const Test = () => {
                         <button type='button' onClick={handleReset}>Reset values</button>
                       </div>
                       <div className="training_status">
-                        <p>Training Status : {status}</p>
+                        <p>Training Status : {status}{showArrow && <img src={arrowDown} style={{ marginLeft: '31%', textAlign: 'center' }} alt="Arrow Down" />}</p>
                       </div>
                     </div>
                   </form>
@@ -1042,7 +996,7 @@ export const Test = () => {
                         <button type='button' onClick={handleReset}>Reset values</button>
                       </div>
                       <div className="training_status">
-                        <p>Training Status : {status}</p>
+                        <p>Training Status : {status}{showArrow && <img src={arrowDown} style={{ marginLeft: '31%', textAlign: 'center' }} alt="Arrow Down" />}</p>
                       </div>
                     </div>
                   </form>
@@ -1152,7 +1106,7 @@ A lower learning rate improves generalization by slowing down model convergence,
                         <button type='button' onClick={handleReset}>Reset values</button>
                       </div>
                       <div className="training_status">
-                        <p>Training Status : {status}</p>
+                        <p>Training Status : {status}{showArrow && <img src={arrowDown} style={{ marginLeft: '31%', textAlign: 'center' }} alt="Arrow Down" />}</p>
                       </div>
                     </div>
                   </form>
@@ -1245,7 +1199,7 @@ A lower learning rate improves generalization by slowing down model convergence,
                         <button type='button' onClick={handleReset}>Reset values</button>
                       </div>
                       <div className="training_status">
-                        <p>Training Status : {status}</p>
+                        <p>Training Status : {status}{showArrow && <img src={arrowDown} style={{ marginLeft: '31%', textAlign: 'center' }} alt="Arrow Down" />}</p>
                       </div>
                     </div>
                   </form>
@@ -1330,7 +1284,7 @@ A lower learning rate improves generalization by slowing down model convergence,
                         <button type='button' onClick={handleReset}>Reset values</button>
                       </div>
                       <div className="training_status">
-                        <p>Training Status : {status}</p>
+                        <p>Training Status : {status}{showArrow && <img src={arrowDown} style={{ marginLeft: '31%', textAlign: 'center' }} alt="Arrow Down" />}</p>
                       </div>
                     </div>
                   </form>
@@ -1392,7 +1346,7 @@ A lower learning rate improves generalization by slowing down model convergence,
                         <button type='button' onClick={handleReset}>Reset values</button>
                       </div>
                       <div className="training_status">
-                        <p>Training Status : {status}</p>
+                        <p>Training Status : {status}{showArrow && <img src={arrowDown} style={{ marginLeft: '31%', textAlign: 'center' }} alt="Arrow Down" />}</p>
                       </div>
                     </div>
                   </form>
@@ -1418,13 +1372,7 @@ A lower learning rate improves generalization by slowing down model convergence,
           </Tab.Container>
         ) : (
           <p ><em style={{ marginLeft: '4em', color: 'red' }}>Please upload a data file first.</em></p>
-
         )}
-
-
-
-
-
       </div>
     </Fragment>
   )

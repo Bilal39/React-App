@@ -1,10 +1,10 @@
 import infoicon from '../assests/images/info_icon.png'
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Button from 'react-bootstrap/Button';
 import Popup from 'reactjs-popup';
 
 const initialState = {
-  psoparticles: 50,
+  psoparticles: 20,
   psoiterations: 50
 };
 
@@ -16,12 +16,33 @@ export default function () {
   const [formFields, setFormFields] = useState([]);
   const [disp, setDisp] = useState(false);
   const [state, setState] = useState(initialState)
-  const [counter3, setcounter3] = useState(10);
-  const [counter5, setcounter5] = useState(0);
+  //const [counter3, setcounter3] = useState(10);
+  const [counter5, setcounter5] = useState(10);
   const range = useRef(null);
   const [inputFields1, setinputFields1] = useState([]);
   const [inputFields2, setinputFields2] = useState([]);
   const [limitBoundries, setlimitBoundries] = useState(false);
+  const [userId, setUserId] = useState('');
+
+
+  useEffect(() => {
+    // Check if user ID exists in local storage
+    const storedUserId = localStorage.getItem('user_id');
+    const storedTabId = sessionStorage.getItem('tab_id');
+
+    if (storedUserId) {
+      // If user ID exists in local storage, set it in state
+      setUserId(storedUserId);
+      console.log("Already stored UserId = ", storedUserId);
+      console.log("Already stored TabId= ", storedTabId);
+    } else {
+      console.log("No ID Found ");
+    }
+    const combinedId = `${String(storedUserId).padStart(4, '0')}_${String(storedTabId).padStart(4, '0')}`;
+    setUserId(combinedId);
+    console.log("already stored Combined ID = ", combinedId);
+    setcounter5(0)
+  }, []);
 
   const handleResetCounter = (event) => {
     setcounter5(0)
@@ -52,9 +73,11 @@ export default function () {
     }
   }
   const handleUpload = (event) => {
+    setStatus('----')
     setlimitBoundries(false);
     const data = new FormData()
     data.append('file', event.target.files[0])
+    data.append('userId', userId)
     //setFile(data)
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/pre_trained_model`, {
       method: 'POST',
@@ -66,8 +89,8 @@ export default function () {
 
           for (var key in data) {
             var arr = data[key];
-            console.log("setting input fields = ", arr);
-            console.log("JSON.parse(JSON.stringify(Array.from(arr))) = ", JSON.parse(JSON.stringify(Array.from(arr))));
+            //console.log("setting input fields = ", arr);
+            //console.log("JSON.parse(JSON.stringify(Array.from(arr))) = ", JSON.parse(JSON.stringify(Array.from(arr))));
             setinputFields1(
               JSON.parse(JSON.stringify(Array.from(arr)))
             );
@@ -90,40 +113,58 @@ export default function () {
     temp_object["psoparticles"] = state.psoparticles
     temp_object["psoiterations"] = state.psoiterations
     console.log("temp_object = ", temp_object)
+    const data_to_send = {
+      'temp_object': temp_object,
+      "userId": userId
+    }
+    setStatus('in progress ...')
+
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/boundries_data`, {
       method: 'POST',
-      body: JSON.stringify(temp_object),
+      body: JSON.stringify(data_to_send),
+    }).then((res) => {
+      res.json().then((response) => {
+          setStatus(response.mstatus);
+          //setcounter3(0)
+          setFormFields(
+            Array.from(response['data'])
+          );
+          //console.log("bringing data from backend = ", statusData)
+        })
     })
 
-    const timerId = setInterval(() => {
-      //console.log('setInterval', count);
-      fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/training_status`)
-        .then((res) => {
-          res.json()
-            .then((statusData) => {
-              setStatus(statusData.mstatus);
-              //console.log("bringing data from backend = ", statusData)
-              if (statusData.mstatus === "Done!") {
-                setStatus(statusData.mstatus);
-                clearInterval(timerId)
-                setcounter3(0)
-              }
-            })
-        })
-    }, 1200);
+    //const timerId = setInterval(() => {
+    //  //console.log('setInterval', count);
+    //  fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/training_status`)
+    //    .then((res) => {
+    //      res.json()
+    //        .then((statusData) => {
+    //          setStatus(statusData.mstatus);
+    //          //console.log("bringing data from backend = ", statusData)
+    //          if (statusData.mstatus === "Done!") {
+    //            setStatus(statusData.mstatus);
+    //            clearInterval(timerId)
+    //            setcounter3(0)
+    //          }
+    //        })
+    //    })
+    //}, 1200);
   }
 
   if (counter5 < 3) {
     setcounter5(counter5 + 1)
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/input_config`).then((res) =>
+    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/input_config`, {
+      method: 'POST',
+      body: JSON.stringify(userId),
+    }).then((res) =>
       res.json().then((data) => {
         //console.log('data', data);
 
         for (var key in data) {
           var arr = data[key];
-          console.log("setting input fields = ", arr);
-          console.log("JSON.parse(JSON.stringify(Array.from(arr))) = ", JSON.parse(JSON.stringify(Array.from(arr))));
+          //console.log("setting input fields = ", arr);
+          //console.log("JSON.parse(JSON.stringify(Array.from(arr))) = ", JSON.parse(JSON.stringify(Array.from(arr))));
           setinputFields1(
             JSON.parse(JSON.stringify(Array.from(arr)))
           );
@@ -135,21 +176,21 @@ export default function () {
     );
   }
 
-  if (counter3 < 3) {
-    setcounter3(counter3 + 1)
-    fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/max_min_data`).then((res) =>
-      res.json().then((data) => {
-        //console.log("Data = ", data.data[0])
-        for (var key in data) {
-          var arr = data[key];
-          console.log("Max Min Data arr = ", arr);
-          setFormFields(
-            Array.from(arr)
-          );
-        }
-      })
-    );
-  }
+  //if (counter3 < 3) {
+  //  setcounter3(counter3 + 1)
+  //  fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/max_min_data`).then((res) =>
+  //    res.json().then((data) => {
+  //      //console.log("Data = ", data.data[0])
+  //      for (var key in data) {
+  //        var arr = data[key];
+  //        console.log("Max Min Data arr = ", arr);
+  //        setFormFields(
+  //          Array.from(arr)
+  //        );
+  //      }
+  //    })
+  //  );
+  //}
 
   return (
     <>
