@@ -23,6 +23,7 @@ export default function () {
   const [inputFields2, setinputFields2] = useState([]);
   const [limitBoundries, setlimitBoundries] = useState(false);
   const [userId, setUserId] = useState('');
+  const [pretrainedFlag, setpretrainedFlag] = useState(0);
 
 
   useEffect(() => {
@@ -73,11 +74,13 @@ export default function () {
     }
   }
   const handleUpload = (event) => {
+    setpretrainedFlag(1)
     setStatus('----')
     setlimitBoundries(false);
     const data = new FormData()
     data.append('file', event.target.files[0])
     data.append('userId', userId)
+    
     //setFile(data)
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/pre_trained_model`, {
       method: 'POST',
@@ -115,7 +118,8 @@ export default function () {
     console.log("temp_object = ", temp_object)
     const data_to_send = {
       'temp_object': temp_object,
-      "userId": userId
+      "userId": userId,
+      "pretrainedFlag":pretrainedFlag
     }
     setStatus('in progress ...')
 

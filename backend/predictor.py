@@ -1,11 +1,10 @@
-import os
 import joblib
 import xgboost as xgb
 import numpy as np
 
 
 def predictor_func(input_values, train_model_path):
-    #train_model_path = os.path.join(os.getcwd(), 'assests',"trained_models", model_file_name)
+    ### This function is responsible for predicting values based on user given inputs
 
     # load the model
     model = joblib.load(train_model_path)

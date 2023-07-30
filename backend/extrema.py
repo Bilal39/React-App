@@ -6,37 +6,13 @@ import joblib
 import xgboost as xgb
 
 
-# def model_training(file_name, data_range):
-def pso_execution(pso_data,user_id):
-    # Function to get latest created file from a folder with specific suffix
-    def get_latest_file_with_suffix(folder_path, suffix):
-        latest_file = None
-        latest_creation_time = 0
-
-        for file in os.listdir(folder_path):
-            if file.endswith(suffix):
-                file_path = os.path.join(folder_path, file)
-                creation_time = os.path.getctime(file_path)
-
-                if creation_time > latest_creation_time:
-                    latest_file = file_path
-                    latest_creation_time = creation_time
-
-        return latest_file
-
+def pso_execution(pso_data,user_id, model_saving_path):
+    ### This function is responsilbe for Running Particle Swarm Optimization using the trained model
+    # Extracting user given parameter values 
     pso_iterations = int(pso_data['psoiterations'])
     pso_particles = int(pso_data['psoparticles'])
     file_path = os.path.join(os.getcwd(), "assests", "data_files", "{}.txt".format(user_id))
     customized_file_path = os.path.join(os.getcwd(), "assests", "data_files_customized", "{}.txt".format(user_id))
-    trained_models_path = os.path.join(os.getcwd(), "assests", "trained_models")
-    model_saving_path = get_latest_file_with_suffix(trained_models_path, "_{}.pkl".format(user_id))
-    
-    #if trained_flag == 0:
-    #    #model_saving_path = os.path.join(os.getcwd(), 'assests',"trained_models", model_file_name)
-    #    model_saving_path = model_file_name
-    #    #print("model_file_name = ", model_file_name)
-    #else:
-    #    model_saving_path = os.path.join(os.getcwd(), 'assests', "user_trained_model.pkl")
 
     model = joblib.load(model_saving_path)
 
@@ -54,9 +30,8 @@ def pso_execution(pso_data,user_id):
 
     # Splitting Data into Inputs and Outputs
     x = data_df.iloc[:, :-1]
-    y = data_df.iloc[:, -1]   
 
-    # Gam Function
+    # Defining model function for PSO
     def model_function(variables):
         #print("variables = ", variables)
         x = [variables]
@@ -76,15 +51,13 @@ def pso_execution(pso_data,user_id):
 
         return output
 
-    # ------------------------------------------------------------------------------
-    # TO CUSTOMIZE THIS PSO CODE TO SOLVE UNCONSTRAINED OPTIMIZATION PROBLEMS, CHANGE THE PARAMETERS IN THIS SECTION ONLY:
-    # THE FOLLOWING PARAMETERS MUST BE CHANGED.
+    # ------------------------------------------------------------------------------ #
+    ##################################### P S O ######################################
+    # ------------------------------------------------------------------------------ #
 
     nv = len(model.input_info['max'])      # number of variables
 
-    # THE FOLLOWING PARAMETERS ARE OPTINAL.
-    # particle_size = psoparticles         # number of particles
-    # iterations = psoiterations           # max number of iterations
+    # FOLLOWING ARE PARAMETERS
     w = 0.85                    # inertia constant
     c1 = 1                      # cognative constant
     c2 = 0.5                    # social constant

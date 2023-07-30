@@ -15,16 +15,17 @@ from extrema import pso_execution
 from correlation_data import correlation_among_data
 from predictor import predictor_func
 from input_config import input_manger
+from file_manager import delete_extra_files, get_latest_file_with_suffix
 
 
 # Initializing flask app
 app = Flask(__name__)
 CORS(app)
 
-# Backend replicas
-backend_replicas = 8
+# Backend replicas (to save nbr of data files & trained models)
+backend_replicas = 16
 
-# To store results
+# To store results (to remove stored datafiles & models)
 user_data_file = {}
 user_tracking = []
 
@@ -40,51 +41,21 @@ data_files_path = os.path.join(
 data_files_cust_path = os.path.join(
             os.getcwd(), "assests", "data_files_customized")
 
-    
-def delete_extra_files(folder_path, max_file_count):
-    files = os.listdir(folder_path)
-
-    # Sort files by creation time (oldest to newest)
-    sorted_files = sorted(files, key=lambda x: os.path.getctime(os.path.join(folder_path, x)))
-
-    num_files_to_delete = len(sorted_files) - max_file_count
-    print("num_files_to_delete = ", num_files_to_delete)
-
-    if num_files_to_delete > 0:
-        for i in range(num_files_to_delete):
-            file_to_delete = os.path.join(folder_path, sorted_files[i])
-            os.remove(file_to_delete)
-            print(f"Deleted: {file_to_delete}")
-
-# Function to get latest created file from a folder with specific suffix
-def get_latest_file_with_suffix(folder_path, suffix):
-    latest_file = None
-    latest_creation_time = 0
-
-    for file in os.listdir(folder_path):
-        if file.endswith(suffix):
-            file_path = os.path.join(folder_path, file)
-            creation_time = os.path.getctime(file_path)
-
-            if creation_time > latest_creation_time:
-                latest_file = file_path
-                latest_creation_time = creation_time
-
-    return latest_file
-
 
 @app.route('/file_transfer',  methods=["POST"])
 def getting_file_from_frontend():
+    ### this function is receivng user's datafile and responsible for histogram plot 
+    # Receiving data from frontend
     user_id = request.form['userId']
     file1 = request.files.get("file")
-    print("user_id = ", user_id)
     
+    # Saving data file temporary
     file_path = os.path.join(data_files_path, "{}.txt".format(user_id))
     file1.save(file_path)
     
+    # to track users files in the backend
     if user_id not in user_tracking:
         user_tracking.append(user_id)
-    print("user_tracking = ", user_tracking)
     
     # Exceeding Qouta Limit (backend replicas)
     if len(user_tracking) > backend_replicas:
@@ -112,6 +83,8 @@ def getting_file_from_frontend():
 
 @app.route('/cor_data',  methods=["POST"])
 def correlation_data():
+    ### Data for correlation is generated in this function 
+    # Receiving data from frontend
     checked_array = json.loads(request.data)['checkedstate']
     user_id = json.loads(request.data)['userId']
     
@@ -126,30 +99,37 @@ def correlation_data():
 
 @app.route('/upload',  methods=["POST"])
 def upload_file():
+    ### Model is trained in this function
+    # Receiving data from frontend
     payload = json.loads(request.data)['checkedState']
     payload_parameter = json.loads(request.data)['parameters']
     user_id = json.loads(request.data)['userId']
     fileName, file_extension = os.path.splitext(json.loads(request.data)['fileName'])
 
+    # getting path of user's data file
     file_path = os.path.join(data_files_path, "{}.txt".format(user_id))
     
     # Reading the data
     data_df = pd.read_csv(file_path, header=1)
     col_names = data_df.columns.tolist()
 
+    # Dropping columns if not select by user
     for index, element in enumerate(payload):
         if element == False:
             data_df = data_df.drop(columns=[col_names[index]])
         else:
             pass
 
+    # Saving updated data file
     customized_file_path = os.path.join(data_files_cust_path, "{}.txt".format(user_id))
     data_df.to_csv(customized_file_path, sep=",", index=False)
     
+    # Deleting files if qouta limit is exceeded
     delete_extra_files(trained_models_path, backend_replicas)
 
+    # Training model
     graph_data_list, smooth_funct_list = model_training(
-        customized_file_path, fileName, payload_parameter)
+        user_id, fileName, payload_parameter)
 
     return {"mstatus" : "Done!",
             "graph_data":graph_data_list,
@@ -158,24 +138,33 @@ def upload_file():
 
 @app.route('/saved_model',  methods=["POST"])
 def transfer_trained_model():
+    ### This function is sharing the newly trained model to the user to download
+    # Receiving data from frontend
     user_id = json.loads(request.data)
-    saved_model = get_latest_file_with_suffix(trained_models_path, "_{}.pkl".format(user_id))
+    saved_model = get_latest_file_with_suffix(trained_models_path, "_{}.pkl".format(user_id), pretrained_flag = 0)
 
     return send_file(saved_model, as_attachment=True)
 
 
 @app.route('/boundries_data',  methods=["POST"])
 def low_up_boundries():
+    ### this function is responsible for finding minima and maxima
+    # Receiving data from frontend
     payload = json.loads(request.data)['temp_object']
     user_id = json.loads(request.data)['userId']
+    pretrained_flag = json.loads(request.data)['pretrainedFlag']
     
-    max_min_list = pso_execution(payload,user_id)
+    model_saved_path = get_latest_file_with_suffix(trained_models_path, "_{}.pkl".format(user_id), pretrained_flag)
+    # Running pso
+    max_min_list = pso_execution(payload,user_id, model_saved_path)
 
     return {'mstatus':"Done!", 'data':max_min_list}
 
 
 @app.route("/input_config", methods={"POST"})
 def input_config():
+    ### This function is responsible for extracting data such as inputs names, their ranges etc from user file
+    # Receiving data from frontend
     user_id = json.loads(request.data)
 
     customized_file_path = os.path.join(data_files_cust_path, "{}.txt".format(user_id))
@@ -185,13 +174,16 @@ def input_config():
 
 @app.route('/pre_trained_model', methods=['POST'])
 def receiving_pre_trained_model():
+    ### This function is responsible for extracting data such as inputs names, their ranges etc from pretrained model
+    # Receiving data from frontend
     file1 = request.files.get("file")
     user_id = request.form.get('userId')
 
-    file1.save(os.path.join(trained_models_path, "{}_{}.pkl".format(os.path.splitext(file1.filename)[0],user_id)))
     # load the model
+    file1.save(os.path.join(trained_models_path, "{}_usr_mdl_{}.pkl".format(os.path.splitext(file1.filename)[0],user_id)))
     model = joblib.load(file1)
 
+    # Extracting name and ranges of values from the the customized trained model
     input_data_list = []
     for index, col_name in enumerate(model.input_info['names']):
         temp_dict = {}
@@ -207,15 +199,21 @@ def receiving_pre_trained_model():
 
 @app.route('/predict',  methods={"POST"})
 def get_prediction():
+    ### This function is responsible for predicting values based on user inputs
     input_values = []
+    # Receiving data from frontend
     payload = json.loads(request.data)['formFields']
     user_id = json.loads(request.data)['userId']
+    pretrained_flag = json.loads(request.data)['pretrainedFlag']
 
     for item in payload:
         input_values.append(item['value'])
 
-    saved_model_path = get_latest_file_with_suffix(trained_models_path, "_{}.pkl".format(user_id))
+    #loading the model
+    saved_model_path = get_latest_file_with_suffix(trained_models_path, "_{}.pkl".format(user_id), pretrained_flag)
     model = joblib.load(saved_model_path)
+    
+    # Predicting values
     output_prediction = predictor_func(input_values, saved_model_path)
 
     return {

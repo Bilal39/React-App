@@ -6,8 +6,8 @@ import Button from 'react-bootstrap/Button';
 function Prediction() {
   const [formFields, setFormFields] = useState([]);
   const [count1, setCount1] = useState(10);
-
   const [userId, setUserId] = useState('');
+  const [pretrainedFlag, setpretrainedFlag] = useState(0);
 
 
   useEffect(() => {
@@ -32,6 +32,7 @@ function Prediction() {
   //const [file, setFile] = useState();
 
   const handleUpload = (event) => {
+    setpretrainedFlag(1)
     const data = new FormData()
     data.append('file', event.target.files[0])
     data.append('userId', userId)
@@ -115,7 +116,8 @@ function Prediction() {
     e.preventDefault();
     const data_to_send = {
       'formFields': formFields,
-      "userId": userId
+      "userId": userId,
+      "pretrainedFlag":pretrainedFlag
     }
 
     fetch(`${process.env.REACT_APP_FLASK_BASE_URL}/predict`, {
