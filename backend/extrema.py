@@ -16,7 +16,7 @@ def pso_execution(pso_data,user_id, model_saving_path):
 
     model = joblib.load(model_saving_path)
 
-    #print("model.input_info = ", model.input_info)
+    print("model.input_info = ", model.input_info['names'])
 
     # initializing list and dictionaries
     maxima = []
@@ -37,6 +37,7 @@ def pso_execution(pso_data,user_id, model_saving_path):
         x = [variables]
         try:
             # GAM Model
+            #print("NOW ABOUT TO PREDICT GAM !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             modelmat = model._modelmat(x, term=-1)
             coeff = model.coef_[model.terms.get_coef_indices(-1)]
             output = modelmat.dot(coeff).flatten()
@@ -45,9 +46,15 @@ def pso_execution(pso_data,user_id, model_saving_path):
                 # Scikit learn models
                 output = model.predict(x)
             except:
-                # For XGBoost model
-                dx = xgb.DMatrix(x)
-                output = model.predict(dx)
+                try:
+                    # For XGBoost model
+                    dx = xgb.DMatrix(x)
+                    output = model.predict(dx)
+                except:
+                    prediction_df = pd.DataFrame(x, columns=model.input_info['names'])
+                    output = model.predict(prediction_df)
+
+
 
         return output
 

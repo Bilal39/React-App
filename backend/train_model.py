@@ -22,10 +22,7 @@ from xgboost import XGBRegressor
 def model_training(userid, original_file_name, input_parameters_dict):
     ### This function is responsible for model training
     
-    # Defining necessary paths
-    nbr_input_track_file_path = os.path.join(
-        os.getcwd(), 'assests', "nbr_of_inputs.ini")
-    
+    # Defining necessary paths    
     file_name = os.path.join(os.getcwd(), "assests",
                                         "data_files_customized", "{}.txt".format(userid))
     
@@ -57,10 +54,6 @@ def model_training(userid, original_file_name, input_parameters_dict):
     # Splitting Data into Inputs and Outputs
     x = data_df.iloc[:, :-1]
     y = data_df.iloc[:, -1]
-
-    # Saving number of inputs in a file
-    with open(nbr_input_track_file_path, 'w+') as f:
-        f.write(str(len(x.columns)))
 
     # Reading User Input Parameters
     with open(original_file, encoding='utf-8-sig') as f:
@@ -283,6 +276,7 @@ def model_training(userid, original_file_name, input_parameters_dict):
         model = StackingRegressor(estimators=base_models, final_estimator=final_model)
 
         # Fit the stacking regressor on the training data
+        print("XTRAIN.columns ##################### = ", X_train.columns)
         model.fit(X_train, y_train)
 
 

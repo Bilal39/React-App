@@ -128,10 +128,16 @@ def upload_file():
     delete_extra_files(trained_models_path, backend_replicas)
 
     # Training model
-    graph_data_list, smooth_funct_list = model_training(
+    try:
+        graph_data_list, smooth_funct_list = model_training(
         user_id, fileName, payload_parameter)
+        status = "Done!"
+    except Exception as error:
+        status = "Error! " + str(error)
+        graph_data_list = []
+        smooth_funct_list = []
 
-    return {"mstatus" : "Done!",
+    return {"mstatus" : status,
             "graph_data":graph_data_list,
             "smooth_func_data":smooth_funct_list
             }
@@ -156,9 +162,14 @@ def low_up_boundries():
     
     model_saved_path = get_latest_file_with_suffix(trained_models_path, "_{}.pkl".format(user_id), pretrained_flag)
     # Running pso
-    max_min_list = pso_execution(payload,user_id, model_saved_path)
-
-    return {'mstatus':"Done!", 'data':max_min_list}
+    try:
+        max_min_list = pso_execution(payload,user_id, model_saved_path)
+        status = "Done!"
+    except Exception as error:
+        status = "Error! " + str(error)
+        max_min_list = []
+        
+    return {'mstatus':status, 'data':max_min_list}
 
 
 @app.route("/input_config", methods={"POST"})
@@ -214,7 +225,11 @@ def get_prediction():
     model = joblib.load(saved_model_path)
     
     # Predicting values
-    output_prediction = predictor_func(input_values, saved_model_path)
+    try:
+        output_prediction = predictor_func(input_values, saved_model_path)
+        
+    except Exception as error:
+        output_prediction = "Error! " + str(error)
 
     return {
         "output_prediction": output_prediction,
